@@ -1,1 +1,45 @@
-{"id":124423,"name":"Zombie","created_at":"2024-11-10T08:02:50.000000Z","updated_at":"2024-11-10T08:23:57.000000Z","is_private":0,"is_extinct":0,"is_dead":0,"creature_id":null,"entity":{"id":6898923,"entity_id":124423,"parent_id":null,"type_id":20,"name":"Zombie","type":"Undead","entry":"<p>Zombies are undead creatures\u2014reanimated corpses given a semblance of life through the ancient and dark teachings first granted by [note:6810323]. Originally, only Myrkul's devoted clerics were entrusted with the knowledge to create these foul entities, using corpses to extend the god\u2019s influence over death and the natural cycles of life. However, over time, this secret of reanimation slipped beyond his followers and into the hands of power-seeking wizards and necromancers, who warped it to serve their own ambitions. Although zombies are usually raised by those with specialized knowledge, some believe that under certain conditions, they can arise spontaneously. One common theory holds that if Myrkul perceives an overpopulation in a region, he may cause the dead to return to life, sending these relentless creatures to cull the living and restore balance.<\/p>","is_private":0,"tooltip":null,"is_template":null,"is_attributes_private":0,"focus_x":null,"focus_y":null,"created_at":"2024-11-10T08:02:50.000000Z","updated_at":"2024-11-10T08:23:57.000000Z","created_by":275646,"updated_by":275646,"image_path":null,"image_uuid":null,"header_image":null,"header_uuid":null,"marketplace_uuid":null,"mentions":[{"entity_id":6898923,"campaign_id":null,"post_id":null,"timeline_element_id":null,"quest_element_id":null,"target_id":6810323}]},"pivotLocations":[]}
+{
+  "id": 124423,
+  "name": "Zombie",
+  "created_at": "2024-11-10T08:02:50.000000Z",
+  "updated_at": "2025-05-04T22:03:31.271.000000Z",
+  "is_private": 0,
+  "is_extinct": 0,
+  "is_dead": 0,
+  "creature_id": null,
+  "entity": {
+    "id": 6898923,
+    "entity_id": 124423,
+    "parent_id": null,
+    "type_id": 20,
+    "name": "Zombie",
+    "type": "Undead",
+    "entry": "<article>\n  <p>Zombies are undead creatures—reanimated corpses given a semblance of life through the ancient and dark teachings first granted by the fallen god, Myrkul. After the Great Descent, Myrkul's power waned considerably, and his direct influence on the world diminished. While pockets of his faithful remain, the knowledge to create zombies is no longer solely within their grasp.</p>\n\n  <p>Before the Great Descent, only Myrkul's devoted clerics were entrusted with the knowledge to create these foul entities, using corpses to extend the god’s influence over death and the natural cycles of life. However, over time, this secret of reanimation slipped beyond his followers and into the hands of power-seeking wizards and necromancers, who warped it to serve their own ambitions. Glasstaff, a renegade drow wizard and known necromancer before his demise, also was known to dabble in these arts.</p>\n\n  <p>Although zombies are usually raised by those with specialized knowledge, some believe that under certain conditions, they can arise spontaneously, especially in areas heavily scarred by the Great Descent's destructive energies. These areas, often referred to as 'Dead Zones,' pulsate with residual necromantic energy, making them prime breeding grounds for the undead. One common theory holds that if the ancient daemon, Akrazul the Whispering Tyrant, sealed beneath the mountains of Damara, perceives an imbalance in the region, it may cause the dead to return to life, sending these relentless creatures to cull the living and restore a twisted sense of order.</p>\n</article>",
+    "is_private": 0,
+    "tooltip": null,
+    "is_template": null,
+    "is_attributes_private": 0,
+    "focus_x": null,
+    "focus_y": null,
+    "created_at": "2024-11-10T08:02:50.000000Z",
+    "updated_at": "2025-05-04T22:03:31.271.000000Z",
+    "created_by": 275646,
+    "updated_by": 275646,
+    "image_path": null,
+    "image_uuid": null,
+    "header_image": null,
+    "header_uuid": null,
+    "marketplace_uuid": null,
+    "mentions": [
+      {
+        "entity_id": 6898923,
+        "campaign_id": null,
+        "post_id": null,
+        "timeline_element_id": null,
+        "quest_element_id": null,
+        "target_id": 6810323
+      }
+    ]
+  },
+  "pivotLocations": []
+}
