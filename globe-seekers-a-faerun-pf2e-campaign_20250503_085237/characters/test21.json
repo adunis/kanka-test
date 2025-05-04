@@ -4,7 +4,7 @@
   "campaign_id": null,
   "entry": "<p>New entry: test21.</p>",
   "created_at": "2025-05-04T22:30:42.703.000000Z",
-  "updated_at": "2025-05-04T22:30:42.703.000000Z",
+  "updated_at": "2025-05-04T22:31:59.935.000000Z",
   "is_private": 0,
   "entity": {
     "id": null,
@@ -17,6 +17,7 @@
     "is_private": 0,
     "is_template": null,
     "created_at": "2025-05-04T22:30:42.703.000000Z",
-    "updated_at": "2025-05-04T22:30:42.703.000000Z"
+    "updated_at": "2025-05-04T22:31:59.935.000000Z",
+    "image_uuid": "P1090338-ANIMATION"
   }
 }
