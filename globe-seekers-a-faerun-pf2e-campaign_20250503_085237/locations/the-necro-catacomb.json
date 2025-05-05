@@ -1,1 +1,47 @@
-{"id":1551388,"name":"The Necro-Catacomb","created_at":"2024-11-22T21:09:24.000000Z","updated_at":"2024-11-22T21:09:24.000000Z","is_private":0,"is_destroyed":0,"location_id":1547846,"entity":{"id":6944546,"entity_id":1551388,"parent_id":null,"type_id":3,"name":"The Necro-Catacomb","type":"Demiplane","entry":"<p>Demipiano Dati<br>Grandezza: ???<br><br>Tratti creati attualmente: Vorrei un portale in una location di bungo dudo in modo che i membri dell' ordine possano entrare ed uscire, una chiave per me per entrarci con incantesimo ovunque io sia e il resto degli usi espando il demipiano<br><\/p>","is_private":0,"tooltip":null,"is_template":null,"is_attributes_private":0,"focus_x":null,"focus_y":null,"created_at":"2024-11-22T21:09:24.000000Z","updated_at":"2024-11-22T21:09:24.000000Z","created_by":275646,"updated_by":null,"image_path":null,"image_uuid":null,"header_image":null,"header_uuid":null,"marketplace_uuid":null,"relationships":[{"id":705838,"owner_id":6944546,"target_id":6751917,"relation":"Creator","visibility_id":1,"mirror_id":null,"attitude":null,"is_pinned":0,"colour":"","marketplace_uuid":null}]}}
+{
+  "id": 1551388,
+  "name": "The Necro-Catacomb",
+  "created_at": "2024-11-22T21:09:24.000000Z",
+  "updated_at": "2025-05-05T08:49:41.791.000000Z",
+  "is_private": 0,
+  "is_destroyed": 0,
+  "location_id": 1547846,
+  "entity": {
+    "id": 6944546,
+    "entity_id": 1551388,
+    "parent_id": null,
+    "type_id": 3,
+    "name": "The Necro-Catacomb",
+    "type": "Demiplane",
+    "entry": "<p>\n  <h1>Demipiano di Shammath</h1>\n  <p>\n    <b>Grandezza:</b> Il demipiano si adatta alle necessità dell'Ordine,\n    iniziando piccolo e crescendo nel tempo con l'uso e la spesa di\n    risorse.\n  </p>\n  <p>\n    <b>Caratteristiche:</b> Creato dopo la Grande Discesa, è un rifugio\n    sicuro per l'Ordine, nascosto dalle macchinazioni degli Dei Antichi e\n    dalle conseguenze del cataclisma.\n  </p>\n\n  <h2>Tratti e Personalizzazioni</h2>\n  <ul>\n    <li>\n      <b>Portale per Bungo Dudo (Planeshift):</b> Un portale stabile, accessibile solo\n      tramite l'incantesimo \"Planeshift\" dal Laboratorio del Dottor Bu\n      (Echo Wave Cavern), garantisce l'accesso controllato al demipiano,\n      evitando intrusioni indesiderate. Questo portale, a causa della\n      distorsione planare dovuta alla Grande Discesa, si manifesta come uno\n      specchio d'acqua increspato, incastonato in una cornice di ossidiana.\n      La manutenzione di questo portale richiede la dedizione di uno\n      specialista dell'ordine per un rituale giornaliero.\n    </li>\n    <li>\n      <b>Chiave Personale:</b> Una chiave arcana unica, legata a chi crea il\n      demipiano, che permette l'accesso istantaneo tramite incantesimo da\n      qualsiasi luogo. Questa chiave si manifesta come un glifo tatuato\n      sull'avambraccio del creatore. Il glifo risplende quando\n      l'incantesimo viene lanciato, aprendo un varco dimensionale temporaneo\n      verso il demipiano. Questo accesso è però consentito solo a chi ha il\n      glifo.\n    </li>\n    <li>\n      <b>Espansione del Demipiano:</b> L'Ordine può utilizzare le risorse estratte\n      dalle zone contaminate dell'Altopiano per espandere il demipiano,\n      aggiungendo stanze di studio, laboratori alchemici, serre per funghi\n      speciali (alcuni anche allucinogeni) e aree di addestramento.\n      L'espansione è un processo graduale che richiede un rituale\n      complicato e la dedizione di più membri dell'Ordine che lavorano\n      all'unisono, imbrigliando la forza delle linee planari per distorcere\n      e plasmare il tessuto dello spazio dimensionale. Si parla di rituali\n      che comprendono l'uso di sfere Nethereese a comando tramite parola.\n    </li>\n    <li>\n      <b>Ambienti Controllati:</b> Creazione di zone specifiche all'interno del\n      demipiano, come camere anecoiche per la meditazione, laboratori protetti\n      per la sperimentazione alchemica o giardini incantati per coltivare\n      erbe rare.\n    </li>\n    <li>\n      <b>Resistenza Planare:</b> Data la sua origine post-Discesa, il demipiano\n      è intrinsecamente protetto contro le intrusioni planari non\n      autorizzate e resistente alle energie caotiche del Limbo e agli\n      influssi corrosivi del Reame Remoto.\n    </li>\n  </ul>\n\n  <h2>Plot Hooks Potenziali</h2>\n  <ul>\n    <li>\n      Il demipiano viene attaccato da forze extraplanari attratte dalle\n      sue energie uniche, costringendo l'Ordine a difenderlo e a cercare\n      nuove forme di protezione.\n    </li>\n    <li>\n      Un membro dell'Ordine tradisce il gruppo, cercando di rubare i segreti\n      del demipiano o di sfruttarlo per scopi malvagi.\n    </li>\n    <li>\n      Una anomalia planare causata dalle rovine della Discesa si apre nel\n      demipiano, rilasciando una nuova minaccia o offrendo un portale verso\n      un'altra dimensione.\n    </li>\n  </ul>\n</p>",
+    "is_private": 0,
+    "tooltip": null,
+    "is_template": null,
+    "is_attributes_private": 0,
+    "focus_x": null,
+    "focus_y": null,
+    "created_at": "2024-11-22T21:09:24.000000Z",
+    "updated_at": "2025-05-05T08:49:41.791.000000Z",
+    "created_by": 275646,
+    "updated_by": null,
+    "image_path": null,
+    "image_uuid": null,
+    "header_image": null,
+    "header_uuid": null,
+    "marketplace_uuid": null,
+    "relationships": [
+      {
+        "id": 705838,
+        "owner_id": 6944546,
+        "target_id": 6751917,
+        "relation": "Creator",
+        "visibility_id": 1,
+        "mirror_id": null,
+        "attitude": null,
+        "is_pinned": 0,
+        "colour": "",
+        "marketplace_uuid": null
+      }
+    ]
+  }
+}
