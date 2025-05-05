@@ -1,1 +1,108 @@
-{"id":1759790,"name":"Gungra","campaign_id":273567,"entry":"","age":null,"sex":"Female","pronouns":null,"created_at":"2024-11-15T23:11:38.000000Z","updated_at":"2025-05-01T21:57:20.000000Z","location_id":1714715,"title":null,"family_id":null,"is_private":0,"is_personality_visible":1,"type":"NPC","is_dead":0,"race_id":null,"deleted_at":null,"is_personality_pinned":0,"is_appearance_pinned":0,"entity":{"id":6920128,"entity_id":1759790,"parent_id":null,"type_id":1,"name":"Gungra","type":"NPC","entry":"","is_private":0,"tooltip":null,"is_template":null,"is_attributes_private":0,"focus_x":null,"focus_y":null,"created_at":"2024-11-15T23:11:38.000000Z","updated_at":"2025-05-01T21:57:20.000000Z","created_by":275646,"updated_by":275646,"image_path":null,"image_uuid":"9d7f91d0-55b4-4d27-8ae3-b51ddc6d2bc2","header_image":null,"header_uuid":null,"marketplace_uuid":null,"relationships":[{"id":702714,"owner_id":6920128,"target_id":6734932,"relation":"Wife","visibility_id":1,"mirror_id":null,"attitude":null,"is_pinned":0,"colour":"","marketplace_uuid":null}]},"character_traits":[],"character_families":[],"character_races":[{"id":806573,"character_id":1759790,"race_id":741610,"created_at":null,"updated_at":null,"is_private":0,"race":{"id":741610,"name":"Gith","is_private":0,"entity":{"id":6883701,"name":"Gith","entity_id":741610,"type_id":9}}}],"organisation_memberships":[],"characterTraits":[],"characterFamilies":[],"characterRaces":[{"id":806573,"character_id":1759790,"race_id":741610,"created_at":null,"updated_at":null,"is_private":0,"race":{"id":741610,"name":"Gith","is_private":0,"entity":{"id":6883701,"name":"Gith","entity_id":741610,"type_id":9}}}],"organisationMemberships":[]}
+{
+  "id": 1759790,
+  "name": "Gungra",
+  "campaign_id": 273567,
+  "entry": "",
+  "age": null,
+  "sex": "Female",
+  "pronouns": null,
+  "created_at": "2024-11-15T23:11:38.000000Z",
+  "updated_at": "2025-05-05T00:44:20.185.000000Z",
+  "location_id": 1714715,
+  "title": null,
+  "family_id": null,
+  "is_private": 0,
+  "is_personality_visible": 1,
+  "type": "NPC",
+  "is_dead": 0,
+  "race_id": null,
+  "deleted_at": null,
+  "is_personality_pinned": 0,
+  "is_appearance_pinned": 0,
+  "entity": {
+    "id": 6920128,
+    "entity_id": 1759790,
+    "parent_id": null,
+    "type_id": 1,
+    "name": "Gungra",
+    "type": "NPC",
+    "entry": "<h1>Gungra: Un Destino Incerto Dopo la Grande Discesa</h1>\n\n<h2>La Vita Prima della Catastrofe</h2>\n\n<p>Prima della Grande Discesa, Gungra era un individuo di cui si sa poco.  Le informazioni frammentarie suggeriscono una vita semplice, forse legata a una piccola comunità di artigiani nelle Terre Spezzate.  Si ipotizza una profonda conoscenza della lavorazione della pietra e dell'utilizzo di materiali organici, ma non si conoscono né la sua posizione sociale né il suo ruolo esatto nella società pre-catastrofe.</p>\n\n<h3>Un'Eredità Sconosciuta</h3>\n\n<p>Non esistono dettagli sulla famiglia, i legami o l'educazione di Gungra.  L'unico accenno al suo passato è un vago ricordo di cerimonie particolari, probabilmente legate a una divinità minore della fertilità o di una particolare cura della terra. Questo lascito oscuro rimane incompleto, suggerendo una storia personale avvolta nel mistero, ora persa nella furia della Grande Discesa.</p>\n\n<h2>La Grande Discesa e le sue Conseguenze</h2>\n\n<p>La Grande Discesa ha profondamente alterato l'esistenza di Gungra, cancellando quasi ogni traccia del suo passato.  Le fonti sono frammentarie, ma alcuni sussurri suggeriscono che sopravvisse al cataclisma riparandosi tra le rovine, nutrendosi di ciò che trovava e aggirando le forze punitive divine che avevano decimato la popolazione delle Terre Spezzate.  Alcune voci lo collegano a un culto minore e segreto, perhaps legato a un potente elemento (acqua, terra o aria), ma è difficile confermare queste ipotesi, che rimangono al limite della leggenda. </p>\n\n<h3>Gungra dopo la Guerra Divina: Un Nuovo Inizio</h3>\n\n<p>Dopo la Grande Discesa, Gungra ha trovato un nuovo scopo nelle terre desolate, unito da un senso di comunità basato non più su legami familiari o sociali, ma su necessità di sopravvivenza e una silenziosa venerazione della natura.  Non si sa molto delle sue attività, ma alcuni sussurri lo collegano al recupero di manufatti, alla vendita di oggetti rari, e alla ricerca di risorse fondamentali, sempre attento a evitare sia le forze divine punitive che i gruppi di predoni che ora infestavano le Terre Spezzate. In seguito al Consiglio di Zerthadlun, Gungra è stato incaricato di proteggere e di curare un misterioso uovo di grande potere.</p>\n\n<h3>Il Mistero dell'Uovo e Spunti per la Campagna</h3>\n\n<p>L'uovo che Gungra custodisce è un artefatto misterioso, il cui potere è sconosciuto.  La sua esistenza potrebbe nascondere collegamenti con potenti entità, artefatti Netheresi, o forze cosmiche.  Ecco alcuni possibili spunti narrativi:</p>\n\n<h3>Cercare la Verità sull'Uovo</h3>\n<ul>\n<li>Indagare sull'origine dell'uovo. Da dove proviene? Chi l'ha creato?</li>\n<li>Svelare il potere dell'uovo. Cosa contiene? Quali sono le sue capacità?</li>\n<li>Proteggere l'uovo dalle numerose fazioni ostili che potrebbero cercarlo. </li>\n</ul>\n\n<h3>Il Futuro di Gungra e la Via della Salvezza</h3>\n<ul>\n<li>Gungra potrà ritrovare il suo passato o dovrà creare un nuovo destino?</li>\n<li>Qual è la connessione tra l'uovo e gli altri artefatti Netheresi?</li>\n<li>Come questa scoperta si allinea con le macchinazioni del Patrono?</li>\n</ul>\n\n<h2>Conclusioni</h2>\n\n<p>Gungra, un individuo enigmatico il cui passato è avvolto nel mistero, incarna il destino di molti che hanno affrontato la Grande Discesa.  La sua sopravvivenza e la sua scelta di servire il consiglio di Zerthadlun gettano le basi per un futuro incerto e avventuroso, una testimonianza della resistenza umana e della capacità di reinventarsi in un mondo cambiato per sempre.</p>",
+    "is_private": 0,
+    "tooltip": null,
+    "is_template": null,
+    "is_attributes_private": 0,
+    "focus_x": null,
+    "focus_y": null,
+    "created_at": "2024-11-15T23:11:38.000000Z",
+    "updated_at": "2025-05-05T00:44:20.185.000000Z",
+    "created_by": 275646,
+    "updated_by": 275646,
+    "image_path": null,
+    "image_uuid": "9d7f91d0-55b4-4d27-8ae3-b51ddc6d2bc2",
+    "header_image": null,
+    "header_uuid": null,
+    "marketplace_uuid": null,
+    "relationships": [
+      {
+        "id": 702714,
+        "owner_id": 6920128,
+        "target_id": 6734932,
+        "relation": "Wife",
+        "visibility_id": 1,
+        "mirror_id": null,
+        "attitude": null,
+        "is_pinned": 0,
+        "colour": "",
+        "marketplace_uuid": null
+      }
+    ]
+  },
+  "character_traits": [],
+  "character_families": [],
+  "character_races": [
+    {
+      "id": 806573,
+      "character_id": 1759790,
+      "race_id": 741610,
+      "created_at": null,
+      "updated_at": null,
+      "is_private": 0,
+      "race": {
+        "id": 741610,
+        "name": "Gith",
+        "is_private": 0,
+        "entity": {
+          "id": 6883701,
+          "name": "Gith",
+          "entity_id": 741610,
+          "type_id": 9
+        }
+      }
+    }
+  ],
+  "organisation_memberships": [],
+  "characterTraits": [],
+  "characterFamilies": [],
+  "characterRaces": [
+    {
+      "id": 806573,
+      "character_id": 1759790,
+      "race_id": 741610,
+      "created_at": null,
+      "updated_at": null,
+      "is_private": 0,
+      "race": {
+        "id": 741610,
+        "name": "Gith",
+        "is_private": 0,
+        "entity": {
+          "id": 6883701,
+          "name": "Gith",
+          "entity_id": 741610,
+          "type_id": 9
+        }
+      }
+    }
+  ],
+  "organisationMemberships": []
+}
