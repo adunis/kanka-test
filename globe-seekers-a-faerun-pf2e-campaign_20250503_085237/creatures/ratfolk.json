@@ -4,7 +4,7 @@
   "campaign_id": 273567,
   "entry": "<p>New entry: Ratfolk.</p>",
   "created_at": "2025-05-05T15:15:57.221.000000Z",
-  "updated_at": "2025-05-05T15:15:57.221.000000Z",
+  "updated_at": "2025-05-05T15:17:02.825.000000Z",
   "is_private": 0,
   "tags": [],
   "entity": {
@@ -14,11 +14,11 @@
     "type_id": null,
     "name": "Ratfolk",
     "type": null,
-    "entry": "<p>New entry: Ratfolk.</p>",
+    "entry": "<article>\n  <header>\n    <h1>Ratfolk: Gli Osservatori del Silenzio</h1>\n    <p>Nuova voce: Ratfolk, una razza scoperta nelle Ruine degli Eterni, dopo la Grande Discesa.</p>\n  </header>\n  <section>\n    <p>I Ratfolk, simili a ratti antropomorfi, non sono una nuova razza nata dalla Grande Discesa ma un popolo semintelligente, abile negli inganni e nel mimetismo.  Si erano già insinuati nelle terre devastate, prosperando nel caos e nell'ombra. Dopo la guerra divina, le loro capacità sono state esaltate, divenendo quasi eteree.</p>\n    <p>Le loro comunità non sono organizzate come vere e proprie città, ma come reti sottili e decentrate sparse nelle zone meno controllate dagli Dei Antichi.  Sfruttano la loro piccolezza e la capacità di infiltrarsi per commerciare con le altre fazioni, agendo spesso come intermediari nel mercato nero, fornitori di informazioni segrete o assassini silenziosi.</p>\n    <p>Il loro interesse nei confronti dei Faith Babies potrebbe essere legato alla loro comprensione dei piani di esistenza e all’idea di potere extradimensionale.  Potrebbero commerciare informazioni sui Faith Babies, o gli stessi bambini come merce rara, o magari cercarli per studiarne il potenziale.</p>\n    <p><strong>I Tessitori del Silenzio:</strong>  I Ratfolk che controllano l'accesso alla Necrocatacomba si identificano come i \"Tessitori del Silenzio.\"  Sono più ostili e organizzati rispetto alle altre comunità e hanno un ruolo chiave nel controllare il flusso delle persone dentro e fuori dal demipiano. La loro capacità di diventare quasi invisibili, o di muoversi attraverso i piani, è quasi leggendaria.</p>\n\n    <section>\n      <h2>Gli Osservatori nelle Ruine degli Eterni</h2>\n      <p>Gli Osservatori del Silenzio, una setta di Ratfolk nelle Ruine degli Eterni, sono specializzati nel mantenimento di un silenzio completo per mascherare la loro presenza. Non attaccano subito, offrendo passaggi sicuri in cambio di un \"servizio\" molto specifico: silenziare il Risuonatore d'Ossa dei Custodi del Silenzio. Loro non sono servitori dei Custodi, ma utilizzano i PG per raggiungere i propri scopi, mettendoli in conflitto con altre fazioni per assicurarsi un futuro.</p>\n      <p><strong>Chirr-Click (Leader):</strong> CR 3 (Statistiche da Ratfolk Grenadier, ma con migliori skill sociali e furtività).\n      </p>\n      <p><strong>Ratfolk Scavengers (x19):</strong> CR 1/2 (Statistiche da Ratfolk Scout).\n      </p>\n      <p><strong>Phase Spiders (x?, Lurking):</strong> CR 5.  Minaccia implicita.\n      </p>\n      <p><strong>Risuonatore d'Ossa:</strong> Oggetto rituale di grandi ossa che vibrano, creando un suono che solo i non-morti apprezzano, ma che disturba le Phase Spiders.\n      </p>\n    </section>\n  </section>\n</article>",
     "is_private": 0,
     "is_template": null,
     "created_at": "2025-05-05T15:15:57.221.000000Z",
-    "updated_at": "2025-05-05T15:15:57.221.000000Z",
+    "updated_at": "2025-05-05T15:17:02.825.000000Z",
     "image_uuids": []
   }
 }
