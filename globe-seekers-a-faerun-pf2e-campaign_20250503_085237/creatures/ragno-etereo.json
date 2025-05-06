@@ -4,7 +4,7 @@
   "campaign_id": null,
   "entry": "<p>New entry: Ragno Etereo.</p>",
   "created_at": "2025-05-06T21:43:17.320.000000Z",
-  "updated_at": "2025-05-06T21:43:17.320.000000Z",
+  "updated_at": "2025-05-06T21:43:30.356.000000Z",
   "is_private": 0,
   "tags": [],
   "entity": {
@@ -21,10 +21,12 @@
     "focus_x": null,
     "focus_y": null,
     "created_at": "2025-05-06T21:43:17.320.000000Z",
-    "updated_at": "2025-05-06T21:43:17.320.000000Z",
+    "updated_at": "2025-05-06T21:43:30.356.000000Z",
     "created_by": null,
     "updated_by": null,
-    "image_uuids": [],
+    "image_uuids": [
+      "89bed094-eb0a-4acb-af38-3922c974da66"
+    ],
     "header_uuid": null,
     "image_path": null,
     "header_image": null,
