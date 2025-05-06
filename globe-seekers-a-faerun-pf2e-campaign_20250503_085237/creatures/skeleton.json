@@ -2,7 +2,7 @@
   "id": 124424,
   "name": "Skeleton",
   "created_at": "2024-11-10T08:08:46.000000Z",
-  "updated_at": "2025-05-04T22:50:19.949.000000Z",
+  "updated_at": "2025-05-06T21:43:49.357.000000Z",
   "is_private": 0,
   "is_extinct": 0,
   "is_dead": 0,
@@ -22,7 +22,7 @@
     "focus_x": null,
     "focus_y": null,
     "created_at": "2024-11-10T08:08:46.000000Z",
-    "updated_at": "2025-05-04T22:50:19.949.000000Z",
+    "updated_at": "2025-05-06T21:43:49.357.000000Z",
     "created_by": 275646,
     "updated_by": 275646,
     "image_path": null,
@@ -39,6 +39,9 @@
         "quest_element_id": null,
         "target_id": 6810286
       }
+    ],
+    "image_uuids": [
+      "f26377f7-470b-47fa-9bfa-ce268cc9d4bc"
     ]
   },
   "pivotLocations": []
