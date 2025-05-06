@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Entry Organizer</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- Include html2canvas library (Ensure its integrity is also correct) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</head>
+<body>
+  <div class="container">
+      <aside class="sidebar" id="sidebar">
+          <h1>Entries</h1>
+          <div class="repo-info">
+              <p>Repo: <span id="repoName">Loading...</span></p>
+              <p>Path: <span id="repoPath">/</span></p>
+              <button id="refreshFileListBtn">Refresh List</button>
+              <div id="loadingIndicator" style="display: none; margin-top: 10px;">
+                  <span class="spinner"></span> <span class="loading-text">Loading...</span>
+              </div>
+               <p id="fileCount" class="instructions" style="margin-top: 10px;"></p>
+          </div>
+          <nav id="fileTreeContainer">
+              <ul id="fileTreeRoot"></ul>
+          </nav>
+           <button id="createNewFileBtn" style="margin-top: 15px;" disabled>Create New Entry (Root)</button>
+      </aside>
+
+      <div class="resizer" id="resizer"></div>
+
+      <main class="content" id="mainContent">
+          <div class="main-content-wrapper">
+
+              <aside class="image-preview-sidebar" id="imagePreviewSidebar" style="display: none;">
+                  <h2>Images</h2>
+                  <div class="image-list-container" id="imageListContainer">
+                      <!-- Images and delete buttons added dynamically -->
+                  </div>
+                  <p id="noImageText" style="display: block;">No images linked.</p>
+                  <button id="addImageBtn" style="display: none; margin-top: 15px;">Add Image</button>
+                  <input type="file" id="imageUploadInput" accept="image/*" style="display: none;">
+              </aside>
+
+              <div class="entry-view-edit-area">
+                  <div id="viewer">
+                      <div class="content-header">
+                          <h2 id="currentFileName">Select an entry</h2>
+                          <div class="controls">
+                              <button id="editBtn" disabled>Edit</button>
+                              <button id="deleteEntryBtn" disabled>Delete Entry</button> <!-- New Button -->
+                              <button id="generatePdfBtn" disabled>Generate PDF</button> <!-- New Button -->
+                              <button id="formatBtn" disabled>Format AI</button>
+                              <button id="improveBtn" disabled>Improve AI</button>
+                          </div>
+                      </div>
+                      <div id="jsonEntryContent" class="markdown-body">
+                          <p>Loading configuration and entries...</p>
+                          <p>If this fails, check `config.json` is present and valid, and check the browser's developer console (F12) for errors.</p>
+                      </div>
+                  </div>
+
+                  <div id="editor" style="display: none;">
+                       <div class="content-header">
+                          <h2 id="editingFileName">Editing...</h2>
+                           <div class="controls">
+                              <button id="saveBtn">Save to GitHub</button>
+                              <button id="cancelBtn">Cancel</button>
+                          </div>
+                       </div>
+                      <textarea id="htmlEditor"></textarea>
+                      <!-- Mirror div for autocomplete positioning -->
+                      <div id="autocomplete-mirror" aria-hidden="true"></div>
+                      <!-- Autocomplete popup -->
+                      <div id="autocompletePopup" class="autocomplete-popup"></div>
+                       <p class="instructions">
+                          <b>Saving:</b> Click 'Save to GitHub'.<br>
+                          <b>Linking:</b> Type <code>@Entry Name</code> for existing entries.<br>
+                          <b>Create New Link:</b> Type <code>@New Entry Name</code> (creates file in root). Use '+' on folders in tree to create inside them.
+                      </p>
+                  </div>
+              </div>
+
+          </div>
+      </main>
+  </div>
+
+  <!-- Improve Modal -->
+  <div id="improveModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-button" id="closeImproveModalBtn">×</span>
+        <h2>Improve Entry with AI</h2>
+        <p>Improve '<span id="improveModalEntryName"></span>' using context from other selected entries.</p>
+
+        <!-- Gemini Model Selection -->
+        <div class="modal-controls" style="margin-top: 15px;">
+            <label for="geminiModelSelect" style="margin-right: 10px; font-weight: bold;">Select AI Model:</label>
+            <select id="geminiModelSelect" style="padding: 5px; min-width: 200px; font-size: 0.9em;"></select>
+        </div>
+
+        <p style="margin-top: 15px;">Select context entries/folders:</p>
+        <div class="modal-controls">
+            <button id="selectAllContextBtn">Select All</button>
+            <button id="deselectAllContextBtn">Deselect All</button>
+        </div>
+        <div id="contextSelectionList" class="context-list context-tree">
+            <ul id="contextTreeRoot"></ul> <!-- Context tree rendered here -->
+        </div>
+        <div class="modal-footer">
+            <p>Estimated Context Tokens: <span id="contextTokenEstimate">0</span> (approx.)</p>
+            <div> <!-- Wrap buttons for layout -->
+                 <!-- *** NEW BUTTON ADDED HERE *** -->
+                 <button id="copyPromptBtn" style="background-color: #6a5a4a;">Copy Full Prompt</button>
+                 <button id="proceedWithImprovementBtn">Proceed with Improvement</button>
+                 <button id="cancelImprovementBtn">Cancel</button>
+            </div>
+        </div>
+        <div id="modalLoadingIndicator" class="modal-loading" style="display: none;">
+            <span class="spinner"></span> <span class="loading-text">Processing...</span>
+        </div>
+    </div>
+</div>
+
+  <!-- Image Lightbox Modal -->
+  <div id="imageLightboxModal" class="modal image-lightbox" style="display: none; align-items: center; justify-content: center;">
+      <span class="close-button lightbox-close" id="closeLightboxBtn" style="position: fixed; top: 20px; right: 30px; font-size: 40px; line-height: 0.6; z-index: 1005;">×</span>
+      <div class="lightbox-content" style="max-width: 90%; max-height: 90%;">
+          <img id="lightboxImage" src="" alt="Enlarged image" style="display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; margin: auto;">
+      </div>
+  </div>
+
+
+  <script src="script.js"></script>
+</body>
+</html>

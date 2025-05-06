@@ -1,0 +1,854 @@
+body,
+html {
+  margin: 0;
+  padding: 0;
+  font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
+    font-size: 15px;
+  line-height: 1.5;
+  background-color: #fdf6e3;
+  color: #3a2a1a;
+  overflow: hidden;
+  height: 100vh;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Trajan Pro", "Palatino Linotype", "Book Antiqua", Palatino,
+    serif;
+  font-weight: 600;
+  color: #8c4b31;
+  margin-top: 1.8em;
+  margin-bottom: 0.6em;
+  line-height: 1.1;
+  border-bottom: 1px solid #c8b8a8;
+  padding-bottom: 0.3em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+h1 {
+  font-size: 2em;
+  border-bottom-width: 2px;
+  text-align: center;
+  margin-bottom: 1em;
+}
+h2 {
+  font-size: 1.6em;
+}
+h3 {
+  font-size: 1.3em;
+  color: #5a3a2a;
+  border-bottom-style: dotted;
+}
+h4 {
+  font-size: 1.1em;
+  color: #5a3a2a;
+  border-bottom: none;
+  font-weight: bold;
+  text-transform: none;
+  letter-spacing: normal;
+}
+a {
+  color: #800000;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+  color: #a52a2a;
+}
+code {
+  font-family: "Courier New", Courier, monospace;
+  background-color: #f4f0e8;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-size: 0.9em;
+  border: 1px solid #e0d8cc;
+}
+pre {
+  background-color: #f4f0e8;
+  padding: 0.8em 1em;
+  border-radius: 4px;
+  overflow-x: auto;
+  border: 1px solid #d4c8b8;
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+blockquote {
+  border-left: 3px solid #a4886f;
+  padding-left: 1em;
+  margin-left: 0.5em;
+  margin-right: 0.5em;
+  font-style: italic;
+  color: #5a4a3a;
+}
+.container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+.sidebar {
+  width: 320px;
+  flex-shrink: 0;
+  background-color: #ede4d4;
+  padding: 15px 20px;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.15), 2px 0 5px rgba(0, 0, 0, 0.1);
+  border-right: 1px solid #a4886f;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  position: relative;
+}
+.sidebar h1 {
+  font-size: 1.8em;
+  margin-bottom: 0.8em;
+  color: #5a3a2a;
+  border-bottom: 1px solid #a4886f;
+}
+.resizer {
+  flex-shrink: 0;
+  width: 6px;
+  background-color: #d4c8b8;
+  cursor: col-resize;
+  height: 100vh;
+  border-left: 1px solid #a4886f;
+  border-right: 1px solid #a4886f;
+}
+.resizer:hover {
+  background-color: #a4886f;
+}
+.resizer:active {
+  background-color: #8c4b31;
+}
+.content {
+  flex-grow: 1;
+  height: 100vh;
+  overflow: hidden;
+  box-sizing: border-box;
+  display: flex;
+  background-color: #fdf6e3;
+}
+.main-content-wrapper {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+/* Add near other image preview styles */
+.image-list-container {
+    margin-top: 10px;
+    width: 100%; /* Ensure it takes full width */
+}
+
+.image-list-container img {
+    max-width: 100%;
+    height: auto;
+    display: block; /* Ensure vertical stacking */
+    margin: 0 auto 15px auto; /* Center block images and add bottom margin */
+    border: 1px solid #d4c8b8;
+    border-radius: 3px;
+    background-color: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.image-preview-sidebar {
+    /* This sets the fixed width */
+    width: 350px; /* You can change 220px to your desired fixed width */
+
+    /* This prevents it from shrinking if the main content area is too narrow */
+    flex-shrink: 0;
+
+    /* Other existing styles (keep these) */
+    height: 100vh;
+    overflow-y: auto;
+    padding: 20px 15px;
+    box-sizing: border-box;
+    border-right: 1px solid #d4c8b8;
+    background-color: #faf6ee;
+}
+
+/* Adjust button ID if needed */
+#addImageBtn {
+    background-color: #a4886f;
+    color: #ffffff;
+    border: 1px solid #8c6a4f; /* Match old button style */
+    padding: 5px 10px;         /* Match old button style */
+    font-size: 0.9em;          /* Match old button style */
+    border-radius: 3px;        /* Match old button style */
+    cursor: pointer;           /* Match old button style */
+    font-family: sans-serif;   /* Match old button style */
+    display: block; /* Make it block to take full width */
+    width: 100%;
+    box-sizing: border-box; /* Include padding/border in width */
+}
+#addImageBtn:hover { background-color: #8c4b31; }
+#addImageBtn:disabled { background-color: #c8b8a8; cursor: not-allowed; }
+.image-container {
+  margin-top: 10px;
+  text-align: center;
+}
+#entryImage {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  border: 1px solid #d4c8b8;
+  border-radius: 3px;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+#noImageText {
+  font-style: italic;
+  color: #6a5a4a;
+  font-size: 0.9em;
+  padding: 10px 0;
+}
+#uploadLinkImageBtn {
+  background-color: #a4886f;
+  color: #ffffff;
+  border: 1px solid #8c6a4f;
+  padding: 5px 10px;
+  font-size: 0.9em;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: sans-serif;
+}
+#uploadLinkImageBtn:hover {
+  background-color: #8c4b31;
+}
+.entry-view-edit-area {
+  flex-grow: 1;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 25px 35px;
+  box-sizing: border-box;
+  background-color: #fdf6e3;
+}
+.repo-info {
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #c8b8a8;
+  font-size: 0.85em;
+  color: #5a4a3a;
+}
+.repo-info p {
+  margin: 3px 0;
+}
+#repoName,
+#repoPath {
+  font-weight: bold;
+  word-break: break-all;
+}
+#refreshFileListBtn {
+  font-size: 0.8em;
+  padding: 4px 8px;
+  margin-top: 5px;
+  margin-bottom: 3px;
+  background-color: #a4886f;
+  color: #ffffff;
+  border: 1px outset #c8b8a8;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-family: sans-serif;
+}
+#refreshFileListBtn:hover {
+  background-color: #8c4b31;
+  border-color: #5a3a2a;
+}
+#refreshFileListBtn:disabled {
+  background-color: #c8b8a8;
+  cursor: not-allowed;
+  border-color: #b8a898;
+  color: #888;
+}
+#loadingIndicator {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  font-size: 0.85em;
+  color: #5a3a2a;
+}
+.spinner {
+  border: 3px solid #e0d8cc;
+  border-top: 3px solid #8c4b31;
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  animation: spin 1s linear infinite;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.instructions {
+  font-size: 0.85em;
+  color: #6a5a4a;
+  margin-top: 5px;
+  line-height: 1.4;
+}
+#fileTreeContainer {
+  flex-grow: 1;
+  margin-top: 10px;
+}
+#fileTreeRoot {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+#fileTreeRoot ul {
+  list-style: none;
+  padding-left: 18px;
+  margin: 0;
+  border-left: 1px dotted #c8b8a8;
+}
+#fileTreeRoot li {
+  margin-bottom: 1px;
+  padding: 1px 0;
+  position: relative;
+}
+#fileTreeRoot li > .node-content {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 2px 4px;
+  border-radius: 2px;
+  font-size: 0.95em;
+  position: relative;
+} /* Added position relative */
+#fileTreeRoot li.folder > .node-content {
+  cursor: pointer;
+  font-weight: bold;
+  color: #5a3a2a;
+}
+#fileTreeRoot li.folder > .node-content:hover {
+  background-color: #d4c8b8;
+}
+#fileTreeRoot li.file > .node-content {
+  text-decoration: none;
+  color: #8c4b31;
+}
+#fileTreeRoot li.file > .node-content:hover {
+  background-color: #e0d8cc;
+}
+#fileTreeRoot li.file > .node-content.active {
+  background-color: #c8b8a8;
+  font-weight: bold;
+  color: #3a2a1a;
+}
+#fileTreeRoot li.collapsed > ul {
+  display: none;
+}
+#fileTreeRoot li > .node-content::before {
+  font-family: monospace;
+  font-weight: bold;
+  margin-right: 5px;
+  display: inline-block;
+  width: 0.8em;
+  text-align: center;
+  flex-shrink: 0;
+  color: #8c4b31;
+}
+#fileTreeRoot li.folder.collapsed > .node-content::before {
+  content: "+";
+}
+#fileTreeRoot li.folder:not(.collapsed) > .node-content::before {
+  content: "-";
+}
+#fileTreeRoot li.file > .node-content::before {
+  content: "•";
+  font-size: 0.8em;
+  opacity: 0.7;
+  color: #a4886f;
+}
+
+/* NEW: Add-in-folder button style */
+.add-in-folder-btn {
+  background-color: transparent;
+  border: none;
+  color: #5a8a3a; /* Greenish color */
+  cursor: pointer;
+  font-size: 1.1em;
+  font-weight: bold;
+  padding: 0 5px;
+  margin-left: auto; /* Push button to the right */
+  line-height: 1;
+  opacity: 0.4; /* Hide slightly until hover */
+  transition: opacity 0.2s ease;
+  z-index: 2; /* Ensure clickable over text */
+}
+#fileTreeRoot li.folder > .node-content:hover .add-in-folder-btn {
+  opacity: 1; /* Show fully on hover */
+}
+.add-in-folder-btn:hover {
+  color: #3a5a2a; /* Darker green */
+}
+
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #a4886f;
+}
+.content-header h2 {
+  margin: 0;
+  border-bottom: none;
+  padding-bottom: 0;
+  font-size: 1.7em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #800000;
+}
+.controls {
+}
+.controls button {
+  background-color: #a4886f;
+  color: #ffffff;
+  border: 1px outset #c8b8a8;
+  padding: 6px 12px;
+  border-radius: 2px;
+  cursor: pointer;
+  font-family: sans-serif;
+  font-size: 0.85em;
+  transition: background-color 0.2s ease;
+  margin-left: 6px;
+  font-weight: bold;
+}
+.controls button:first-child {
+  margin-left: 0;
+}
+.controls button:hover {
+  background-color: #8c4b31;
+  border-color: #5a3a2a;
+}
+.controls button:disabled {
+  background-color: #c8b8a8;
+  cursor: not-allowed;
+  border-color: #b8a898;
+  color: #888;
+}
+.sidebar #createNewFileBtn {
+  width: 100%;
+  margin-top: 15px;
+  background-color: #a4886f;
+  color: #ffffff;
+  border: 1px outset #c8b8a8;
+  padding: 8px 15px;
+  border-radius: 2px;
+  cursor: pointer;
+  font-family: sans-serif;
+  font-size: 0.9em;
+  transition: background-color 0.2s ease;
+  font-weight: bold;
+}
+.sidebar #createNewFileBtn:hover {
+  background-color: #8c4b31;
+  border-color: #5a3a2a;
+}
+.sidebar #createNewFileBtn:disabled {
+  background-color: #c8b8a8;
+  cursor: not-allowed;
+  border-color: #b8a898;
+  color: #888;
+}
+#jsonEntryContent.markdown-body {
+  background-color: transparent;
+  padding: 10px 0;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  min-height: 100px;
+}
+.markdown-body p {
+  margin-bottom: 0.8em;
+  text-align: justify;
+}
+.markdown-body a[data-internal-link] {
+  border-bottom: 1px dotted #800000;
+}
+.markdown-body a[data-internal-link]:hover {
+  border-bottom-style: solid;
+}
+.missing-link {
+  color: #a52a2a;
+  font-style: italic;
+  cursor: help;
+  border-bottom: 1px dashed #a52a2a;
+}
+
+#editor{
+    width: 70%;
+    padding: 15px
+}
+
+
+#editor textarea#htmlEditor {
+  width: 100%;
+  height: calc(100vh - 200px);
+  min-height: 300px;
+  border: 1px solid #c8b8a8;
+  padding: 15px;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  background-color: #fdfcf9;
+  border-radius: 4px;
+  resize: vertical;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+#editor .instructions {
+  width:100%;
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f4f0e8;
+  border: 1px dashed #c8b8a8;
+  border-radius: 4px;
+  font-size: 0.8em;
+}
+/* Styles for the hidden mirror div used for positioning */
+#autocomplete-mirror {
+    /* --- CRITICAL: Match these styles EXACTLY to #htmlEditor --- */
+    font-family: 'Courier New', Courier, monospace; /* Match textarea */
+
+    padding: 15px;
+    font-size: 14px;
+    line-height: 1.5;
+    border-radius: 4px;
+    border: 1px solid transparent;            /* Match textarea border width, but transparent */
+    width: 100%;                              /* Match textarea width */
+    box-sizing: border-box;                   /* Match textarea box-sizing */
+    word-wrap: break-word;                    /* Important for wrapping */
+    white-space: pre-wrap;                  /* Important for whitespace/newlines */
+    /* --- End of critical matching styles --- */
+
+    /* Styles to hide the div visually but keep layout */
+    position: absolute;
+    top: 0;
+    left: -9999px; /* Move off-screen */
+    visibility: hidden; /* Hide visually */
+    overflow: hidden;   /* Prevent scrollbars */
+    min-height: 20px;   /* Prevent collapsing completely */
+    pointer-events: none; /* Ignore mouse events */
+}
+
+/* Style for the temporary marker span inside the mirror */
+#autocomplete-mirror span {
+    display: inline-block; /* Ensure it has layout */
+    width: 0;
+    height: 0;
+}
+.autocomplete-popup {
+  position: absolute;
+  border: 1px solid #a4886f;
+  background-color: #fdfcf9;
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+  display: none;
+  width: auto;
+  min-width: 250px;
+  max-width: 400px;
+}
+.autocomplete-popup div {
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 0.9em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.autocomplete-popup div:hover,
+.autocomplete-popup div.selected {
+  background-color: #e8e4d8;
+}
+.autocomplete-popup div.create-new {
+  font-style: italic;
+  color: #8c4b31;
+  border-top: 1px dashed #d4c8b8;
+  margin-top: 4px;
+  padding-top: 6px;
+}
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1001;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+.modal-content {
+  background-color: #fdf6e3;
+  margin: 8% auto;
+  padding: 25px 30px;
+  border: 2px solid #a4886f;
+  width: 80%;
+  max-width: 750px;
+  border-radius: 0;
+  position: relative;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+}
+.modal-content h2 {
+  margin-top: 0;
+  color: #800000;
+  border-bottom-color: #a4886f;
+}
+.close-button {
+  color: #aaa;
+  float: right;
+  font-size: 32px;
+  font-weight: bold;
+  line-height: 0.8;
+}
+.close-button:hover,
+.close-button:focus {
+  color: #3a2a1a;
+  text-decoration: none;
+  cursor: pointer;
+}
+.context-list {
+  max-height: 45vh;
+  overflow-y: auto;
+  border: 1px solid #d4c8b8;
+  padding: 15px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  background-color: #faf6ee;
+  border-radius: 3px;
+}
+.context-list label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 0.9em;
+  cursor: pointer;
+}
+.context-list input[type="checkbox"] {
+  margin-right: 8px;
+  vertical-align: middle;
+  cursor: pointer;
+}
+.modal-controls {
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px dotted #c8b8a8;
+}
+.modal-controls button {
+  font-size: 0.8em;
+  padding: 4px 8px;
+  margin-right: 8px;
+  background-color: #a4886f;
+  color: #fff;
+  border: 1px outset #c8b8a8;
+  border-radius: 2px;
+  font-family: sans-serif;
+}
+.modal-controls button:hover {
+  background-color: #8c4b31;
+}
+.modal-footer {
+  margin-top: 20px;
+  border-top: 1px solid #d4c8b8;
+  padding-top: 15px;
+  text-align: right;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.modal-footer p {
+  text-align: left;
+  font-size: 0.85em;
+  color: #6a5a4a;
+  margin: 0;
+}
+.modal-footer button {
+  padding: 8px 18px;
+  margin-left: 10px;
+  font-size: 0.9em;
+  background-color: #a4886f;
+  color: #fff;
+  border: 1px outset #c8b8a8;
+  border-radius: 2px;
+  font-weight: bold;
+  font-family: sans-serif;
+}
+.modal-footer button:hover {
+  background-color: #8c4b31;
+  border-color: #5a3a2a;
+}
+.modal-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(253, 246, 227, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1002;
+  border-radius: 0;
+}
+.modal-loading .spinner {
+  width: 30px;
+  height: 30px;
+  border-width: 4px;
+}
+.modal-loading .loading-text {
+  margin-left: 10px;
+  font-weight: bold;
+}
+.context-tree ul {
+  list-style: none;
+  padding-left: 18px;
+  margin: 0;
+  border-left: 1px dotted #d4c8b8;
+}
+.context-tree li {
+  margin-bottom: 2px;
+  padding: 1px 0;
+}
+.context-tree .context-node-content {
+  display: flex;
+  align-items: center;
+  cursor: default;
+  padding: 1px 0;
+}
+.context-tree .context-node-content input[type="checkbox"] {
+  margin-right: 5px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.context-tree .context-node-content label {
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-grow: 1;
+  cursor: pointer;
+  padding: 1px 0;
+  font-size: 0.95em;
+}
+.context-tree li.folder > .context-node-content label {
+  font-weight: bold;
+  color: #5a3a2a;
+}
+.context-tree li.file > .context-node-content label {
+  color: #3a2a1a;
+}
+.context-tree li.folder > .context-node-content {
+  cursor: pointer;
+}
+.context-tree li.collapsed > ul {
+  display: none;
+}
+.context-tree li.folder > .context-node-content::before {
+  content: "+";
+  font-family: monospace;
+  font-weight: bold;
+  display: inline-block;
+  width: 0.8em;
+  margin-right: 4px;
+  text-align: center;
+  flex-shrink: 0;
+  color: #8c4b31;
+  font-size: 1.1em;
+}
+.context-tree li.folder:not(.collapsed) > .context-node-content::before {
+  content: "-";
+}
+.context-tree li.file > .context-node-content::before {
+  content: "";
+  width: 0.8em;
+  margin-right: 4px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+
+/* Improve Modal - Dropdown */
+#improveModal label {
+    vertical-align: middle;
+}
+#improveModal select {
+    vertical-align: middle;
+}
+
+/* Image Lightbox Modal Styles */
+.image-lightbox {
+    /* Uses base .modal style, add specifics */
+    background-color: rgba(0,0,0,0.85); /* Darker overlay */
+}
+
+.image-lightbox .lightbox-content {
+    /* Override modal-content padding/border if needed */
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    margin: auto; /* Center content */
+    width: auto; /* Allow image to determine width up to max */
+    height: auto; /* Allow image to determine height up to max */
+    max-width: 90vw; /* Limit max width */
+    max-height: 90vh; /* Limit max height */
+    box-shadow: 0 5px 25px rgba(0,0,0,0.5);
+}
+
+.image-lightbox #lightboxImage {
+    /* Styles already set inline in HTML for max-width/height etc. */
+    /* Add transitions or other effects if desired */
+}
+
+.image-lightbox .lightbox-close {
+    color: #fff; /* White close button on dark background */
+    text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+.image-lightbox .lightbox-close:hover {
+    opacity: 1;
+    color: #eee;
+}
+
+/* Ensure mirror div styling matches textarea EXACTLY */
+#autocomplete-mirror {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 15px;
+    border: 1px solid transparent; /* Match width, hide visually */
+    width: 100%;
+    box-sizing: border-box;
+    word-wrap: break-word;
+    white-space: pre-wrap; /* Crucial for layout matching */
+    /* Hiding styles */
+    position: absolute;
+    top: 0;
+    left: -9999px;
+    visibility: hidden;
+    overflow: hidden;
+    min-height: 20px;
+    pointer-events: none;
+}
+#autocomplete-mirror span { /* Marker span */
+    display: inline-block;
+    width: 0;
+    height: 0;
+}
+
