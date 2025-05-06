@@ -4,7 +4,7 @@
   "campaign_id": null,
   "entry": "<p>New entry: Bestia Scavatrice del Vuoto.</p>",
   "created_at": "2025-05-06T15:55:21.992.000000Z",
-  "updated_at": "2025-05-06T15:59:44.966.000000Z",
+  "updated_at": "2025-05-06T21:42:57.276.000000Z",
   "is_private": 0,
   "tags": [],
   "entity": {
@@ -21,10 +21,12 @@
     "focus_x": null,
     "focus_y": null,
     "created_at": "2025-05-06T15:55:21.992.000000Z",
-    "updated_at": "2025-05-06T15:59:44.966.000000Z",
+    "updated_at": "2025-05-06T21:42:57.276.000000Z",
     "created_by": null,
     "updated_by": null,
-    "image_uuids": [],
+    "image_uuids": [
+      "ecf04937-c548-40cd-a596-76d0e1a8fc9f"
+    ],
     "header_uuid": null,
     "image_path": null,
     "header_image": null,
