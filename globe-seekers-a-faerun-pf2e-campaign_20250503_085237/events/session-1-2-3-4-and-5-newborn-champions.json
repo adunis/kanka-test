@@ -2,7 +2,7 @@
   "id": 180607,
   "name": "Session 1, 2 3, 4 and 5: Newborn Champions",
   "created_at": "2025-02-27T19:53:48.000000Z",
-  "updated_at": "2025-05-19T19:29:14.249.000000Z",
+  "updated_at": "2025-05-19T19:53:00.812.000000Z",
   "is_private": 0,
   "date": "1526-11-10",
   "location_id": null,
@@ -22,7 +22,7 @@
     "focus_x": null,
     "focus_y": null,
     "created_at": "2025-02-27T19:53:48.000000Z",
-    "updated_at": "2025-05-19T19:29:14.249.000000Z",
+    "updated_at": "2025-05-19T19:53:00.812.000000Z",
     "created_by": 275646,
     "updated_by": 275646,
     "image_path": null,
@@ -50,7 +50,8 @@
     ],
     "image_uuids": [
       "04b835ee-050e-4e92-8380-33c8c865bd6a",
-      "26d1e6a6-157e-4880-ae74-b35a7d52037c"
+      "26d1e6a6-157e-4880-ae74-b35a7d52037c",
+      "795bbee5-089f-4093-bc08-c97ff151968e"
     ]
   }
 }
