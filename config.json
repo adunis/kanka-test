@@ -1,14 +1,15 @@
 {
   "github": {
     "USERNAME": "adunis",
-    "REPO": "kanka-test",
+    "REPO": "kanka-test", 
     "DATA_PATH": "globe-seekers-a-faerun-pf2e-campaign_20250503_085237",
     "BRANCH": "main",
-    "TOKEN": "GITHUB_TOKEN_PLACEHOLDER", 
+    "DEFAULT_READ_TOKEN": "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", 
+    "TOKEN_PLACEHOLDER_MESSAGE": "GITHUB_WRITE_TOKEN_NEEDED_FOR_EDITS", 
     "GALLERY_FOLDER": "gallery"
   },
   "gemini": {
-    "API_KEY": "GEMINI_API_KEY_PLACEHOLDER",
+    "API_KEY_PLACEHOLDER_MESSAGE": "GEMINI_API_KEY_NEEDED_FOR_AI",
     "API_BASE_URL": "https://generativelanguage.googleapis.com/v1beta/models/",
     "MODELS": [
       { "name": "Gemini 1.5 Flash (Recommended)", "id": "gemini-1.5-flash" },
