@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Entry Organizer</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNgIT0mFEkZH7QUE1ZKbHAzvIR51FcEnOekXYAJOVMIHGHHOI2GU3dv" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- Include html2canvas library (Ensure its integrity is also correct) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</head>
+<body>
+  <div class="container">
+      <aside class="sidebar" id="sidebar">
+          <h1>Entries</h1>
+          <div class="repo-info">
+              <p>Repo: <span id="repoName">Loading...</span></p>
+              <p>Path: <span id="repoPath">/</span></p>
+              <button id="refreshFileListBtn">Refresh List</button>
+              <!-- Clear Keys Button -->
+              <button id="clearKeysBtn" style="margin-top: 5px; background-color: #d9534f; color:white; border-color: #c9302c; font-size:0.8em; padding: 4px 8px;">Clear API Keys</button>
+
+              <!-- Keep only ONE instance of loadingIndicator and fileCount within repo-info -->
+              <div id="loadingIndicator" style="display: none; margin-top: 10px;">
+                  <span class="spinner"></span> <span class="loading-text">Loading...</span>
+              </div>
+              <p id="fileCount" class="instructions" style="margin-top: 10px;"></p>
+          </div>
+
+          <nav id="fileTreeContainer">
+              <ul id="fileTreeRoot"></ul>
+          </nav>
+           <button id="createNewFileBtn" style="margin-top: 15px;" disabled>Create New Entry (Root)</button>
+           <button id="createNewFolderBtn" style="margin-top: 10px;" disabled>Create New Folder (Root)</button>
+           <button id="reorganizeEntriesBtn" style="margin-top: 10px;" disabled>Reorganize Entries</button>
+      </aside>
+
+      <div class="resizer" id="resizer"></div>
+
+      <main class="content" id="mainContent">
+          <div class="main-content-wrapper">
+
+              <aside class="image-preview-sidebar" id="imagePreviewSidebar" style="display: none;">
+                  <h2>Images</h2>
+                  <div class="image-list-container" id="imageListContainer">
+                      <!-- Images and delete buttons added dynamically -->
+                  </div>
+                  <p id="noImageText" style="display: block;">No images linked.</p>
+                  <button id="addImageBtn" style="display: none; margin-top: 15px;">Add Image(s)</button>
+                  <input type="file" id="imageUploadInput" accept="image/*" style="display: none;" multiple>
+              </aside>
+
+              <div class="entry-view-edit-area">
+                  <div id="viewer">
+                      <div class="content-header">
+                          <h2 id="currentFileName">Select an entry</h2>
+                          <div class="controls">
+                              <button id="editBtn" disabled>Edit</button>
+                              <button id="renameEntryBtn" disabled>Rename</button>
+                              <button id="deleteEntryBtn" disabled>Delete Entry</button>
+                              <button id="generatePdfBtn" disabled>Generate PDF</button>
+                              <button id="formatBtn" disabled>Format AI</button>
+                              <button id="improveBtn" disabled disabled>Improve AI</button> <!-- Added disabled here -->
+                          </div>
+                      </div>
+                      <div id="jsonEntryContent" class="markdown-body">
+                          <p>Loading configuration and entries...</p>
+                          <p>If this fails, check `config.json` is present and valid, and check the browser's developer console (F12) for errors.</p>
+                      </div>
+                  </div>
+
+                  <div id="editor" style="display: none;">
+                       <div class="content-header">
+                          <h2 id="editingFileName">Editing...</h2>
+                           <div class="controls">
+                              <button id="saveBtn">Save to GitHub</button>
+                              <button id="cancelBtn">Cancel</button>
+                          </div>
+                       </div>
+                      <textarea id="htmlEditor"></textarea>
+                      <!-- Mirror div for autocomplete positioning -->
+                      <div id="autocomplete-mirror" aria-hidden="true"></div>
+                      <!-- Autocomplete popup -->
+                      <div id="autocompletePopup" class="autocomplete-popup"></div>
+                       <p class="instructions">
+                          <b>Saving:</b> Click 'Save to GitHub'.<br>
+                          <b>Linking:</b> Type <code>@Entry Name</code> for existing entries.<br>
+                          <b>Create New Link:</b> Type <code>@New Entry Name</code> (creates file in root). Use '+' on folders in tree to create inside them.
+                      </p>
+                  </div>
+              </div>
+
+          </div>
+      </main>
+  </div>
+
+  <!-- API Key Input Modal - MOVED HERE -->
+  <div id="apiKeyModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <h2>Enter API Keys</h2>
+        <p>Please provide your API keys to use the application. These keys will be stored in your browser's session storage and cleared when you close the tab/browser.</p>
+        <div style="margin-bottom: 15px;">
+            <label for="githubTokenInput" style="display: block; margin-bottom: 5px; font-weight: bold;">GitHub Personal Access Token:</label>
+            <input type="password" id="githubTokenInput" style="width: 95%; padding: 8px; border: 1px solid #c8b8a8; border-radius: 3px;">
+            <small>Required. Needs `repo` scope for private repositories, or `public_repo` if it's a public repo you intend to modify.</small>
+        </div>
+        <div style="margin-bottom: 20px;">
+            <label for="geminiApiKeyInput" style="display: block; margin-bottom: 5px; font-weight: bold;">Google Gemini API Key:</label>
+            <input type="password" id="geminiApiKeyInput" style="width: 95%; padding: 8px; border: 1px solid #c8b8a8; border-radius: 3px;">
+            <small>Optional. Required for "Format AI" and "Improve AI" features.</small>
+        </div>
+        <div class="modal-footer" style="text-align: right;">
+            <button id="saveApiKeysBtn" style="padding: 10px 20px; background-color: #8c4b31; color: white; border: none; border-radius: 3px; cursor: pointer;">Save and Continue</button>
+        </div>
+    </div>
+  </div>
+
+  <!-- Improve Modal -->
+  <div id="improveModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-button" id="closeImproveModalBtn">×</span>
+        <h2>Improve Entry with AI</h2>
+        <p>Improve '<span id="improveModalEntryName"></span>' using context from other selected entries.</p>
+
+        <div class="modal-controls" style="margin-top: 15px;">
+            <label for="geminiModelSelect" style="margin-right: 10px; font-weight: bold;">Select AI Model:</label>
+            <select id="geminiModelSelect" style="padding: 5px; min-width: 200px; font-size: 0.9em;"></select>
+        </div>
+
+        <p style="margin-top: 15px;">Select context entries/folders:</p>
+        <div class="modal-controls">
+            <button id="selectAllContextBtn">Select All</button>
+            <button id="deselectAllContextBtn">Deselect All</button>
+        </div>
+        <div id="contextSelectionList" class="context-list context-tree">
+            <ul id="contextTreeRoot"></ul>
+        </div>
+        <div class="modal-footer">
+            <p>Estimated Context Tokens: <span id="contextTokenEstimate">0</span> (approx.)</p>
+            <div>
+                 <button id="copyPromptBtn" style="background-color: #6a5a4a;">Copy Full Prompt</button>
+                 <button id="proceedWithImprovementBtn">Proceed with Improvement</button>
+                 <button id="cancelImprovementBtn">Cancel</button>
+            </div>
+        </div>
+        <div id="modalLoadingIndicator" class="modal-loading" style="display: none;">
+            <span class="spinner"></span> <span class="loading-text">Processing...</span>
+        </div>
+    </div>
+</div>
+
+  <!-- Image Lightbox Modal -->
+  <div id="imageLightboxModal" class="modal image-lightbox" style="display: none; align-items: center; justify-content: center;">
+      <span class="close-button lightbox-close" id="closeLightboxBtn" style="position: fixed; top: 20px; right: 30px; font-size: 40px; line-height: 0.6; z-index: 1005;">×</span>
+      <div class="lightbox-content" style="max-width: 90%; max-height: 90%;">
+          <img id="lightboxImage" src="" alt="Enlarged image" style="display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; margin: auto;">
+      </div>
+  </div>
+
+  <!-- Reorganize Entries Modal -->
+  <div id="reorganizeModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-button" id="closeReorganizeModalBtn">×</span>
+        <h2>Reorganize Entries</h2>
+        <p>Select a target folder and then choose the entries/folders you wish to move.</p>
+
+        <div class="modal-section">
+            <h3>Target Folder:</h3>
+            <div id="reorganizeTargetFolderSelector" class="context-list context-tree" style="max-height: 200px;">
+                <!-- Target folder tree/list will be rendered here by JavaScript -->
+                <p>Loading folders...</p>
+            </div>
+            <p>Selected target: <strong id="selectedTargetFolderPathDisplay">Root</strong></p>
+        </div>
+
+        <div class="modal-section" style="margin-top: 20px;">
+            <h3>Items to Move:</h3>
+             <div class="modal-controls">
+                <button id="selectAllReorganizeBtn">Select All</button>
+                <button id="deselectAllReorganizeBtn">Deselect All</button>
+            </div>
+            <div id="reorganizeSourceItemsSelector" class="context-list context-tree" style="max-height: 300px;">
+                <!-- Source items tree will be rendered here by JavaScript -->
+                <p>Loading entries and folders...</p>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <p id="reorganizeStatusMessage" style="color: red; text-align: left; flex-grow: 1;"></p>
+            <div>
+                 <button id="proceedWithReorganizationBtn">Move Selected Items</button>
+                 <button id="cancelReorganizationBtn">Cancel</button>
+            </div>
+        </div>
+        <div id="reorganizeModalLoadingIndicator" class="modal-loading" style="display: none;">
+            <span class="spinner"></span> <span class="loading-text">Processing...</span>
+        </div>
+         <p class="instructions" style="margin-top:15px; font-size:0.8em; color: #800000;">
+            <strong>Warning:</strong> Moving files or folders may break existing links (e.g., <code>@EntryName</code>) in other entries.
+            Full reorganization functionality is complex and under development. This modal is a placeholder for future enhancements.
+        </p>
+    </div>
+</div>
+
+
+  <script src="script.js"></script>
+</body>
+</html>

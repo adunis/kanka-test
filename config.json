@@ -1,0 +1,28 @@
+{
+  "github": {
+    "USERNAME": "adunis",
+    "REPO": "kanka-test",
+    "DATA_PATH": "globe-seekers-a-faerun-pf2e-campaign_20250503_085237",
+    "BRANCH": "main",
+    "TOKEN": "GITHUB_TOKEN_PLACEHOLDER", 
+    "GALLERY_FOLDER": "gallery"
+  },
+  "gemini": {
+    "API_KEY": "GEMINI_API_KEY_PLACEHOLDER",
+    "API_BASE_URL": "https://generativelanguage.googleapis.com/v1beta/models/",
+    "MODELS": [
+      { "name": "Gemini 1.5 Flash (Recommended)", "id": "gemini-1.5-flash" },
+      { "name": "Gemini 2.0 Flash", "id": "gemini-2.0-flash" },
+      { "name": "gemini 2.5 Flash", "id": "gemini-2.5-flash-preview-04-17" },
+      { "name": "gemini-2.5 Pro", "id": "gemini-2.5-pro-exp-03-25" }
+    ]
+  },
+  "prompts": {
+    "format": "Reformat the following HTML content for clarity, correctness, and consistent structure. Fix any basic HTML errors (like unclosed tags). Ensure paragraphs, headings, and lists are used appropriately. Output ONLY the valid, corrected HTML code block, without any introductory text, explanations, or markdown fences (```html or ```). Just the raw HTML. Use <h1>, <h2> and <h3> headers for titles. If the test is in english, traslate it in ITALIAN.",
+    "improve_base": "Improve the following main HTML content by adding relevant details, enhancing clarity, ensuring coherence, and improving the overall structure. Use the provided context from other entries to enrich the main content, expanding on the topic where appropriate. Ensure the final output is ONLY the improved, valid HTML code block for the main content, without any surrounding text, explanations, or markdown fences (```html or ```).",
+    "improve_campaign_context": "IMPORTANT CONTEXT: You have to rewrite everything taking in consideration the current time period of the campaign is after the Great Descent, the apocalyptic divine war led by the Old Gods that changed the world. You MUST provide information about the article of what happened to the entity (character, location etc) after the Great Descent - if missing, create and invent it. You are free to create new lore and new plot hooks for this Pathfinder 2e Campaign but remain coherent with the rest of the information.",
+    "improve_context_header": "\n\n--- Context Starts ---",
+    "improve_context_footer": "\n--- Context Ends ---",
+    "improve_main_content_header": "\n\n--- Main Content to Improve ---"
+  }
+}
