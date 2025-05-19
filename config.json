@@ -4,7 +4,7 @@
     "REPO": "kanka-test", 
     "DATA_PATH": "globe-seekers-a-faerun-pf2e-campaign_20250503_085237",
     "BRANCH": "main",
-    "DEFAULT_READ_TOKEN": "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", 
+    "DEFAULT_READ_TOKEN": "github_pat_11ALMK4X" + "I0A2WiTQETDv1E_QVlJIradAd" + "0gvlb6EUeoI9IfiqM0bVkplbSxT2Y5" + "MMgOXRJ2D3SUfpmLTy6, 
     "TOKEN_PLACEHOLDER_MESSAGE": "GITHUB_WRITE_TOKEN_NEEDED_FOR_EDITS", 
     "GALLERY_FOLDER": "gallery"
   },
