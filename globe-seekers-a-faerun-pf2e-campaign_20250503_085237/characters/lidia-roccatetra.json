@@ -7,7 +7,7 @@
   "sex": null,
   "pronouns": null,
   "created_at": "2024-11-05T18:31:57.000000Z",
-  "updated_at": "2025-05-20T12:41:42.506.000000Z",
+  "updated_at": "2025-05-20T13:00:31.090.000000Z",
   "location_id": 1714715,
   "title": null,
   "family_id": null,
@@ -34,11 +34,10 @@
     "focus_x": null,
     "focus_y": null,
     "created_at": "2024-11-05T18:31:57.000000Z",
-    "updated_at": "2025-05-20T12:41:42.506.000000Z",
+    "updated_at": "2025-05-20T13:00:31.090.000000Z",
     "created_by": 275646,
     "updated_by": 275646,
     "image_path": null,
-    "image_uuid": null,
     "header_image": null,
     "header_uuid": null,
     "marketplace_uuid": null,
@@ -51,6 +50,9 @@
         "quest_element_id": null,
         "target_id": 6751878
       }
+    ],
+    "image_uuids": [
+      "618387d0-8468-4714-880a-1a7c8c4e724d"
     ]
   },
   "character_traits": [],
