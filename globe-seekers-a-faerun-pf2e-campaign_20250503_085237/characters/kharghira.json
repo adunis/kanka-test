@@ -7,7 +7,7 @@
   "sex": null,
   "pronouns": null,
   "created_at": "2024-10-01T21:22:08.000000Z",
-  "updated_at": "2025-05-05T00:47:58.869.000000Z",
+  "updated_at": "2025-05-20T12:23:25.686.000000Z",
   "location_id": 1714715,
   "title": ", Emissario Wyrmclaw",
   "family_id": null,
@@ -34,14 +34,17 @@
     "focus_x": null,
     "focus_y": null,
     "created_at": "2024-10-01T21:22:08.000000Z",
-    "updated_at": "2025-05-05T00:47:58.869.000000Z",
+    "updated_at": "2025-05-20T12:23:25.686.000000Z",
     "created_by": 275646,
     "updated_by": 275646,
     "image_path": null,
-    "image_uuid": "9d6cb8e5-f9c4-46a6-8256-47689a3f1405",
     "header_image": null,
     "header_uuid": null,
-    "marketplace_uuid": null
+    "marketplace_uuid": null,
+    "image_uuids": [
+      "9d6cb8e5-f9c4-46a6-8256-47689a3f1405",
+      "355ff051-4621-438b-9eab-ed38cf5f80b5"
+    ]
   },
   "character_traits": [],
   "character_families": [],
