@@ -1,11 +1,11 @@
 {
   "github": {
     "USERNAME": "adunis",
-    "REPO": "kanka-test", 
+    "REPO": "kanka-test",
     "DATA_PATH": "globe-seekers-a-faerun-pf2e-campaign_20250503_085237",
     "BRANCH": "main",
-        "TOKEN_PLACEHOLDER_MESSAGE": "GITHUB_WRITE_TOKEN_NEEDED_FOR_EDITS", 
-            "DEFAULT_READ_TOKEN_PARTS": [
+    "TOKEN_PLACEHOLDER_MESSAGE": "GITHUB_WRITE_TOKEN_NEEDED_FOR_EDITS",
+    "DEFAULT_READ_TOKEN_PARTS": [
       "github_pat_11ALMK4X",
       "I0A2WiTQETDv1E_QVlJIradAd",
       "0gvlb6EUeoI9IfiqM0bVkplbSxT2Y5MMgOXRJ2D3SUfpmLTy6"
