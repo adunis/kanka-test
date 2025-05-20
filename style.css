@@ -4,9 +4,13 @@ html {
   padding: 0;
   font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
   font-size: 15px;
+  font-size: 15px;
   line-height: 1.5;
   background-color: #fdf6e3;
   color: #3a2a1a;
+  /* overflow: hidden; Removed for responsive scroll */
+  height: 100vh; /* Keep for desktop full height */
+  overflow-x: hidden; /* Prevent horizontal scroll always */
   /* overflow: hidden; Removed for responsive scroll */
   height: 100vh; /* Keep for desktop full height */
   overflow-x: hidden; /* Prevent horizontal scroll always */
@@ -129,6 +133,7 @@ blockquote {
   flex-grow: 1;
   height: 100vh;
   overflow: hidden; /* Will be changed for mobile */
+  overflow: hidden; /* Will be changed for mobile */
   box-sizing: border-box;
   display: flex;
   background-color: #fdf6e3;
@@ -141,11 +146,16 @@ blockquote {
 .image-list-container {
     margin-top: 10px;
     width: 100%;
+    width: 100%;
 }
+.image-list-container img,
+.image-list-container .image-placeholder-item img { /* Target loaded images inside placeholders too */
 .image-list-container img,
 .image-list-container .image-placeholder-item img { /* Target loaded images inside placeholders too */
     max-width: 100%;
     height: auto;
+    display: block;
+    margin: 0 auto 15px auto;
     display: block;
     margin: 0 auto 15px auto;
     border: 1px solid #d4c8b8;
@@ -174,7 +184,30 @@ blockquote {
     font-size: 0.9em;
     color: #666;
 }
+    cursor: pointer; /* Add for lightbox */
+}
+/* Placeholder specific styling */
+.image-placeholder-item {
+    border: 1px dashed #ccc;
+    padding: 10px;
+    margin-bottom: 15px;
+    background-color: #f9f9f9;
+    border-radius: 3px;
+    text-align: center;
+}
+.image-placeholder-item p {
+    margin: 0 0 5px 0;
+    word-break: break-all;
+}
+.image-placeholder-item p:first-of-type { /* For filename */
+    font-weight: bold;
+}
+.image-placeholder-item p:last-of-type { /* For status */
+    font-size: 0.9em;
+    color: #666;
+}
 .image-preview-sidebar {
+    width: 350px;
     width: 350px;
     flex-shrink: 0;
     height: 100vh;
@@ -194,7 +227,15 @@ blockquote {
     cursor: pointer;
     font-family: sans-serif;
     display: block;
+    border: 1px solid #8c6a4f;
+    padding: 5px 10px;
+    font-size: 0.9em;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: sans-serif;
+    display: block;
     width: 100%;
+    box-sizing: border-box;
     box-sizing: border-box;
 }
 #addImageBtn:hover { background-color: #8c4b31; }
@@ -204,6 +245,7 @@ blockquote {
   color: #6a5a4a;
   font-size: 0.9em;
   padding: 10px 0;
+  text-align: center;
   text-align: center;
 }
 .entry-view-edit-area {
@@ -230,10 +272,12 @@ blockquote {
   word-break: break-all;
 }
 #refreshFileListBtn, #clearKeysBtn /* Added clearKeysBtn */ {
+#refreshFileListBtn, #clearKeysBtn /* Added clearKeysBtn */ {
   font-size: 0.8em;
   padding: 4px 8px;
   margin-top: 5px;
   margin-bottom: 3px;
+  margin-right: 5px; /* Added for spacing if they are next to each other */
   margin-right: 5px; /* Added for spacing if they are next to each other */
   background-color: #a4886f;
   color: #ffffff;
@@ -244,14 +288,25 @@ blockquote {
   font-family: sans-serif;
 }
 #refreshFileListBtn:hover, #clearKeysBtn:hover:not(:disabled) /* Added :not(:disabled) */ {
+#refreshFileListBtn:hover, #clearKeysBtn:hover:not(:disabled) /* Added :not(:disabled) */ {
   background-color: #8c4b31;
   border-color: #5a3a2a;
 }
+#refreshFileListBtn:disabled, #clearKeysBtn:disabled {
 #refreshFileListBtn:disabled, #clearKeysBtn:disabled {
   background-color: #c8b8a8;
   cursor: not-allowed;
   border-color: #b8a898;
   color: #888;
+}
+/* Specific style for clearKeysBtn if needed for different color */
+#clearKeysBtn {
+    background-color: #d9534f;
+    border-color: #c9302c;
+}
+#clearKeysBtn:hover:not(:disabled) {
+    background-color: #c9302c;
+    border-color: #ac2925;
 }
 /* Specific style for clearKeysBtn if needed for different color */
 #clearKeysBtn {
@@ -324,6 +379,7 @@ blockquote {
   font-size: 0.95em;
   position: relative;
 }
+}
 #fileTreeRoot li.folder > .node-content {
   cursor: pointer;
   font-weight: bold;
@@ -373,20 +429,26 @@ blockquote {
   background-color: transparent;
   border: none;
   color: #5a8a3a;
+  color: #5a8a3a;
   cursor: pointer;
   font-size: 1.1em;
   font-weight: bold;
   padding: 0 5px;
   margin-left: auto;
+  margin-left: auto;
   line-height: 1;
   opacity: 0.4;
+  opacity: 0.4;
   transition: opacity 0.2s ease;
+  z-index: 2;
   z-index: 2;
 }
 #fileTreeRoot li.folder > .node-content:hover .add-in-folder-btn {
   opacity: 1;
+  opacity: 1;
 }
 .add-in-folder-btn:hover {
+  color: #3a5a2a;
   color: #3a5a2a;
 }
 .content-header {
@@ -435,7 +497,9 @@ blockquote {
   color: #888;
 }
 .sidebar #createNewFileBtn, .sidebar #createNewFolderBtn, .sidebar #reorganizeEntriesBtn /* Grouped similar buttons */ {
+.sidebar #createNewFileBtn, .sidebar #createNewFolderBtn, .sidebar #reorganizeEntriesBtn /* Grouped similar buttons */ {
   width: 100%;
+  margin-top: 10px; /* Consistent margin */
   margin-top: 10px; /* Consistent margin */
   background-color: #a4886f;
   color: #ffffff;
@@ -449,9 +513,11 @@ blockquote {
   font-weight: bold;
 }
 .sidebar #createNewFileBtn:hover, .sidebar #createNewFolderBtn:hover, .sidebar #reorganizeEntriesBtn:hover {
+.sidebar #createNewFileBtn:hover, .sidebar #createNewFolderBtn:hover, .sidebar #reorganizeEntriesBtn:hover {
   background-color: #8c4b31;
   border-color: #5a3a2a;
 }
+.sidebar #createNewFileBtn:disabled, .sidebar #createNewFolderBtn:disabled, .sidebar #reorganizeEntriesBtn:disabled {
 .sidebar #createNewFileBtn:disabled, .sidebar #createNewFolderBtn:disabled, .sidebar #reorganizeEntriesBtn:disabled {
   background-color: #c8b8a8;
   cursor: not-allowed;
@@ -489,8 +555,16 @@ blockquote {
     flex-direction: column; /* Stack header and textarea */
     height: 100%; /* Take full height of its container */
 }
+    width: 100%; /* Default to 100%, will be adjusted if image preview is shown */
+    padding: 15px;
+    display: flex; /* Use flex for editor layout */
+    flex-direction: column; /* Stack header and textarea */
+    height: 100%; /* Take full height of its container */
+}
 #editor textarea#htmlEditor {
   width: 100%;
+  flex-grow: 1; /* Allow textarea to take remaining space */
+  min-height: 200px; /* Ensure a minimum usable height */
   flex-grow: 1; /* Allow textarea to take remaining space */
   min-height: 200px; /* Ensure a minimum usable height */
   border: 1px solid #c8b8a8;
@@ -513,13 +587,20 @@ blockquote {
   border-radius: 4px;
   font-size: 0.8em;
   flex-shrink: 0; /* Prevent instructions from shrinking too much */
+  flex-shrink: 0; /* Prevent instructions from shrinking too much */
 }
 #autocomplete-mirror {
+    font-family: 'Courier New', Courier, monospace;
     font-family: 'Courier New', Courier, monospace;
     padding: 15px;
     font-size: 14px;
     line-height: 1.5;
     border-radius: 4px;
+    border: 1px solid transparent;
+    width: 100%;
+    box-sizing: border-box;
+    word-wrap: break-word;
+    white-space: pre-wrap;
     border: 1px solid transparent;
     width: 100%;
     box-sizing: border-box;
@@ -532,8 +613,14 @@ blockquote {
     overflow: hidden;
     min-height: 20px;
     pointer-events: none;
+    left: -9999px;
+    visibility: hidden;
+    overflow: hidden;
+    min-height: 20px;
+    pointer-events: none;
 }
 #autocomplete-mirror span {
+    display: inline-block;
     display: inline-block;
     width: 0;
     height: 0;
@@ -776,6 +863,7 @@ blockquote {
 }
 .image-lightbox {
     background-color: rgba(0,0,0,0.85);
+    background-color: rgba(0,0,0,0.85);
 }
 .image-lightbox .lightbox-content {
     background-color: transparent;
@@ -786,9 +874,15 @@ blockquote {
     height: auto;
     max-width: 90vw;
     max-height: 90vh;
+    margin: auto;
+    width: auto;
+    height: auto;
+    max-width: 90vw;
+    max-height: 90vh;
     box-shadow: 0 5px 25px rgba(0,0,0,0.5);
 }
 .image-lightbox .lightbox-close {
+    color: #fff;
     color: #fff;
     text-shadow: 0 1px 3px rgba(0,0,0,0.7);
     opacity: 0.8;
@@ -804,9 +898,11 @@ blockquote {
     line-height: 1.5;
     padding: 15px;
     border: 1px solid transparent;
+    border: 1px solid transparent;
     width: 100%;
     box-sizing: border-box;
     word-wrap: break-word;
+    white-space: pre-wrap;
     white-space: pre-wrap;
     position: absolute;
     top: 0;
@@ -817,6 +913,7 @@ blockquote {
     pointer-events: none;
 }
 #autocomplete-mirror span {
+#autocomplete-mirror span {
     display: inline-block;
     width: 0;
     height: 0;
@@ -825,10 +922,13 @@ blockquote {
   background-color: transparent;
   border: none;
   color: #3a5a8a;
+  color: #3a5a8a;
   cursor: pointer;
+  font-size: 1.0em;
   font-size: 1.0em;
   font-weight: bold;
   padding: 0 3px;
+  margin-left: 3px;
   margin-left: 3px;
   line-height: 1;
   opacity: 0.4;
@@ -839,6 +939,243 @@ blockquote {
   opacity: 1;
 }
 .create-subfolder-btn:hover {
+  color: #2a3a5a;
+}
+
+/* --- Responsive Design --- */
+
+/* Tablet and smaller devices */
+@media (max-width: 1600px) {
+    .sidebar {
+        width: 280px; /* Slightly narrower sidebar */
+    }
+
+    .image-preview-sidebar {
+        width: 280px; /* Narrower image preview */
+         /* Hide by default on tablet, can be toggled by JS if needed */
+        /* display: none;  Or, make it toggleable */
+    }
+
+    .entry-view-edit-area {
+        padding: 20px 25px; /* Reduce padding */
+    }
+
+    #editor {
+        width: 100%; /* Editor takes full width of its parent */
+    }
+
+
+    .modal-content {
+        width: 85%;
+        margin: 10% auto;
+    }
+}
+
+/* Mobile devices - Major layout changes */
+@media (max-width: 1600px) {
+    html, body {
+        overflow-x: hidden;
+        overflow-y: auto;
+        height: auto;
+    }
+
+    .container {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+        max-height: 45vh; /* Constrain height and allow scroll */
+        overflow-y: auto;
+        padding: 10px;
+        box-shadow: none;
+        border-right: none;
+        border-bottom: 2px solid #a4886f;
+    }
+    .sidebar #createNewFileBtn, .sidebar #createNewFolderBtn, .sidebar #reorganizeEntriesBtn {
+        padding: 10px 12px; /* Easier to tap */
+        font-size: 0.95em;
+    }
+
+
+    .resizer {
+        display: none;
+    }
+
+    .content {
+        height: auto;
+        overflow-y: auto; /* Allow this section to scroll if needed */
+        overflow-x: hidden;
+    }
+    
+    .main-content-wrapper {
+        flex-direction: column; /* Stack entry view and image preview */
+    }
+
+    .entry-view-edit-area {
+        order: 1; /* Entry view appears first */
+        padding: 15px;
+        height: auto;
+        overflow-y: visible; /* Let body handle scrolling */
+    }
+
+    .image-preview-sidebar {
+        order: 2; /* Image preview appears after entry view */
+        width: 100%;
+        height: auto;
+        max-height: 50vh; /* Generous height for image preview, scrollable */
+        overflow-y: auto;
+        border-right: none;
+        border-left: none;
+        border-top: 1px solid #d4c8b8;
+        padding: 10px;
+    }
+    
+    #addImageBtn { /* Ensure it's full width in its container */
+        width: 100%;
+        padding: 10px;
+    }
+
+    .content-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .content-header h2 {
+        font-size: 1.4em;
+        margin-bottom: 10px;
+    }
+
+    .controls {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        margin-top: 10px;
+    }
+
+    .controls button {
+        margin-left: 0;
+        margin-right: 8px;
+        margin-bottom: 8px;
+        padding: 8px 10px;
+        flex-grow: 1; /* Buttons can share space */
+        flex-basis: calc(50% - 8px); /* Roughly 2 buttons per row, accounting for margin */
+        min-width: 120px;
+        box-sizing: border-box;
+    }
+     /* Ensure last button in a row doesn't have right margin or adjust for full width */
+    .controls button:last-child {
+        margin-right: 0;
+    }
+    @media (max-width: 420px) { /* For very small phones, make control buttons stack */
+        .controls button {
+            flex-basis: 100%; 
+            margin-right: 0;
+        }
+    }
+
+    #editor textarea#htmlEditor {
+        height: 55vh; /* Good height for mobile text editing */
+        font-size: 13px; /* Slightly smaller for more content view */
+    }
+
+    /* Modals */
+    .modal-content {
+        width: 90%;
+        margin: 5% auto;
+        padding: 20px;
+    }
+    .modal-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .modal-footer p {
+        text-align: center;
+        margin-bottom: 10px;
+    }
+    .modal-footer div {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .modal-footer button {
+        width: 100%;
+        margin-left: 0;
+    }
+    .context-list {
+        max-height: 30vh;
+    }
+
+    /* File Tree - Tappability */
+    #fileTreeRoot li > .node-content {
+        padding: 6px 4px; /* Increase tappable area */
+    }
+    .add-in-folder-btn, .create-subfolder-btn {
+        font-size: 1.4em; /* Make icons larger */
+        padding: 0 8px; /* Better tap area */
+        opacity: 0.6;
+    }
+     /* Reorganize Modal specific adjustments */
+    #reorganizeModal .modal-section h3 {
+        font-size: 1.1em;
+    }
+    #reorganizeModal .context-list {
+        max-height: 25vh; /* Adjust height for these specific lists */
+    }
+}
+
+/* Further fine-tuning for very small screens (e.g., less than 480px) */
+@media (max-width: 480px) {
+    h1 { font-size: 1.5em; }
+    h2 { font-size: 1.2em; }
+    h3 { font-size: 1.0em; }
+    body, html { font-size: 13px; } 
+
+    .sidebar {
+        padding: 8px;
+        max-height: 40vh; /* Even less height for file tree on small phones */
+    }
+    .sidebar #createNewFileBtn, .sidebar #createNewFolderBtn, .sidebar #reorganizeEntriesBtn {
+        font-size: 0.9em;
+        padding: 8px 10px;
+    }
+
+    .entry-view-edit-area {
+        padding: 10px;
+    }
+
+    .content-header h2 {
+        font-size: 1.1em;
+    }
+
+    .controls button {
+        font-size: 0.9em; /* Ensure buttons are not too small */
+        padding: 8px 10px;
+    }
+
+    #editor textarea#htmlEditor {
+        height: 50vh;
+        font-size: 12px;
+    }
+
+    .modal-content {
+        width: 95%;
+        padding: 15px;
+        margin-top: 3%;
+        margin-bottom: 3%;
+    }
+     #apiKeyModal .modal-content small {
+        font-size: 0.75em;
+        line-height: 1.2;
+    }
+    #reorganizeModal .context-list {
+        max-height: 20vh;
+    }
+}
+
   color: #2a3a5a;
 }
 
