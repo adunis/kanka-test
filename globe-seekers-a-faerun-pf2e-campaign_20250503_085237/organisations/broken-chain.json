@@ -2,7 +2,7 @@
   "id": 327251,
   "name": "Broken Chain",
   "created_at": "2024-10-18T05:01:55.000000Z",
-  "updated_at": "2025-05-20T12:47:30.884.000000Z",
+  "updated_at": "2025-05-20T12:47:33.653.000000Z",
   "is_private": 0,
   "is_defunct": 0,
   "organisation_id": 330577,
@@ -21,7 +21,7 @@
     "focus_x": null,
     "focus_y": null,
     "created_at": "2024-10-18T05:01:55.000000Z",
-    "updated_at": "2025-05-20T12:47:30.884.000000Z",
+    "updated_at": "2025-05-20T12:47:33.653.000000Z",
     "created_by": 275646,
     "updated_by": 275646,
     "image_path": null,
@@ -48,7 +48,8 @@
     ],
     "image_uuids": [
       "9d6cf3fe-d598-4c20-baa5-180a9badc70e",
-      "1b12590b-e205-47bd-b941-97d84571f8cd"
+      "1b12590b-e205-47bd-b941-97d84571f8cd",
+      "b1e89627-e2fe-4636-b832-c3f21b89e2d5"
     ]
   },
   "members": [],
