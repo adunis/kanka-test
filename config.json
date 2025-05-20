@@ -28,6 +28,7 @@
     "improve_campaign_context": "IMPORTANT CONTEXT: You have to rewrite everything taking in consideration the current time period of the campaign is after the Great Descent, the apocalyptic divine war led by the Old Gods that changed the world. You MUST provide information about the article of what happened to the entity (character, location etc) after the Great Descent - if missing, create and invent it. You are free to create new lore and new plot hooks for this Pathfinder 2e Campaign but remain coherent with the rest of the information.",
     "improve_context_header": "\n\n--- Context Starts ---",
     "improve_context_footer": "\n--- Context Ends ---",
-    "improve_main_content_header": "\n\n--- Main Content to Improve ---"
+    "improve_main_content_header": "\n\n--- Main Content to Improve ---",
+        "image_generation": "Based on the following article content, create a concise yet detailed prompt suitable for an AI image generation model. The prompt should capture the essence of the article, focusing on visual elements, atmosphere, key subjects, and artistic style if applicable. Aim for a prompt that an AI can use to generate a compelling and representative image. Output ONLY the image prompt itself, without any introductory text or explanations."
   }
 }

@@ -22,11 +22,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   const cancelBtn = document.getElementById("cancelBtn"); // Editor Cancel
   const createNewFileBtn = document.getElementById("createNewFileBtn"); // Root file
   const createNewFolderBtn = document.getElementById("createNewFolderBtn"); // Root folder - Added
-// Add to your DOM Element References section
-const tokenStatusIndicatorDiv = document.getElementById("tokenStatusIndicator");
-const addEditTokensBtn = document.getElementById("addEditTokensBtn");
+  // Add to your DOM Element References section
+  const tokenStatusIndicatorDiv = document.getElementById(
+    "tokenStatusIndicator"
+  );
+  const addEditTokensBtn = document.getElementById("addEditTokensBtn");
   const reorganizeEntriesBtn = document.getElementById("reorganizeEntriesBtn");
   const reorganizeModal = document.getElementById("reorganizeModal");
+  const createImagePromptBtn = document.getElementById("createImagePromptBtn");
   const closeReorganizeModalBtn = document.getElementById(
     "closeReorganizeModalBtn"
   );
@@ -207,16 +210,14 @@ const addEditTokensBtn = document.getElementById("addEditTokensBtn");
       });
     }
 
-if (addEditTokensBtn) {
-    addEditTokensBtn.addEventListener("click", () => {
+    if (addEditTokensBtn) {
+      addEditTokensBtn.addEventListener("click", () => {
         // When this button is clicked, we always want to prompt for both,
         // focusing on the GitHub write token.
         // The showApiKeyModal logic will pre-fill if values exist.
         showApiKeyModal(true, false, "write_action"); // true for GitHub (write), false for Gemini, context
-    });
-}
-
-
+      });
+    }
   }
 
   // --- APP FEATURE EVENT LISTENERS SETUP ---
@@ -225,40 +226,45 @@ if (addEditTokensBtn) {
       "[SETUP_APP] Setting up application-specific event listeners..."
     );
 
- // Inside setupAppEventListeners()
+    // Inside setupAppEventListeners()
 
-if (refreshFileListBtn) {
-    refreshFileListBtn.addEventListener("click", async () => {
+    if (refreshFileListBtn) {
+      refreshFileListBtn.addEventListener("click", async () => {
         // Check if ANY GitHub token is available for reading
         if (!GITHUB_READ_TOKEN && !GITHUB_WRITE_TOKEN) {
-            alert("A GitHub API Token is required to refresh the list. Please provide one.");
-            // true for GitHub required (could be read or write), false for Gemini, general context
-            showApiKeyModal(true, false, "general");
-            return;
+          alert(
+            "A GitHub API Token is required to refresh the list. Please provide one."
+          );
+          // true for GitHub required (could be read or write), false for Gemini, general context
+          showApiKeyModal(true, false, "general");
+          return;
         }
         // fetchFileList will internally use getGitHubHeaders(false) which prioritizes write token then read token
         await fetchFileList();
-    });
-}
+      });
+    }
 
-if (createNewFileBtn) {
-    createNewFileBtn.addEventListener("click", () => {
+    if (createNewFileBtn) {
+      createNewFileBtn.addEventListener("click", () => {
         // Creating a new file is a WRITE operation, requires GITHUB_WRITE_TOKEN
         if (!GITHUB_WRITE_TOKEN) {
-            alert("A GitHub token with write permissions is required to create a new entry. Please provide one.");
-            // true for GitHub (write) required, false for Gemini, context for write action
-            showApiKeyModal(true, false, "write_action");
-            return;
+          alert(
+            "A GitHub token with write permissions is required to create a new entry. Please provide one."
+          );
+          // true for GitHub (write) required, false for Gemini, context for write action
+          showApiKeyModal(true, false, "write_action");
+          return;
         }
         const newFileNameBase = prompt(
-            "Enter name for new entry (creates file in root of data path):"
+          "Enter name for new entry (creates file in root of data path):"
         );
-        if (newFileNameBase && newFileNameBase.trim() !== "") { // Check for non-empty after trim
-            // handleCreateNewEntry will call commitFileToGitHub, which uses getGitHubHeaders(true)
-            handleCreateNewEntry(newFileNameBase.trim(), GITHUB_DATA_PATH);
+        if (newFileNameBase && newFileNameBase.trim() !== "") {
+          // Check for non-empty after trim
+          // handleCreateNewEntry will call commitFileToGitHub, which uses getGitHubHeaders(true)
+          handleCreateNewEntry(newFileNameBase.trim(), GITHUB_DATA_PATH);
         }
-    });
-}
+      });
+    }
 
     if (editBtn) {
       editBtn.addEventListener("click", () => {
@@ -320,6 +326,15 @@ if (createNewFileBtn) {
           alert("Gemini formatting complete. Review & save.");
         }
       });
+    }
+
+    // Inside setupAppEventListeners()
+
+    if (createImagePromptBtn) {
+      createImagePromptBtn.addEventListener(
+        "click",
+        generateImagePromptWithGemini
+      );
     }
 
     if (improveBtn) {
@@ -513,18 +528,26 @@ if (createNewFileBtn) {
         appConfig.github.DEFAULT_READ_TOKEN_PARTS &&
         Array.isArray(appConfig.github.DEFAULT_READ_TOKEN_PARTS) &&
         appConfig.github.DEFAULT_READ_TOKEN_PARTS.length === 3 && // Expecting 3 parts
-        appConfig.github.DEFAULT_READ_TOKEN_PARTS.every(part => typeof part === 'string' && part.trim() !== "")
+        appConfig.github.DEFAULT_READ_TOKEN_PARTS.every(
+          (part) => typeof part === "string" && part.trim() !== ""
+        )
       ) {
-        const potentialTokenFromParts = appConfig.github.DEFAULT_READ_TOKEN_PARTS.join('');
+        const potentialTokenFromParts =
+          appConfig.github.DEFAULT_READ_TOKEN_PARTS.join("");
         // Check if the joined token is not a placeholder
-        if (potentialTokenFromParts &&
-            !potentialTokenFromParts.includes("YOUR_TOKEN_PART") && // Generic check for "YOUR_TOKEN_PART_1_HERE" etc.
-            !potentialTokenFromParts.includes("YOUR_READ_ONLY_GITHUB_TOKEN_HERE") // Check for old placeholder too
-           ) {
+        if (
+          potentialTokenFromParts &&
+          !potentialTokenFromParts.includes("YOUR_TOKEN_PART") && // Generic check for "YOUR_TOKEN_PART_1_HERE" etc.
+          !potentialTokenFromParts.includes("YOUR_READ_ONLY_GITHUB_TOKEN_HERE") // Check for old placeholder too
+        ) {
           GITHUB_READ_TOKEN = potentialTokenFromParts;
-          console.log("[INIT] Using default read-only GitHub token constructed from 3 parts from config.");
+          console.log(
+            "[INIT] Using default read-only GitHub token constructed from 3 parts from config."
+          );
         } else {
-          console.log("[INIT] DEFAULT_READ_TOKEN_PARTS from config resulted in a placeholder or invalid token. Not using.");
+          console.log(
+            "[INIT] DEFAULT_READ_TOKEN_PARTS from config resulted in a placeholder or invalid token. Not using."
+          );
         }
       }
       // Fallback to single DEFAULT_READ_TOKEN if parts weren't used or are invalid,
@@ -532,13 +555,18 @@ if (createNewFileBtn) {
       else if (
         !GITHUB_READ_TOKEN && // Only if not already set by parts
         appConfig.github.DEFAULT_READ_TOKEN &&
-        appConfig.github.DEFAULT_READ_TOKEN !== "ghp_YOUR_READ_ONLY_GITHUB_TOKEN_HERE" &&
+        appConfig.github.DEFAULT_READ_TOKEN !==
+          "ghp_YOUR_READ_ONLY_GITHUB_TOKEN_HERE" &&
         !appConfig.github.DEFAULT_READ_TOKEN.includes("YOUR_TOKEN_PART") // Paranoia
       ) {
         GITHUB_READ_TOKEN = appConfig.github.DEFAULT_READ_TOKEN;
-        console.log("[INIT] Using single default read-only GitHub token from config (parts not used/valid).");
+        console.log(
+          "[INIT] Using single default read-only GitHub token from config (parts not used/valid)."
+        );
       } else if (!GITHUB_READ_TOKEN) {
-        console.log("[INIT] No valid default read token found in config (neither parts nor single field).");
+        console.log(
+          "[INIT] No valid default read token found in config (neither parts nor single field)."
+        );
       }
       // ---END MODIFIED PART---
 
@@ -608,6 +636,8 @@ if (createNewFileBtn) {
     if (clearKeysBtn) clearKeysBtn.disabled = false;
   }
 
+  let PROMPT_IMAGE_GENERATION; // Declare it with other prompt variables
+
   // --- Configuration Loading ---
   async function loadConfig() {
     try {
@@ -642,9 +672,120 @@ if (createNewFileBtn) {
       PROMPT_IMPROVE_CONTEXT_FOOTER = appConfig.prompts.improve_context_footer;
       PROMPT_IMPROVE_MAIN_HEADER =
         appConfig.prompts.improve_main_content_header;
+      PROMPT_IMAGE_GENERATION = appConfig.prompts.image_generation; // <-- ADD THIS
+
+      if (!PROMPT_IMAGE_GENERATION) {
+        console.warn(
+          "[CONFIG] 'image_generation' prompt is missing from config.json. Using a default."
+        );
+        PROMPT_IMAGE_GENERATION =
+          "Based on the following article content, create a concise yet detailed prompt suitable for an AI image generation model. The prompt should capture the essence of the article, focusing on visual elements, atmosphere, key subjects, and artistic style if applicable. Aim for a prompt that an AI can use to generate a compelling and representative image. Output ONLY the image prompt itself, without any introductory text or explanations.";
+      }
     } catch (error) {
       console.error("[CONFIG] Error loading or parsing config.json:", error);
       throw error;
+    }
+  }
+
+  async function generateImagePromptWithGemini() {
+    if (!GEMINI_API_KEY) {
+      alert(
+        "Gemini API Key is required to generate an image prompt. Please provide it."
+      );
+      showApiKeyModal(false, true, "ai_action"); // Gemini required
+      return;
+    }
+    if (!currentFilePath || !currentJsonData) {
+      alert("Please load an entry first.");
+      return;
+    }
+
+    const isJournal = !!(
+      currentJsonData.entity && Array.isArray(currentJsonData.entity.posts)
+    );
+    const articleContent = getContentForEditingOrAI(isJournal);
+
+    if (!articleContent || articleContent.trim() === "") {
+      alert(
+        "The current entry content is empty. Cannot generate an image prompt."
+      );
+      return;
+    }
+
+    // Use a suitable model, preferably one good for creative text generation.
+    // Gemini 2.0 Flash might be okay, or a more general model if available in your config.
+    const modelForPrompting =
+      GEMINI_MODELS.find(
+        (m) =>
+          m.id &&
+          (m.id.includes("gemini-2.0-flash") ||
+            m.id.includes("gemini-1.5-flash"))
+      )?.id || GEMINI_MODELS[0]?.id;
+
+    if (!modelForPrompting) {
+      alert(
+        "No suitable Gemini model found for image prompt generation. Check config.json."
+      );
+      return;
+    }
+
+    showLoading(
+      `Asking Gemini (${modelForPrompting
+        .split("/")
+        .pop()}) for an image prompt...`
+    );
+
+    const fullPrompt = `${PROMPT_IMAGE_GENERATION}\n\n--- Article Content Start ---\n${articleContent}\n--- Article Content End ---`;
+
+    try {
+      const generatedPrompt = await callGeminiApi(
+        fullPrompt,
+        modelForPrompting
+      );
+
+      // Attempt to display it nicely
+      const modalContent = `
+            <div style="margin-bottom: 15px;">
+                <strong>Suggested Image Prompt:</strong>
+                <textarea id="generatedImagePromptTextarea" style="width: 98%; height: 150px; margin-top: 5px; padding: 5px; font-family: monospace; border: 1px solid #ccc; border-radius: 3px;" readonly>${generatedPrompt.trim()}</textarea>
+            </div>
+            <div style="text-align: right;">
+                <button id="copyGeneratedPromptBtn" style="padding: 8px 15px; background-color: #8c4b31; color: white; border: none; border-radius: 3px; cursor: pointer; margin-right: 10px;">Copy Prompt</button>
+                <button id="closePromptModalBtn" style="padding: 8px 15px;">Close</button>
+            </div>
+        `;
+
+      // Create a simple modal for this
+      const promptModal = document.createElement("div");
+      promptModal.id = "imagePromptDisplayModal";
+      promptModal.classList.add("modal");
+      promptModal.style.display = "block"; // Show it
+
+      const promptModalContent = document.createElement("div");
+      promptModalContent.classList.add("modal-content");
+      promptModalContent.innerHTML = `<h2>Generated Image Prompt</h2>${modalContent}`;
+      promptModal.appendChild(promptModalContent);
+      document.body.appendChild(promptModal);
+
+      document
+        .getElementById("copyGeneratedPromptBtn")
+        .addEventListener("click", () => {
+          const textarea = document.getElementById(
+            "generatedImagePromptTextarea"
+          );
+          textarea.select();
+          document.execCommand("copy");
+          alert("Prompt copied to clipboard!");
+        });
+      document
+        .getElementById("closePromptModalBtn")
+        .addEventListener("click", () => {
+          document.body.removeChild(promptModal);
+        });
+    } catch (error) {
+      alert(`Failed to generate image prompt: ${error.message}`);
+    } finally {
+      hideLoading();
     }
   }
 
@@ -711,118 +852,79 @@ if (createNewFileBtn) {
   function hideApiKeyModal() {
     if (apiKeyModal) apiKeyModal.style.display = "none";
     updateButtonStatesBasedOnTokens(); // Re-enable app controls based on current token status
-      updateTokenStatusDisplay();      // <--- ADD THIS LINE
+    updateTokenStatusDisplay(); // <--- ADD THIS LINE
   }
 
   // --- Update Button States ---
-    // This function should be called after keys are loaded/changed, or after actions complete.
-    function updateButtonStatesBasedOnTokens() {
-        const hasReadAccess = !!(GITHUB_READ_TOKEN || GITHUB_WRITE_TOKEN);
-        const hasWriteAccess = !!GITHUB_WRITE_TOKEN;
-        const hasGeminiAccess = !!GEMINI_API_KEY;
-        const isFileLoaded = !!currentFilePath;
+  // This function should be called after keys are loaded/changed, or after actions complete.
+  function updateButtonStatesBasedOnTokens() {
+    const hasReadAccess = !!(GITHUB_READ_TOKEN || GITHUB_WRITE_TOKEN);
+    const hasWriteAccess = !!GITHUB_WRITE_TOKEN;
+    // Ensure GEMINI_MODELS is checked for actual content, not just if the array exists
+    const hasGeminiAccess = !!(GEMINI_API_KEY && Array.isArray(GEMINI_MODELS) && GEMINI_MODELS.length > 0);
+    const isFileLoaded = !!currentFilePath;
+    // Define isInEditMode based on the current display style of the editorDiv
+    const isInEditMode = editorDiv && editorDiv.style.display !== 'none';
 
-        if (refreshFileListBtn) refreshFileListBtn.disabled = !hasReadAccess;
-        if (createNewFileBtn) createNewFileBtn.disabled = !hasWriteAccess; // Write action
-        if (createNewFolderBtn) createNewFolderBtn.disabled = !hasWriteAccess; // Write action
-        if (reorganizeEntriesBtn) reorganizeEntriesBtn.disabled = !hasWriteAccess || !fileTree || fileTree.length === 0; // Write action
+    console.log(`[BTN_UPDATE] Read: ${hasReadAccess}, Write: ${hasWriteAccess}, Gemini: ${hasGeminiAccess}, FileLoaded: ${isFileLoaded}, EditMode: ${isInEditMode}`);
 
-        if (editBtn) editBtn.disabled = !isFileLoaded || !hasWriteAccess; // Entering edit mode implies potential save
-        if (deleteEntryBtn) deleteEntryBtn.disabled = !isFileLoaded || !hasWriteAccess; // Write action
-        if (renameEntryBtn) renameEntryBtn.disabled = !isFileLoaded || !hasWriteAccess; // Write action
-        
-        if (generatePdfBtn) generatePdfBtn.disabled = !isFileLoaded || !hasReadAccess; // Read action
 
-        if (formatBtn) formatBtn.disabled = !isFileLoaded || !hasGeminiAccess || !hasWriteAccess; // Needs Gemini + ability to save
-        if (improveBtn) improveBtn.disabled = !isFileLoaded || !hasGeminiAccess || !hasWriteAccess; // Needs Gemini + ability to save
+    if (refreshFileListBtn) refreshFileListBtn.disabled = !hasReadAccess || isInEditMode;
+    if (createNewFileBtn) createNewFileBtn.disabled = !hasWriteAccess || isInEditMode;
+    if (createNewFolderBtn) createNewFolderBtn.disabled = !hasWriteAccess || isInEditMode;
+    if (reorganizeEntriesBtn) {
+         reorganizeEntriesBtn.disabled = !hasWriteAccess || !fileTree || fileTree.length === 0 || isInEditMode;
+    }
+    if (clearKeysBtn) clearKeysBtn.disabled = false; // Always enabled if element exists
 
-        if (addImageBtn) { // Adding an image is a write operation
-            addImageBtn.disabled = !isFileLoaded || !hasWriteAccess;
-            addImageBtn.style.display = (isFileLoaded && hasWriteAccess) ? "block" : "none";
-        }
-        if(clearKeysBtn) clearKeysBtn.disabled = false; // Always enabled
-
-        // Editor buttons are handled by switchToViewMode/switchToEditMode mostly
-        // but ensure they respect write access if a save is implied.
-        if (saveBtn) saveBtn.disabled = editorDiv.style.display === 'none' || !hasWriteAccess;
+    // Viewer Header Buttons (only enabled if NOT in edit mode)
+    if (editBtn) editBtn.disabled = !isFileLoaded || !hasWriteAccess || isInEditMode;
+    if (deleteEntryBtn) deleteEntryBtn.disabled = !isFileLoaded || !hasWriteAccess || isInEditMode;
+    if (renameEntryBtn) renameEntryBtn.disabled = !isFileLoaded || !hasWriteAccess || isInEditMode;
+    if (generatePdfBtn) generatePdfBtn.disabled = !isFileLoaded || !hasReadAccess || isInEditMode;
+    
+    if (formatBtn) formatBtn.disabled = !isFileLoaded || !hasGeminiAccess || !hasWriteAccess || isInEditMode;
+    
+    // CORRECTED for createImagePromptBtn:
+    if (createImagePromptBtn) {
+        createImagePromptBtn.disabled = !isFileLoaded || !hasGeminiAccess || isInEditMode;
     }
 
-     
+    if (improveBtn) improveBtn.disabled = !isFileLoaded || !hasGeminiAccess || !hasWriteAccess || isInEditMode;
+    
+    if (addImageBtn) {
+        const canAddImage = isFileLoaded && hasWriteAccess && !isInEditMode;
+        addImageBtn.disabled = !canAddImage;
+        addImageBtn.style.display = canAddImage ? "block" : "none";
+    }
+
+    // Editor Header Buttons (only enabled if IN edit mode)
+    if (saveBtn) saveBtn.disabled = !isInEditMode || !hasWriteAccess;
+    if (cancelBtn) cancelBtn.disabled = !isInEditMode;
+}
+
 function switchToViewMode() {
     if (editorDiv) editorDiv.style.display = "none";
     if (viewerDiv) viewerDiv.style.display = "block";
-    // htmlEditorTextarea.value = ""; // Optionally clear editor content when switching to view
-
-    // Determine access levels based on the new token variables
-    const hasReadAccess = !!((GITHUB_READ_TOKEN && GITHUB_READ_TOKEN.length > 20) || (GITHUB_WRITE_TOKEN && GITHUB_WRITE_TOKEN.length > 20));
-    const hasWriteAccess = !!(GITHUB_WRITE_TOKEN && GITHUB_WRITE_TOKEN.length > 20);
-    const hasGeminiAccess = !!(GEMINI_API_KEY && GEMINI_API_KEY.length > 20 && GEMINI_MODELS && GEMINI_MODELS.length > 0);
-    const isFileLoaded = !!currentFilePath;
-
-    console.log(`[ViewMode] Updating button states. Read: ${hasReadAccess}, Write: ${hasWriteAccess}, Gemini: ${hasGeminiAccess}, FileLoaded: ${isFileLoaded}`);
-
-    // --- Enable buttons appropriate for View Mode ---
-
-    // Edit button: requires a file to be loaded and write access (to save changes if edited)
-    if (editBtn) editBtn.disabled = !isFileLoaded || !hasWriteAccess;
-
-    // Delete & Rename buttons: require a file and write access
-    if (deleteEntryBtn) deleteEntryBtn.disabled = !isFileLoaded || !hasWriteAccess;
-    if (renameEntryBtn) renameEntryBtn.disabled = !isFileLoaded || !hasWriteAccess;
-
-    // Generate PDF: requires a file and at least read access
-    if (generatePdfBtn) generatePdfBtn.disabled = !isFileLoaded || !hasReadAccess;
-
-    // AI buttons: require a file, Gemini access, and write access (to save results)
-    if (formatBtn) formatBtn.disabled = !isFileLoaded || !hasGeminiAccess || !hasWriteAccess;
-    if (improveBtn) improveBtn.disabled = !isFileLoaded || !hasGeminiAccess || !hasWriteAccess;
-
-    // Add Image button: requires a file and write access
-    if (addImageBtn) {
-        addImageBtn.disabled = !isFileLoaded || !hasWriteAccess;
-        // Visibility of addImageBtn is often handled when a file is loaded (e.g., in loadFileContentAndDisplay)
-        // but ensuring it's correctly enabled/disabled here is also good.
-        // It should only be visible if a file is loaded AND user has write access.
-        if (isFileLoaded && hasWriteAccess) {
-            addImageBtn.style.display = 'block';
-        } else {
-            addImageBtn.style.display = 'none';
-        }
-    }
-
-    // --- Disable buttons appropriate for Edit Mode ---
-    if (saveBtn) saveBtn.disabled = true;   // Editor's save button
-    if (cancelBtn) cancelBtn.disabled = true; // Editor's cancel button
-
-    // Ensure other general sidebar buttons are set correctly too (they are mostly handled by hideLoading)
-    // if (refreshFileListBtn) refreshFileListBtn.disabled = !hasReadAccess;
-    // if (createNewFileBtn) createNewFileBtn.disabled = !hasWriteAccess;
-    // if (createNewFolderBtn) createNewFolderBtn.disabled = !hasWriteAccess;
-    // if (reorganizeEntriesBtn) reorganizeEntriesBtn.disabled = !hasWriteAccess || !fileTree || fileTree.length === 0;
-    // if (clearKeysBtn) clearKeysBtn.disabled = false;
+    updateButtonStatesBasedOnTokens(); // This will now correctly handle createImagePromptBtn
 }
 
-    function switchToEditMode() {
-        // Check for write access BEFORE allowing edit mode, as saving requires it.
-        if (!GITHUB_WRITE_TOKEN) {
-            showApiKeyModal(true, false, "write_action");
-            alert("A GitHub token with write permissions is required to edit entries.");
-            return; // Don't switch to edit mode
-        }
-        if (viewerDiv) viewerDiv.style.display = "none";
-        if (editorDiv) editorDiv.style.display = "block";
-        if (htmlEditorTextarea) {
-            htmlEditorTextarea.disabled = false;
-            htmlEditorTextarea.focus();
-        }
-        updateButtonStatesBasedOnTokens();
-        // Specific to edit mode (e.g., editBtn itself should be disabled)
-        if (editBtn) editBtn.disabled = true;
-        if (saveBtn) saveBtn.disabled = false; // Enabled because we checked for write token
-        if (cancelBtn) cancelBtn.disabled = false;
+function switchToEditMode() {
+    if (!GITHUB_WRITE_TOKEN) {
+        showApiKeyModal(true, false, "write_action");
+        alert("A GitHub token with write permissions is required to edit entries.");
+        return;
     }
+    if (viewerDiv) viewerDiv.style.display = "none";
+    if (editorDiv) editorDiv.style.display = "block";
+    if (htmlEditorTextarea) {
+        htmlEditorTextarea.disabled = false;
+        htmlEditorTextarea.focus();
+    }
+    updateButtonStatesBasedOnTokens(); // This will correctly disable viewer buttons when isInEditMode is true
+}
 
-function disableAppControls() {
+  function disableAppControls() {
     console.warn("Disabling main app controls.");
     const controlsToDisable = [
       refreshFileListBtn,
@@ -839,10 +941,10 @@ function disableAppControls() {
       addImageBtn,
       reorganizeEntriesBtn,
       // REMOVE THESE TWO:
-      // selectAllContextBtn, 
-      // deselectAllContextBtn, 
+      // selectAllContextBtn,
+      // deselectAllContextBtn,
       proceedWithImprovementBtn, // This IS an AI modal button, but handled in openImproveModal
-      copyPromptBtn,             // This IS an AI modal button, but handled in openImproveModal
+      copyPromptBtn, // This IS an AI modal button, but handled in openImproveModal
       proceedWithReorganizationBtn, // Reorg modal button
       // Add any other app-specific controls here
     ];
@@ -851,7 +953,7 @@ function disableAppControls() {
     });
     if (htmlEditorTextarea) htmlEditorTextarea.disabled = true;
     if (geminiModelSelect) geminiModelSelect.disabled = true; // This IS in the AI modal, disable it if general controls are off
-}
+  }
 
   // --- Utility, GitHub, and Feature Functions ---
 
@@ -873,14 +975,14 @@ function disableAppControls() {
     }
   }
 
+
 function hideModalLoading() {
     if (modalLoadingIndicator) {
         modalLoadingIndicator.style.display = "none";
     }
-    // After ANY modal loading is hidden (even AI modal's),
-    // refresh main app button states based on current file and token availability.
-    updateButtonStatesBasedOnTokens();
+    updateButtonStatesBasedOnTokens(); // CRUCIAL: Ensure this is called
 }
+
   function showLoading(message = "Loading...") {
     if (loadingIndicator) {
       const textElement = loadingIndicator.querySelector(".loading-text");
@@ -906,53 +1008,12 @@ function hideLoading() {
         loadingIndicator.style.display = "none";
     }
     if (!appConfig) {
-        // If appConfig isn't loaded, it's a very early stage or critical error.
-        // Most buttons should probably remain disabled.
-        // However, clearKeysBtn should always be enabled if the element exists.
         if (clearKeysBtn) clearKeysBtn.disabled = false;
         return;
     }
-
-    // Determine access levels based on the new token variables
-    const hasReadAccess = !!((GITHUB_READ_TOKEN && GITHUB_READ_TOKEN.length > 20) || (GITHUB_WRITE_TOKEN && GITHUB_WRITE_TOKEN.length > 20));
-    const hasWriteAccess = !!(GITHUB_WRITE_TOKEN && GITHUB_WRITE_TOKEN.length > 20);
-    const hasGeminiAccess = !!(GEMINI_API_KEY && GEMINI_API_KEY.length > 20 && GEMINI_MODELS && GEMINI_MODELS.length > 0);
-    const isFileLoaded = !!currentFilePath; // Assumes currentFilePath is correctly managed
-
-    // --- Update button states based on access levels ---
-
-    // Buttons requiring at least READ access
-    if (refreshFileListBtn) refreshFileListBtn.disabled = !hasReadAccess;
-    if (generatePdfBtn) generatePdfBtn.disabled = !isFileLoaded || !hasReadAccess;
-
-    // Buttons requiring WRITE access
-    if (createNewFileBtn) createNewFileBtn.disabled = !hasWriteAccess;
-    if (createNewFolderBtn) createNewFolderBtn.disabled = !hasWriteAccess;
-    if (reorganizeEntriesBtn) {
-        reorganizeEntriesBtn.disabled = !hasWriteAccess || !fileTree || fileTree.length === 0;
-    }
-    if (editBtn) editBtn.disabled = !isFileLoaded || !hasWriteAccess; // Entering edit implies potential save
-    if (deleteEntryBtn) deleteEntryBtn.disabled = !isFileLoaded || !hasWriteAccess;
-    if (renameEntryBtn) renameEntryBtn.disabled = !isFileLoaded || !hasWriteAccess;
-    if (addImageBtn) {
-        addImageBtn.disabled = !isFileLoaded || !hasWriteAccess;
-        addImageBtn.style.display = (isFileLoaded && hasWriteAccess) ? "block" : "none";
-    }
-    // Save button in editor is usually handled by switchToViewMode/EditMode
-
-    // Buttons requiring Gemini AND Write access (to save results)
-    if (formatBtn) formatBtn.disabled = !isFileLoaded || !hasGeminiAccess || !hasWriteAccess;
-    if (improveBtn) improveBtn.disabled = !isFileLoaded || !hasGeminiAccess || !hasWriteAccess;
-
-    // This button should always be enabled if the element exists
-    if (clearKeysBtn) clearKeysBtn.disabled = false;
-
-    // Any other general buttons that don't fit the above, assess their needs.
-    // For example, if there were a "View Settings" button that doesn't need tokens:
-    // if (viewSettingsBtn) viewSettingsBtn.disabled = false;
-
-    console.log(`[hideLoading] Button states updated. Read: ${hasReadAccess}, Write: ${hasWriteAccess}, Gemini: ${hasGeminiAccess}, FileLoaded: ${isFileLoaded}`);
-}
+    updateButtonStatesBasedOnTokens(); // CRUCIAL: Ensure this is called
+    console.log(`[hideLoading] Button states updated.`);
+  }
 
   function showError(message) {
     if (jsonEntryContentDiv) {
@@ -974,7 +1035,9 @@ function hideLoading() {
     if (editorDiv) editorDiv.style.display = "none";
     if (viewerDiv) viewerDiv.style.display = "block";
 
-    const githubReady = !!(GITHUB_TOKEN && GITHUB_TOKEN.length > 20);
+    const githubReady = !!(
+      GITHUB_WRITE_TOKEN && GITHUB_WRITE_TOKEN.length > 20
+    );
     const geminiReady = !!(
       GEMINI_API_KEY &&
       GEMINI_API_KEY.length > 20 &&
@@ -1216,128 +1279,161 @@ function hideLoading() {
     }
   }
 
-async function commitFileToGitHub(
+  async function commitFileToGitHub(
     filePath,
     content,
     commitMessage,
     sha = null,
     isBinary = false
-) {
+  ) {
     // Get headers FOR A WRITE OPERATION.
     // getGitHubHeaders(true) will throw an error and show the API key modal
     // if a suitable write token is not available.
     let headers; // Declare headers here
     try {
-        headers = getGitHubHeaders(true); // true indicates a write operation
+      headers = getGitHubHeaders(true); // true indicates a write operation
     } catch (error) {
-        // Error already handled by getGitHubHeaders (alert/modal shown, error thrown)
-        // We just need to stop execution of this function.
-        console.error("[COMMIT] Could not get GitHub headers for write operation:", error.message);
-        // hideLoading(); // Ensure loading is hidden if shown before this point for this specific action
-        return null; // Indicate failure
+      // Error already handled by getGitHubHeaders (alert/modal shown, error thrown)
+      // We just need to stop execution of this function.
+      console.error(
+        "[COMMIT] Could not get GitHub headers for write operation:",
+        error.message
+      );
+      // hideLoading(); // Ensure loading is hidden if shown before this point for this specific action
+      return null; // Indicate failure
     }
 
     console.log(
-        `[COMMIT] Attempting to ${sha ? "update" : "create"} file: ${filePath} (SHA: ${sha || 'new'})`
+      `[COMMIT] Attempting to ${
+        sha ? "update" : "create"
+      } file: ${filePath} (SHA: ${sha || "new"})`
     );
     showLoading(sha ? "Saving changes..." : "Creating file..."); // This is fine
     const url = `${API_BASE_URL}/${filePath}`; // API_BASE_URL should be set
     let base64Content;
 
     if (!isBinary) {
-        try {
-            const utf8Bytes = new TextEncoder().encode(content);
-            let binaryString = "";
-            utf8Bytes.forEach((byte) => {
-                binaryString += String.fromCharCode(byte);
-            });
-            base64Content = btoa(binaryString);
-        } catch (e) {
-            console.error("[COMMIT] Base64 Text Encoding Error:", e);
-            alert("Text Encoding Error. Could not save file.");
-            hideLoading();
-            return null;
-        }
+      try {
+        const utf8Bytes = new TextEncoder().encode(content);
+        let binaryString = "";
+        utf8Bytes.forEach((byte) => {
+          binaryString += String.fromCharCode(byte);
+        });
+        base64Content = btoa(binaryString);
+      } catch (e) {
+        console.error("[COMMIT] Base64 Text Encoding Error:", e);
+        alert("Text Encoding Error. Could not save file.");
+        hideLoading();
+        return null;
+      }
     } else {
-        base64Content = content;
+      base64Content = content;
     }
 
     const body = {
-        message: commitMessage,
-        content: base64Content,
-        branch: GITHUB_BRANCH, // GITHUB_BRANCH should be set
+      message: commitMessage,
+      content: base64Content,
+      branch: GITHUB_BRANCH, // GITHUB_BRANCH should be set
     };
     if (sha) {
-        body.sha = sha;
+      body.sha = sha;
     }
 
     try {
-        const response = await fetch(url, {
-            method: "PUT",
-            headers: headers, // <<< CORRECTED: Use the 'headers' variable obtained from getGitHubHeaders(true)
-            body: JSON.stringify(body),
-        });
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: headers, // <<< CORRECTED: Use the 'headers' variable obtained from getGitHubHeaders(true)
+        body: JSON.stringify(body),
+      });
 
-        // Try to parse JSON regardless of status, as GitHub often returns error details in JSON
-        let resultData = null;
-        try {
-            resultData = await response.json();
-        } catch (e) {
-            console.warn("[COMMIT] Failed to parse JSON response body, or no JSON body present. Status:", response.status, response.statusText);
-            // If it's not JSON, but response was not ok, we still want to report the statusText
-            if (!response.ok) {
-                throw new Error(`GitHub API Error (${response.status}): ${response.statusText} (No JSON error details)`);
-            }
-            // If response was ok but no JSON (e.g. 204 No Content on successful delete, though PUT usually returns content)
-            // this might be fine depending on the specific API endpoint. For PUT content, we expect JSON.
-        }
-        
-        if (!response.ok) {
-            console.error(
-                `[COMMIT] GitHub API Error (${response.status}) for ${filePath}:`,
-                resultData || response.statusText // Show parsed JSON error or status text
-            );
-            let errorMsg = `GitHub API Error (${response.status}): ${
-                resultData?.message || response.statusText
-            }`;
-            // Specific error messages based on status codes
-            if (response.status === 401) errorMsg = "GitHub API Error (401): Unauthorized. Your GitHub token may be invalid or lack permissions.";
-            else if (response.status === 403) errorMsg = "GitHub API Error (403): Forbidden. Your token might lack necessary scopes, or you've hit a rate limit.";
-            else if (response.status === 404 && sha) errorMsg = `GitHub API Error (404): File not found for update (SHA: ${sha}). Has it been deleted or path incorrect?`;
-            else if (response.status === 404 && !sha) errorMsg = `GitHub API Error (404): The repository path or branch might be incorrect for creating the file.`;
-            else if (response.status === 409) errorMsg = "GitHub API Error (409): Conflict detected. The file may have been updated since you loaded it (SHA mismatch). Please refresh and try again.";
-            else if (response.status === 422) { // Unprocessable Entity
-                 if (!sha) errorMsg = `GitHub API Error (422): Could not create file. The path might be invalid, or the file already exists and you are not providing a SHA for update. Server message: ${resultData?.message || ''}`;
-                 else errorMsg = `GitHub API Error (422): Could not update file. There might be a validation error. Server message: ${resultData?.message || ''}`;
-            }
-            // Add more specific messages as needed
-
-            throw new Error(errorMsg);
-        }
-
-        // Ensure we actually got content back on a successful create/update
-        if (!resultData || !resultData.content) {
-            console.warn("[COMMIT] GitHub commit reported OK, but no content object returned. This is unexpected for a PUT. Response:", resultData);
-            // Depending on strictness, you might throw an error here or just log and return null.
-            // For now, let's assume if it's OK, it's mostly fine.
-            // throw new Error("GitHub commit OK, but no content object returned.");
-        }
-
-        console.log(
-            "[COMMIT] GitHub Commit successful:",
-            resultData?.commit?.message || "No commit message in response",
-            resultData?.content?.path || filePath
+      // Try to parse JSON regardless of status, as GitHub often returns error details in JSON
+      let resultData = null;
+      try {
+        resultData = await response.json();
+      } catch (e) {
+        console.warn(
+          "[COMMIT] Failed to parse JSON response body, or no JSON body present. Status:",
+          response.status,
+          response.statusText
         );
-        return resultData?.content; // Return the content object from GitHub's response
-    } catch (error) { // Catches errors from fetch, JSON parsing, or explicitly thrown !response.ok errors
-        console.error("[COMMIT] Error during commitFileToGitHub execution:", error);
-        // The error message might already be user-friendly from the !response.ok block
-        alert(`Failed to save to GitHub: ${filePath}\nError: ${error.message}`);
-        return null; // Indicate failure
+        // If it's not JSON, but response was not ok, we still want to report the statusText
+        if (!response.ok) {
+          throw new Error(
+            `GitHub API Error (${response.status}): ${response.statusText} (No JSON error details)`
+          );
+        }
+        // If response was ok but no JSON (e.g. 204 No Content on successful delete, though PUT usually returns content)
+        // this might be fine depending on the specific API endpoint. For PUT content, we expect JSON.
+      }
+
+      if (!response.ok) {
+        console.error(
+          `[COMMIT] GitHub API Error (${response.status}) for ${filePath}:`,
+          resultData || response.statusText // Show parsed JSON error or status text
+        );
+        let errorMsg = `GitHub API Error (${response.status}): ${
+          resultData?.message || response.statusText
+        }`;
+        // Specific error messages based on status codes
+        if (response.status === 401)
+          errorMsg =
+            "GitHub API Error (401): Unauthorized. Your GitHub token may be invalid or lack permissions.";
+        else if (response.status === 403)
+          errorMsg =
+            "GitHub API Error (403): Forbidden. Your token might lack necessary scopes, or you've hit a rate limit.";
+        else if (response.status === 404 && sha)
+          errorMsg = `GitHub API Error (404): File not found for update (SHA: ${sha}). Has it been deleted or path incorrect?`;
+        else if (response.status === 404 && !sha)
+          errorMsg = `GitHub API Error (404): The repository path or branch might be incorrect for creating the file.`;
+        else if (response.status === 409)
+          errorMsg =
+            "GitHub API Error (409): Conflict detected. The file may have been updated since you loaded it (SHA mismatch). Please refresh and try again.";
+        else if (response.status === 422) {
+          // Unprocessable Entity
+          if (!sha)
+            errorMsg = `GitHub API Error (422): Could not create file. The path might be invalid, or the file already exists and you are not providing a SHA for update. Server message: ${
+              resultData?.message || ""
+            }`;
+          else
+            errorMsg = `GitHub API Error (422): Could not update file. There might be a validation error. Server message: ${
+              resultData?.message || ""
+            }`;
+        }
+        // Add more specific messages as needed
+
+        throw new Error(errorMsg);
+      }
+
+      // Ensure we actually got content back on a successful create/update
+      if (!resultData || !resultData.content) {
+        console.warn(
+          "[COMMIT] GitHub commit reported OK, but no content object returned. This is unexpected for a PUT. Response:",
+          resultData
+        );
+        // Depending on strictness, you might throw an error here or just log and return null.
+        // For now, let's assume if it's OK, it's mostly fine.
+        // throw new Error("GitHub commit OK, but no content object returned.");
+      }
+
+      console.log(
+        "[COMMIT] GitHub Commit successful:",
+        resultData?.commit?.message || "No commit message in response",
+        resultData?.content?.path || filePath
+      );
+      return resultData?.content; // Return the content object from GitHub's response
+    } catch (error) {
+      // Catches errors from fetch, JSON parsing, or explicitly thrown !response.ok errors
+      console.error(
+        "[COMMIT] Error during commitFileToGitHub execution:",
+        error
+      );
+      // The error message might already be user-friendly from the !response.ok block
+      alert(`Failed to save to GitHub: ${filePath}\nError: ${error.message}`);
+      return null; // Indicate failure
     } finally {
-        hideLoading(); // Ensure loading indicator is hidden
+      hideLoading(); // Ensure loading indicator is hidden
     }
-}
+  }
 
   async function deleteFileFromGitHub(filePath, sha, commitMessage) {
     console.log(
@@ -1915,401 +2011,562 @@ async function commitFileToGitHub(
     }
   }
 
-async function loadFileContentAndDisplay(filePath, linkElement = null, isReloadAfterStaleLinkRemoval = false) { // <-- NEW PARAMETER    console.log(`[LOAD] Attempting to load: ${filePath}`);
+  async function loadFileContentAndDisplay(
+    filePath,
+    linkElement = null,
+    isReloadAfterStaleLinkRemoval = false
+  ) {
+    // <-- NEW PARAMETER    console.log(`[LOAD] Attempting to load: ${filePath}`);
     if (editorDiv.style.display !== "none") {
-        if (!confirm("You have unsaved changes. Discard them and load the new entry?")) {
-            // Revert hash if user cancels
-            if (currentFilePath && filePath !== currentFilePath) { // Only if loading a *different* file
-                let oldRelativePath = currentFilePath;
-                 if (GITHUB_DATA_PATH && currentFilePath.startsWith(GITHUB_DATA_PATH + '/')) {
-                    oldRelativePath = currentFilePath.substring(GITHUB_DATA_PATH.length + 1);
-                } else if (currentFilePath.startsWith(GITHUB_DATA_PATH)) {
-                    oldRelativePath = currentFilePath.substring(GITHUB_DATA_PATH.length);
-                     if(oldRelativePath.startsWith('/')) oldRelativePath = oldRelativePath.substring(1);
-                }
-                window.location.hash = `#${getSlug(oldRelativePath)}`;
-            }
-            return;
+      if (
+        !confirm(
+          "You have unsaved changes. Discard them and load the new entry?"
+        )
+      ) {
+        // Revert hash if user cancels
+        if (currentFilePath && filePath !== currentFilePath) {
+          // Only if loading a *different* file
+          let oldRelativePath = currentFilePath;
+          if (
+            GITHUB_DATA_PATH &&
+            currentFilePath.startsWith(GITHUB_DATA_PATH + "/")
+          ) {
+            oldRelativePath = currentFilePath.substring(
+              GITHUB_DATA_PATH.length + 1
+            );
+          } else if (currentFilePath.startsWith(GITHUB_DATA_PATH)) {
+            oldRelativePath = currentFilePath.substring(
+              GITHUB_DATA_PATH.length
+            );
+            if (oldRelativePath.startsWith("/"))
+              oldRelativePath = oldRelativePath.substring(1);
+          }
+          window.location.hash = `#${getSlug(oldRelativePath)}`;
         }
+        return;
+      }
     }
 
-  
     showLoading(`Loading ${filePath.split("/").pop()}...`);
 
-
     if (currentFileNameH2) currentFileNameH2.textContent = "Loading...";
-    if (jsonEntryContentDiv) jsonEntryContentDiv.innerHTML = "<p>Loading content...</p>";
+    if (jsonEntryContentDiv)
+      jsonEntryContentDiv.innerHTML = "<p>Loading content...</p>";
     if (htmlEditorTextarea) {
-        htmlEditorTextarea.value = "";
-        htmlEditorTextarea.dataset.rawHtmlEntry = "";
-        htmlEditorTextarea.dataset.concatenatedJournalHtml = "";
-        htmlEditorTextarea.disabled = true;
+      htmlEditorTextarea.value = "";
+      htmlEditorTextarea.dataset.rawHtmlEntry = "";
+      htmlEditorTextarea.dataset.concatenatedJournalHtml = "";
+      htmlEditorTextarea.disabled = true;
     }
-    if(imagePreviewSidebar) imagePreviewSidebar.style.display = "block"; // Show it, text will indicate loading
-    if(imageListContainer) imageListContainer.innerHTML = "";
-    if(noImageTextElement) {
-        noImageTextElement.textContent = "Loading image info...";
-        noImageTextElement.style.display = "block";
+    if (imagePreviewSidebar) imagePreviewSidebar.style.display = "block"; // Show it, text will indicate loading
+    if (imageListContainer) imageListContainer.innerHTML = "";
+    if (noImageTextElement) {
+      noImageTextElement.textContent = "Loading image info...";
+      noImageTextElement.style.display = "block";
     }
-    if(addImageBtn) {
-        addImageBtn.style.display = "none"; // Hide until file loaded and write access confirmed
-        addImageBtn.disabled = true;
+    if (addImageBtn) {
+      addImageBtn.style.display = "none"; // Hide until file loaded and write access confirmed
+      addImageBtn.disabled = true;
     }
 
     let entrySuccessfullyLoaded = false; // Flag to track overall success of this function call
 
     let staleImageUUIDs = isReloadAfterStaleLinkRemoval ? [] : []; // <-- MODIFIED INITIALIZATION
 
-
     try {
-        const result = await fetchFileContent(filePath, false); // false to force fetch
-        console.log(`[LOAD] fetchFileContent result for ${filePath}:`, result ? "Success" : "Failure/Null", result?.sha);
+      const result = await fetchFileContent(filePath, false); // false to force fetch
+      console.log(
+        `[LOAD] fetchFileContent result for ${filePath}:`,
+        result ? "Success" : "Failure/Null",
+        result?.sha
+      );
 
-        if (result && result.jsonData) {
-            currentFilePath = filePath;
-            currentJsonData = result.jsonData; // Store the pristine, unmodified data
-            currentFileSha = result.sha;
-            entrySuccessfullyLoaded = true;
-            console.log(`[LOAD] Successfully fetched data for ${filePath} with SHA: ${currentFileSha}`);
+      if (result && result.jsonData) {
+        currentFilePath = filePath;
+        currentJsonData = result.jsonData; // Store the pristine, unmodified data
+        currentFileSha = result.sha;
+        entrySuccessfullyLoaded = true;
+        console.log(
+          `[LOAD] Successfully fetched data for ${filePath} with SHA: ${currentFileSha}`
+        );
 
-            if (activeLinkElement && activeLinkElement !== linkElement) {
-                activeLinkElement.classList.remove("active");
-            }
-            if (linkElement) {
-                linkElement.classList.add("active");
-                activeLinkElement = linkElement;
-                // Expand parent folders
-                let parentLi = linkElement.closest("li.folder");
-                while (parentLi) {
-                    parentLi.classList.remove("collapsed");
-                    const grandParentUl = parentLi.parentElement;
-                    if (grandParentUl && grandParentUl.id !== "fileTreeRoot") {
-                        parentLi = grandParentUl.closest("li.folder");
-                    } else {
-                        parentLi = null;
-                    }
-                }
-            } else {
-                activeLinkElement = null;
-            }
-
-            const entryDisplayName = currentJsonData?.name || filePath.split("/").pop().replace(/\.json$/, "");
-            if (currentFileNameH2) currentFileNameH2.textContent = entryDisplayName;
-            document.title = `${entryDisplayName} - Kanka Editor`;
-            console.log(`[LOAD] Set header to: ${entryDisplayName}`);
-
-            const isJournal = !!(currentJsonData.entity && Array.isArray(currentJsonData.entity.posts) && currentJsonData.entity.posts.length >= 0);
-            console.log(`[LOAD] File Type Detected: ${isJournal ? "Journal" : "Standard Entry"}`);
-
-            if (isJournal) {
-                console.log("[LOAD] Processing as Journal...");
-                const posts = currentJsonData.entity.posts || [];
-                const separator = "\n<hr />\n";
-                const concatenatedHtml = posts.map(p => p.entry || "").join(separator);
-                if (htmlEditorTextarea) htmlEditorTextarea.dataset.concatenatedJournalHtml = concatenatedHtml;
-                try {
-                    console.log(`[LOAD] Rendering Journal structured view for ${filePath}`);
-                    renderJournalContent(posts);
-                    console.log(`[LOAD] Finished rendering Journal structured view for ${filePath}`);
-                } catch (renderError) {
-                    console.error(`[LOAD] Error during renderJournalContent for ${filePath}:`, renderError);
-                    if (jsonEntryContentDiv) jsonEntryContentDiv.innerHTML = `<p style="color: red;">Error rendering journal content. Check console.</p>`;
-                }
-            } else {
-                console.log("[LOAD] Processing as Standard Entry...");
-                const entryHtml = currentJsonData?.entity?.entry ?? currentJsonData?.entry ?? "";
-                console.log(`[LOAD] Standard Entry HTML length: ${entryHtml.length}`);
-                if (htmlEditorTextarea) htmlEditorTextarea.dataset.rawHtmlEntry = entryHtml;
-                try {
-                    console.log(`[LOAD] Rendering standard entry content for ${filePath}...`);
-                    renderHtmlEntry(entryHtml || "<p><em>(Entry content is empty)</em></p>", jsonEntryContentDiv);
-                    console.log(`[LOAD] Finished rendering standard entry content for ${filePath}`);
-                } catch (renderError) {
-                    console.error(`[LOAD] Error during renderHtmlEntry for ${filePath}:`, renderError);
-                    if (jsonEntryContentDiv) jsonEntryContentDiv.innerHTML = `<p style="color: red;">Error rendering standard content. Check console.</p>`;
-                }
-            }
-            if (htmlEditorTextarea) htmlEditorTextarea.disabled = false;
-
-            // --- Image Handling with Stale Link Detection ---
-            console.log(`[LOAD] Starting image handling for ${filePath}`);
-            let imageUUIDs = currentJsonData.entity?.image_uuids;
-            if (!Array.isArray(imageUUIDs) && currentJsonData.entity?.image_uuid) { // Handle legacy single image_uuid
-                imageUUIDs = [currentJsonData.entity.image_uuid];
-            }
-
-            if (Array.isArray(imageUUIDs) && imageUUIDs.length > 0) {
-                console.log(`[LOAD] Found ${imageUUIDs.length} linked image UUIDs.`);
-                if (imageListContainer) imageListContainer.innerHTML = ""; // Clear previous images
-                let validImagesAttempted = 0;
-
-                const imageLoadPromises = imageUUIDs.map(async (uuid) => {
-                    const imageData = imageFileMap[uuid];
-                    const imageContainerDiv = document.createElement("div");
-                    imageContainerDiv.style.position = "relative";
-                    imageContainerDiv.style.marginBottom = "15px";
-
-                    if (imageData && imageData.download_url && imageData.sha) {
-                        validImagesAttempted++;
-                        const imgElement = document.createElement("img");
-                        const cacheBustedUrl = `${imageData.download_url}?v=${imageData.sha}`;
-                        let imageLoadedSuccessfully = false;
-
-                        await new Promise(resolve => {
-                            imgElement.onload = () => {
-                                console.log(`[LOAD] Image loaded successfully: ${cacheBustedUrl}`);
-                                imageLoadedSuccessfully = true;
-                                resolve();
-                            };
-                            imgElement.onerror = () => {
-                                console.error(`[LOAD] Failed to load image: ${cacheBustedUrl}. Marking UUID ${uuid} as stale.`);
-                                staleImageUUIDs.push(uuid);
-                                const errorText = document.createElement("p");
-                                errorText.textContent = `[Image data for ${uuid} failed to load. Possible stale link.]`;
-                                errorText.style.cssText = "color: red; font-size: 0.8em; text-align: center;";
-                                imageContainerDiv.innerHTML = ''; // Clear previous attempts
-                                imageContainerDiv.appendChild(errorText);
-                                resolve(); // Resolve even on error to not block Promise.all
-                            };
-                            imgElement.src = cacheBustedUrl;
-                            imgElement.alt = `Linked image ${uuid}`;
-                            imgElement.title = `${imageData.name} (UUID: ${uuid}) - Click to enlarge`;
-                            imgElement.style.cssText = `display: block; max-width: 100%; height: auto; border: 1px solid #d4c8b8; border-radius: 3px; background-color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin: 0 auto; cursor: pointer;`;
-                            imgElement.addEventListener("click", () => openImageLightbox(cacheBustedUrl));
-                        });
-
-                        if (imageLoadedSuccessfully) {
-                             imageContainerDiv.appendChild(imgElement); // Add image first
-                            if (GITHUB_WRITE_TOKEN) { // Only add delete button if write token exists
-                                const deleteBtn = document.createElement("button");
-                                deleteBtn.textContent = "×";
-                                deleteBtn.title = `Delete image: ${imageData.name}`;
-                                deleteBtn.style.cssText = `position: absolute; top: 2px; right: 2px; background-color: rgba(200, 0, 0, 0.7); color: white; border: 1px solid rgba(100, 0, 0, 0.8); border-radius: 50%; width: 20px; height: 20px; line-height: 18px; text-align: center; font-size: 14px; font-weight: bold; cursor: pointer; padding: 0; z-index: 10;`;
-                                deleteBtn.dataset.uuid = uuid;
-                                deleteBtn.dataset.filename = imageData.name;
-                                deleteBtn.addEventListener("click", handleDeleteImageClick);
-                                imageContainerDiv.appendChild(deleteBtn);
-                            }
-                        }
-                        if (imageListContainer && (imageContainerDiv.querySelector('img') || imageContainerDiv.querySelector('p[style*="color: red"]'))) {
-                           imageListContainer.appendChild(imageContainerDiv);
-                        }
-
-                    } else {
-                        console.warn(`[LOAD] Image data or essential properties missing for UUID: ${uuid} in imageFileMap. Marking as stale.`);
-                        staleImageUUIDs.push(uuid);
-                        const errorP = document.createElement("p");
-                        errorP.textContent = `[Image data for ${uuid} is missing or invalid. Possible stale link.]`;
-                        errorP.style.cssText = "color: orange; font-size: 0.8em; text-align: center; margin-bottom: 10px;";
-                        if(imageListContainer) imageListContainer.appendChild(errorP);
-                    }
-                });
-
-                await Promise.all(imageLoadPromises);
-
-                if (noImageTextElement) {
-                    if (imageListContainer && imageListContainer.children.length > 0) {
-                        noImageTextElement.style.display = "none";
-                    } else {
-                        noImageTextElement.textContent = "No images linked or all linked images are invalid/missing.";
-                        noImageTextElement.style.display = "block";
-                    }
-                }
-            } else {
-                console.log("[LOAD] No image UUIDs found for this entry.");
-                if(imageListContainer) imageListContainer.innerHTML = "";
-                if(noImageTextElement) {
-                    noImageTextElement.textContent = "No images linked.";
-                    noImageTextElement.style.display = "block";
-                }
-            }
-            console.log(`[LOAD] Finished image handling for ${filePath}`);
-
-            // --- Handle Stale Links ---
-         if (staleImageUUIDs.length > 0 && GITHUB_WRITE_TOKEN && !isReloadAfterStaleLinkRemoval) {
-                const changesMade = await handleStaleImageLinks(staleImageUUIDs, filePath, linkElement);
-                if (changesMade) {
-                    // If changes were made and saved, handleStaleImageLinks already re-triggered
-                    // loadFileContentAndDisplay. We should return here to prevent this instance
-                    // from continuing to the finally block and potentially messing with UI states
-                    // that the re-triggered call will handle.
-                    console.log("[LOAD] Stale links handled and entry reloaded. Exiting current load cycle.");
-                    return; // Important to prevent double UI updates from 'finally'
-                }
-            } else if (staleImageUUIDs.length > 0 && !GITHUB_WRITE_TOKEN) {
-                console.log("[LOAD] Stale image links detected, but no write token. Cannot offer to remove them.");
-            } else if (staleImageUUIDs.length > 0 && isReloadAfterStaleLinkRemoval) {
-                console.log("[LOAD] Stale links were detected on a reload after removal attempt. Ignoring to prevent loop. User may need to refresh if GitHub sync was slow.");
-            }  
-        } else { // if (!result || !result.jsonData)
-            entrySuccessfullyLoaded = false;
-            console.error(`[LOAD] fetchFileContent failed or returned no JSON data for ${filePath}.`);
-            showError(`Failed to load entry content for ${filePath}.`);
-            if (activeLinkElement) {
-                activeLinkElement.classList.remove("active");
-                activeLinkElement = null;
-            }
-            if (currentFileNameH2) currentFileNameH2.textContent = "Error loading entry";
-            if (imagePreviewSidebar) imagePreviewSidebar.style.display = "none";
-            currentFilePath = null; // Clear current file if load fails
-            currentJsonData = null;
-            currentFileSha = null;
+        if (activeLinkElement && activeLinkElement !== linkElement) {
+          activeLinkElement.classList.remove("active");
         }
-    } catch (error) {
+        if (linkElement) {
+          linkElement.classList.add("active");
+          activeLinkElement = linkElement;
+          // Expand parent folders
+          let parentLi = linkElement.closest("li.folder");
+          while (parentLi) {
+            parentLi.classList.remove("collapsed");
+            const grandParentUl = parentLi.parentElement;
+            if (grandParentUl && grandParentUl.id !== "fileTreeRoot") {
+              parentLi = grandParentUl.closest("li.folder");
+            } else {
+              parentLi = null;
+            }
+          }
+        } else {
+          activeLinkElement = null;
+        }
+
+        const entryDisplayName =
+          currentJsonData?.name ||
+          filePath
+            .split("/")
+            .pop()
+            .replace(/\.json$/, "");
+        if (currentFileNameH2) currentFileNameH2.textContent = entryDisplayName;
+        document.title = `${entryDisplayName} - Kanka Editor`;
+        console.log(`[LOAD] Set header to: ${entryDisplayName}`);
+
+        const isJournal = !!(
+          currentJsonData.entity &&
+          Array.isArray(currentJsonData.entity.posts) &&
+          currentJsonData.entity.posts.length >= 0
+        );
+        console.log(
+          `[LOAD] File Type Detected: ${
+            isJournal ? "Journal" : "Standard Entry"
+          }`
+        );
+
+        if (isJournal) {
+          console.log("[LOAD] Processing as Journal...");
+          const posts = currentJsonData.entity.posts || [];
+          const separator = "\n<hr />\n";
+          const concatenatedHtml = posts
+            .map((p) => p.entry || "")
+            .join(separator);
+          if (htmlEditorTextarea)
+            htmlEditorTextarea.dataset.concatenatedJournalHtml =
+              concatenatedHtml;
+          try {
+            console.log(
+              `[LOAD] Rendering Journal structured view for ${filePath}`
+            );
+            renderJournalContent(posts);
+            console.log(
+              `[LOAD] Finished rendering Journal structured view for ${filePath}`
+            );
+          } catch (renderError) {
+            console.error(
+              `[LOAD] Error during renderJournalContent for ${filePath}:`,
+              renderError
+            );
+            if (jsonEntryContentDiv)
+              jsonEntryContentDiv.innerHTML = `<p style="color: red;">Error rendering journal content. Check console.</p>`;
+          }
+        } else {
+          console.log("[LOAD] Processing as Standard Entry...");
+          const entryHtml =
+            currentJsonData?.entity?.entry ?? currentJsonData?.entry ?? "";
+          console.log(`[LOAD] Standard Entry HTML length: ${entryHtml.length}`);
+          if (htmlEditorTextarea)
+            htmlEditorTextarea.dataset.rawHtmlEntry = entryHtml;
+          try {
+            console.log(
+              `[LOAD] Rendering standard entry content for ${filePath}...`
+            );
+            renderHtmlEntry(
+              entryHtml || "<p><em>(Entry content is empty)</em></p>",
+              jsonEntryContentDiv
+            );
+            console.log(
+              `[LOAD] Finished rendering standard entry content for ${filePath}`
+            );
+          } catch (renderError) {
+            console.error(
+              `[LOAD] Error during renderHtmlEntry for ${filePath}:`,
+              renderError
+            );
+            if (jsonEntryContentDiv)
+              jsonEntryContentDiv.innerHTML = `<p style="color: red;">Error rendering standard content. Check console.</p>`;
+          }
+        }
+        if (htmlEditorTextarea) htmlEditorTextarea.disabled = false;
+
+        // --- Image Handling with Stale Link Detection ---
+        console.log(`[LOAD] Starting image handling for ${filePath}`);
+        let imageUUIDs = currentJsonData.entity?.image_uuids;
+        if (!Array.isArray(imageUUIDs) && currentJsonData.entity?.image_uuid) {
+          // Handle legacy single image_uuid
+          imageUUIDs = [currentJsonData.entity.image_uuid];
+        }
+
+        if (Array.isArray(imageUUIDs) && imageUUIDs.length > 0) {
+          console.log(`[LOAD] Found ${imageUUIDs.length} linked image UUIDs.`);
+          if (imageListContainer) imageListContainer.innerHTML = ""; // Clear previous images
+          let validImagesAttempted = 0;
+
+          const imageLoadPromises = imageUUIDs.map(async (uuid) => {
+            const imageData = imageFileMap[uuid];
+            const imageContainerDiv = document.createElement("div");
+            imageContainerDiv.style.position = "relative";
+            imageContainerDiv.style.marginBottom = "15px";
+
+            if (imageData && imageData.download_url && imageData.sha) {
+              validImagesAttempted++;
+              const imgElement = document.createElement("img");
+              const cacheBustedUrl = `${imageData.download_url}?v=${imageData.sha}`;
+              let imageLoadedSuccessfully = false;
+
+              await new Promise((resolve) => {
+                imgElement.onload = () => {
+                  console.log(
+                    `[LOAD] Image loaded successfully: ${cacheBustedUrl}`
+                  );
+                  imageLoadedSuccessfully = true;
+                  resolve();
+                };
+                imgElement.onerror = () => {
+                  console.error(
+                    `[LOAD] Failed to load image: ${cacheBustedUrl}. Marking UUID ${uuid} as stale.`
+                  );
+                  staleImageUUIDs.push(uuid);
+                  const errorText = document.createElement("p");
+                  errorText.textContent = `[Image data for ${uuid} failed to load. Possible stale link.]`;
+                  errorText.style.cssText =
+                    "color: red; font-size: 0.8em; text-align: center;";
+                  imageContainerDiv.innerHTML = ""; // Clear previous attempts
+                  imageContainerDiv.appendChild(errorText);
+                  resolve(); // Resolve even on error to not block Promise.all
+                };
+                imgElement.src = cacheBustedUrl;
+                imgElement.alt = `Linked image ${uuid}`;
+                imgElement.title = `${imageData.name} (UUID: ${uuid}) - Click to enlarge`;
+                imgElement.style.cssText = `display: block; max-width: 100%; height: auto; border: 1px solid #d4c8b8; border-radius: 3px; background-color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin: 0 auto; cursor: pointer;`;
+                imgElement.addEventListener("click", () =>
+                  openImageLightbox(cacheBustedUrl)
+                );
+              });
+
+              if (imageLoadedSuccessfully) {
+                imageContainerDiv.appendChild(imgElement); // Add image first
+                if (GITHUB_WRITE_TOKEN) {
+                  // Only add delete button if write token exists
+                  const deleteBtn = document.createElement("button");
+                  deleteBtn.textContent = "×";
+                  deleteBtn.title = `Delete image: ${imageData.name}`;
+                  deleteBtn.style.cssText = `position: absolute; top: 2px; right: 2px; background-color: rgba(200, 0, 0, 0.7); color: white; border: 1px solid rgba(100, 0, 0, 0.8); border-radius: 50%; width: 20px; height: 20px; line-height: 18px; text-align: center; font-size: 14px; font-weight: bold; cursor: pointer; padding: 0; z-index: 10;`;
+                  deleteBtn.dataset.uuid = uuid;
+                  deleteBtn.dataset.filename = imageData.name;
+                  deleteBtn.addEventListener("click", handleDeleteImageClick);
+                  imageContainerDiv.appendChild(deleteBtn);
+                }
+              }
+              if (
+                imageListContainer &&
+                (imageContainerDiv.querySelector("img") ||
+                  imageContainerDiv.querySelector('p[style*="color: red"]'))
+              ) {
+                imageListContainer.appendChild(imageContainerDiv);
+              }
+            } else {
+              console.warn(
+                `[LOAD] Image data or essential properties missing for UUID: ${uuid} in imageFileMap. Marking as stale.`
+              );
+              staleImageUUIDs.push(uuid);
+              const errorP = document.createElement("p");
+              errorP.textContent = `[Image data for ${uuid} is missing or invalid. Possible stale link.]`;
+              errorP.style.cssText =
+                "color: orange; font-size: 0.8em; text-align: center; margin-bottom: 10px;";
+              if (imageListContainer) imageListContainer.appendChild(errorP);
+            }
+          });
+
+          await Promise.all(imageLoadPromises);
+
+          if (noImageTextElement) {
+            if (imageListContainer && imageListContainer.children.length > 0) {
+              noImageTextElement.style.display = "none";
+            } else {
+              noImageTextElement.textContent =
+                "No images linked or all linked images are invalid/missing.";
+              noImageTextElement.style.display = "block";
+            }
+          }
+        } else {
+          console.log("[LOAD] No image UUIDs found for this entry.");
+          if (imageListContainer) imageListContainer.innerHTML = "";
+          if (noImageTextElement) {
+            noImageTextElement.textContent = "No images linked.";
+            noImageTextElement.style.display = "block";
+          }
+        }
+        console.log(`[LOAD] Finished image handling for ${filePath}`);
+
+        // --- Handle Stale Links ---
+        if (
+          staleImageUUIDs.length > 0 &&
+          GITHUB_WRITE_TOKEN &&
+          !isReloadAfterStaleLinkRemoval
+        ) {
+          const changesMade = await handleStaleImageLinks(
+            staleImageUUIDs,
+            filePath,
+            linkElement
+          );
+          if (changesMade) {
+            // If changes were made and saved, handleStaleImageLinks already re-triggered
+            // loadFileContentAndDisplay. We should return here to prevent this instance
+            // from continuing to the finally block and potentially messing with UI states
+            // that the re-triggered call will handle.
+            console.log(
+              "[LOAD] Stale links handled and entry reloaded. Exiting current load cycle."
+            );
+            return; // Important to prevent double UI updates from 'finally'
+          }
+        } else if (staleImageUUIDs.length > 0 && !GITHUB_WRITE_TOKEN) {
+          console.log(
+            "[LOAD] Stale image links detected, but no write token. Cannot offer to remove them."
+          );
+        } else if (
+          staleImageUUIDs.length > 0 &&
+          isReloadAfterStaleLinkRemoval
+        ) {
+          console.log(
+            "[LOAD] Stale links were detected on a reload after removal attempt. Ignoring to prevent loop. User may need to refresh if GitHub sync was slow."
+          );
+        }
+      } else {
+        // if (!result || !result.jsonData)
         entrySuccessfullyLoaded = false;
-        console.error(`[LOAD] Critical error loading/displaying file ${filePath}:`, error);
-        showError(`Critical error processing entry: ${error.message}. Check console.`);
+        console.error(
+          `[LOAD] fetchFileContent failed or returned no JSON data for ${filePath}.`
+        );
+        showError(`Failed to load entry content for ${filePath}.`);
         if (activeLinkElement) {
-            activeLinkElement.classList.remove("active");
-            activeLinkElement = null;
+          activeLinkElement.classList.remove("active");
+          activeLinkElement = null;
         }
-        if (currentFileNameH2) currentFileNameH2.textContent = "Error";
+        if (currentFileNameH2)
+          currentFileNameH2.textContent = "Error loading entry";
         if (imagePreviewSidebar) imagePreviewSidebar.style.display = "none";
-        currentFilePath = null;
+        currentFilePath = null; // Clear current file if load fails
         currentJsonData = null;
         currentFileSha = null;
+      }
+    } catch (error) {
+      entrySuccessfullyLoaded = false;
+      console.error(
+        `[LOAD] Critical error loading/displaying file ${filePath}:`,
+        error
+      );
+      showError(
+        `Critical error processing entry: ${error.message}. Check console.`
+      );
+      if (activeLinkElement) {
+        activeLinkElement.classList.remove("active");
+        activeLinkElement = null;
+      }
+      if (currentFileNameH2) currentFileNameH2.textContent = "Error";
+      if (imagePreviewSidebar) imagePreviewSidebar.style.display = "none";
+      currentFilePath = null;
+      currentJsonData = null;
+      currentFileSha = null;
     } finally {
-        // This block will execute even if `handleStaleImageLinks` causes a reload,
-        // UNLESS we explicitly returned from within the try block.
-        // If `entrySuccessfullyLoaded` is true, but `handleStaleImageLinks` didn't make changes or wasn't called,
-        // we still need to update button states.
-        // If `entrySuccessfullyLoaded` is false, it means the initial load failed, so buttons should reflect that.
+      // This block will execute even if `handleStaleImageLinks` causes a reload,
+      // UNLESS we explicitly returned from within the try block.
+      // If `entrySuccessfullyLoaded` is true, but `handleStaleImageLinks` didn't make changes or wasn't called,
+      // we still need to update button states.
+      // If `entrySuccessfullyLoaded` is false, it means the initial load failed, so buttons should reflect that.
 
-        if(addImageBtn){
-            if (entrySuccessfullyLoaded && GITHUB_WRITE_TOKEN) {
-                addImageBtn.style.display = "block";
-                addImageBtn.disabled = false;
-            } else {
-                addImageBtn.style.display = "none";
-                addImageBtn.disabled = true;
-            }
+      if (addImageBtn) {
+        if (entrySuccessfullyLoaded && GITHUB_WRITE_TOKEN) {
+          addImageBtn.style.display = "block";
+          addImageBtn.disabled = false;
+        } else {
+          addImageBtn.style.display = "none";
+          addImageBtn.disabled = true;
         }
+      }
 
-        switchToViewMode(); // This calls updateButtonStatesBasedOnTokens which is aware of currentFilePath etc.
-        if (!entrySuccessfullyLoaded && imagePreviewSidebar) { // Hide image sidebar if the main entry load failed
-            imagePreviewSidebar.style.display = "none";
+      switchToViewMode(); // This calls updateButtonStatesBasedOnTokens which is aware of currentFilePath etc.
+      if (!entrySuccessfullyLoaded && imagePreviewSidebar) {
+        // Hide image sidebar if the main entry load failed
+        imagePreviewSidebar.style.display = "none";
+      }
+      hideLoading();
+      console.log(
+        `[LOAD] Load process finished for ${filePath}. Success: ${entrySuccessfullyLoaded}`
+      );
+    }
+  }
+
+  // Ensure these are accessible or passed as parameters if needed:
+  // GITHUB_WRITE_TOKEN, currentJsonData, currentFilePath, currentFileSha,
+  // showLoading, hideLoading, commitFileToGitHub, flatJsonData, contextCache,
+  // loadFileContentAndDisplay (and its signature is updated to accept the third param)
+
+  async function handleStaleImageLinks(
+    staleUUIDs,
+    entryPathToUpdate,
+    linkElementForReload
+  ) {
+    if (
+      !currentJsonData ||
+      entryPathToUpdate !== currentFilePath ||
+      !currentFileSha ||
+      !GITHUB_WRITE_TOKEN
+    ) {
+      console.warn(
+        "[STALE_LINKS] Pre-conditions not met for handling stale links:",
+        {
+          currentJsonDataExists: !!currentJsonData,
+          pathMatch: entryPathToUpdate === currentFilePath,
+          shaExists: !!currentFileSha,
+          writeTokenExists: !!GITHUB_WRITE_TOKEN,
         }
-        hideLoading();
-        console.log(`[LOAD] Load process finished for ${filePath}. Success: ${entrySuccessfullyLoaded}`);
-    }
-}
-
-
-
-
-// Ensure these are accessible or passed as parameters if needed:
-// GITHUB_WRITE_TOKEN, currentJsonData, currentFilePath, currentFileSha,
-// showLoading, hideLoading, commitFileToGitHub, flatJsonData, contextCache,
-// loadFileContentAndDisplay (and its signature is updated to accept the third param)
-
-async function handleStaleImageLinks(staleUUIDs, entryPathToUpdate, linkElementForReload) {
-    if (!currentJsonData || entryPathToUpdate !== currentFilePath || !currentFileSha || !GITHUB_WRITE_TOKEN) {
-        console.warn("[STALE_LINKS] Pre-conditions not met for handling stale links:", {
-            currentJsonDataExists: !!currentJsonData,
-            pathMatch: entryPathToUpdate === currentFilePath,
-            shaExists: !!currentFileSha,
-            writeTokenExists: !!GITHUB_WRITE_TOKEN
-        });
-        // Do not alert here, as this function is called internally.
-        // The calling function (loadFileContentAndDisplay) should handle UI if these pre-conditions fail.
-        return false; // Indicate no action taken or failed pre-check
+      );
+      // Do not alert here, as this function is called internally.
+      // The calling function (loadFileContentAndDisplay) should handle UI if these pre-conditions fail.
+      return false; // Indicate no action taken or failed pre-check
     }
 
-    const entryName = currentJsonData.name || entryPathToUpdate.split("/").pop();
-    const confirmMessage = `The entry "${entryName}" contains ${staleUUIDs.length} image link(s) that appear to be stale or broken (image data not found/loadable):\n\n${staleUUIDs.join("\n")}\n\nDo you want to PERMANENTLY REMOVE these broken links from this entry's data? This action cannot be undone. (This will not delete any actual image files from the gallery, only the references in this entry).`;
+    const entryName =
+      currentJsonData.name || entryPathToUpdate.split("/").pop();
+    const confirmMessage = `The entry "${entryName}" contains ${
+      staleUUIDs.length
+    } image link(s) that appear to be stale or broken (image data not found/loadable):\n\n${staleUUIDs.join(
+      "\n"
+    )}\n\nDo you want to PERMANENTLY REMOVE these broken links from this entry's data? This action cannot be undone. (This will not delete any actual image files from the gallery, only the references in this entry).`;
 
     if (confirm(confirmMessage)) {
-        showLoading(`Removing ${staleUUIDs.length} stale image link(s) from "${entryName}"...`);
-        try {
-            const modifiedJsonData = JSON.parse(JSON.stringify(currentJsonData)); // Deep copy
+      showLoading(
+        `Removing ${staleUUIDs.length} stale image link(s) from "${entryName}"...`
+      );
+      try {
+        const modifiedJsonData = JSON.parse(JSON.stringify(currentJsonData)); // Deep copy
 
-            // Ensure entity object and image_uuids array exist and are correctly formatted
-            if (!modifiedJsonData.entity) {
-                console.log("[STALE_LINKS] Entry was missing 'entity' object. Creating it for consistency, though no image_uuids to remove if it was missing.");
-                modifiedJsonData.entity = { image_uuids: [] }; // Initialize with image_uuids array
-            }
-            if (!Array.isArray(modifiedJsonData.entity.image_uuids)) {
-                if (typeof modifiedJsonData.entity.image_uuid === 'string') {
-                    console.log("[STALE_LINKS] Found legacy 'image_uuid' string. Converting to 'image_uuids' array.");
-                    modifiedJsonData.entity.image_uuids = [modifiedJsonData.entity.image_uuid];
-                    delete modifiedJsonData.entity.image_uuid;
-                } else {
-                    console.log("[STALE_LINKS] 'entity.image_uuids' was not an array and no legacy string found. Initializing as empty array.");
-                    modifiedJsonData.entity.image_uuids = [];
-                }
-            }
-
-            const originalUUIDs = [...modifiedJsonData.entity.image_uuids];
-            modifiedJsonData.entity.image_uuids = modifiedJsonData.entity.image_uuids.filter(
-                uuid => !staleUUIDs.includes(uuid)
-            );
-            const removedCount = originalUUIDs.length - modifiedJsonData.entity.image_uuids.length;
-
-            console.log(`[STALE_LINKS] Original UUIDs: ${originalUUIDs.join(', ')}. Filtered UUIDs: ${modifiedJsonData.entity.image_uuids.join(', ')}. Removed: ${removedCount}`);
-
-            if (removedCount > 0) {
-                const now = new Date().toISOString().replace("Z", ".000000Z");
-                modifiedJsonData.updated_at = now;
-                if (modifiedJsonData.entity) modifiedJsonData.entity.updated_at = now;
-
-                const updatedJsonString = JSON.stringify(modifiedJsonData, null, 2);
-                const commitMessage = `fix: Remove ${removedCount} stale image link(s) from entry: ${entryName}`;
-
-                // Use currentFileSha for the update commit of the entry itself
-                const commitResult = await commitFileToGitHub(
-                    entryPathToUpdate, // This should be currentFilePath
-                    updatedJsonString,
-                    commitMessage,
-                    currentFileSha
-                );
-
-                if (commitResult && commitResult.sha) {
-                    console.log("[STALE_LINKS] Entry updated successfully on GitHub after removing stale links. New SHA:", commitResult.sha);
-                    // Update global state with the new SHA and modified data
-                    currentFileSha = commitResult.sha;
-                    currentJsonData = modifiedJsonData;
-                    contextCache[entryPathToUpdate] = modifiedJsonData;
-
-                    const fileIndex = flatJsonData.findIndex(item => item.path === entryPathToUpdate);
-                    if (fileIndex !== -1) {
-                        flatJsonData[fileIndex].sha = commitResult.sha;
-                         // If the kankaName was based on the jsonData, update it too (though unlikely needed here)
-                        flatJsonData[fileIndex].kankaName = modifiedJsonData.name || flatJsonData[fileIndex].name.replace(/\.json$/, "");
-                    }
-
-
-                    alert(`${removedCount} stale image link(s) removed successfully from "${entryName}". Reloading entry view.`);
-                    hideLoading(); // Hide loading *before* the recursive call
-                    // Call loadFileContentAndDisplay with the flag to prevent immediate re-prompting
-                    await loadFileContentAndDisplay(entryPathToUpdate, linkElementForReload, true);
-                    return true; // Indicate changes were made and successfully saved
-                } else {
-                    // commitFileToGitHub would have shown an alert
-                    console.error("[STALE_LINKS] Failed to save updated entry JSON to GitHub after attempting to remove stale links. Commit result:", commitResult);
-                    // No throw here, allow finally to hide loading
-                    hideLoading();
-                    return false; // Indicate save failure
-                }
-            } else {
-                console.log("[STALE_LINKS] No UUIDs were actually removed from the array. This might happen if staleUUIDs list was empty or didn't match existing UUIDs in the entry.");
-                alert("No stale links found in the entry's list to remove, or an issue occurred matching them.");
-                hideLoading();
-                return false; // No changes made to the file
-            }
-        } catch (error) {
-            console.error("[STALE_LINKS] Error during stale image link handling:", error);
-            alert(`Failed to remove stale image links: ${error.message}`);
-            hideLoading();
-            return false; // Indicate error
+        // Ensure entity object and image_uuids array exist and are correctly formatted
+        if (!modifiedJsonData.entity) {
+          console.log(
+            "[STALE_LINKS] Entry was missing 'entity' object. Creating it for consistency, though no image_uuids to remove if it was missing."
+          );
+          modifiedJsonData.entity = { image_uuids: [] }; // Initialize with image_uuids array
         }
-    } else { // User cancelled the confirm dialog
-        console.log("[STALE_LINKS] User chose not to remove stale image links.");
-        alert("Stale image links will remain. You can manually edit the entry or GitHub JSON if needed.");
-        // No need to call hideLoading() here as it wasn't shown for the confirm dialog itself
-        return false; // Indicate no action taken by user
-    }
-}
+        if (!Array.isArray(modifiedJsonData.entity.image_uuids)) {
+          if (typeof modifiedJsonData.entity.image_uuid === "string") {
+            console.log(
+              "[STALE_LINKS] Found legacy 'image_uuid' string. Converting to 'image_uuids' array."
+            );
+            modifiedJsonData.entity.image_uuids = [
+              modifiedJsonData.entity.image_uuid,
+            ];
+            delete modifiedJsonData.entity.image_uuid;
+          } else {
+            console.log(
+              "[STALE_LINKS] 'entity.image_uuids' was not an array and no legacy string found. Initializing as empty array."
+            );
+            modifiedJsonData.entity.image_uuids = [];
+          }
+        }
 
+        const originalUUIDs = [...modifiedJsonData.entity.image_uuids];
+        modifiedJsonData.entity.image_uuids =
+          modifiedJsonData.entity.image_uuids.filter(
+            (uuid) => !staleUUIDs.includes(uuid)
+          );
+        const removedCount =
+          originalUUIDs.length - modifiedJsonData.entity.image_uuids.length;
+
+        console.log(
+          `[STALE_LINKS] Original UUIDs: ${originalUUIDs.join(
+            ", "
+          )}. Filtered UUIDs: ${modifiedJsonData.entity.image_uuids.join(
+            ", "
+          )}. Removed: ${removedCount}`
+        );
+
+        if (removedCount > 0) {
+          const now = new Date().toISOString().replace("Z", ".000000Z");
+          modifiedJsonData.updated_at = now;
+          if (modifiedJsonData.entity) modifiedJsonData.entity.updated_at = now;
+
+          const updatedJsonString = JSON.stringify(modifiedJsonData, null, 2);
+          const commitMessage = `fix: Remove ${removedCount} stale image link(s) from entry: ${entryName}`;
+
+          // Use currentFileSha for the update commit of the entry itself
+          const commitResult = await commitFileToGitHub(
+            entryPathToUpdate, // This should be currentFilePath
+            updatedJsonString,
+            commitMessage,
+            currentFileSha
+          );
+
+          if (commitResult && commitResult.sha) {
+            console.log(
+              "[STALE_LINKS] Entry updated successfully on GitHub after removing stale links. New SHA:",
+              commitResult.sha
+            );
+            // Update global state with the new SHA and modified data
+            currentFileSha = commitResult.sha;
+            currentJsonData = modifiedJsonData;
+            contextCache[entryPathToUpdate] = modifiedJsonData;
+
+            const fileIndex = flatJsonData.findIndex(
+              (item) => item.path === entryPathToUpdate
+            );
+            if (fileIndex !== -1) {
+              flatJsonData[fileIndex].sha = commitResult.sha;
+              // If the kankaName was based on the jsonData, update it too (though unlikely needed here)
+              flatJsonData[fileIndex].kankaName =
+                modifiedJsonData.name ||
+                flatJsonData[fileIndex].name.replace(/\.json$/, "");
+            }
+
+            alert(
+              `${removedCount} stale image link(s) removed successfully from "${entryName}". Reloading entry view.`
+            );
+            hideLoading(); // Hide loading *before* the recursive call
+            // Call loadFileContentAndDisplay with the flag to prevent immediate re-prompting
+            await loadFileContentAndDisplay(
+              entryPathToUpdate,
+              linkElementForReload,
+              true
+            );
+            return true; // Indicate changes were made and successfully saved
+          } else {
+            // commitFileToGitHub would have shown an alert
+            console.error(
+              "[STALE_LINKS] Failed to save updated entry JSON to GitHub after attempting to remove stale links. Commit result:",
+              commitResult
+            );
+            // No throw here, allow finally to hide loading
+            hideLoading();
+            return false; // Indicate save failure
+          }
+        } else {
+          console.log(
+            "[STALE_LINKS] No UUIDs were actually removed from the array. This might happen if staleUUIDs list was empty or didn't match existing UUIDs in the entry."
+          );
+          alert(
+            "No stale links found in the entry's list to remove, or an issue occurred matching them."
+          );
+          hideLoading();
+          return false; // No changes made to the file
+        }
+      } catch (error) {
+        console.error(
+          "[STALE_LINKS] Error during stale image link handling:",
+          error
+        );
+        alert(`Failed to remove stale image links: ${error.message}`);
+        hideLoading();
+        return false; // Indicate error
+      }
+    } else {
+      // User cancelled the confirm dialog
+      console.log("[STALE_LINKS] User chose not to remove stale image links.");
+      alert(
+        "Stale image links will remain. You can manually edit the entry or GitHub JSON if needed."
+      );
+      // No need to call hideLoading() here as it wasn't shown for the confirm dialog itself
+      return false; // Indicate no action taken by user
+    }
+  }
 
   function handleInternalLinkClick(event) {
     event.preventDefault();
@@ -2852,18 +3109,22 @@ async function handleStaleImageLinks(staleUUIDs, entryPathToUpdate, linkElementF
 
       console.log("Metadata file deleted successfully.");
 
-if (imageData && imageFileMap[uuid]) {
-    delete imageFileMap[uuid];
-    console.log(`[DELETE] Removed ${uuid} from local imageFileMap.`);
-}
-if (imageData && metadataFile) {
-    allFetchedFiles = allFetchedFiles.filter(
-        f => f.path !== imageData.path && f.path !== metadataFile.path
-    );
-    console.log(`[DELETE] Removed image and metadata files for ${uuid} from allFetchedFiles.`);
-} else {
-    console.warn(`[DELETE] Could not fully clean up ${uuid} from local caches due to missing imageData or metadataFile entry.`);
-}
+      if (imageData && imageFileMap[uuid]) {
+        delete imageFileMap[uuid];
+        console.log(`[DELETE] Removed ${uuid} from local imageFileMap.`);
+      }
+      if (imageData && metadataFile) {
+        allFetchedFiles = allFetchedFiles.filter(
+          (f) => f.path !== imageData.path && f.path !== metadataFile.path
+        );
+        console.log(
+          `[DELETE] Removed image and metadata files for ${uuid} from allFetchedFiles.`
+        );
+      } else {
+        console.warn(
+          `[DELETE] Could not fully clean up ${uuid} from local caches due to missing imageData or metadataFile entry.`
+        );
+      }
 
       showLoading(`Updating entry: ${currentJsonData.name}...`);
       const modifiedJsonData = JSON.parse(JSON.stringify(currentJsonData));
@@ -3168,85 +3429,97 @@ if (imageData && metadataFile) {
     }
   }
 
-function openImproveModal() {
+  function openImproveModal() {
     console.log("[IMPROVE MODAL] Opening modal...");
     if (!currentJsonData || !currentFilePath || !fileTree) {
-        console.error("[IMPROVE MODAL] Missing current data or file tree.");
-        return;
+      console.error("[IMPROVE MODAL] Missing current data or file tree.");
+      return;
     }
-    if (!GEMINI_API_KEY || GEMINI_API_KEY.startsWith("YOUR_")) { // Check if it's a placeholder
-        alert("A valid Gemini API Key is required for AI features. Please provide one.");
-        showApiKeyModal(false, true, "ai_action"); // Gemini required, GH not for this specific prompt
-        return;
+    if (!GEMINI_API_KEY || GEMINI_API_KEY.startsWith("YOUR_")) {
+      // Check if it's a placeholder
+      alert(
+        "A valid Gemini API Key is required for AI features. Please provide one."
+      );
+      showApiKeyModal(false, true, "ai_action"); // Gemini required, GH not for this specific prompt
+      return;
     }
     if (!Array.isArray(GEMINI_MODELS) || GEMINI_MODELS.length === 0) {
-        alert("No Gemini models loaded from config. AI features unavailable.");
-        console.error("[IMPROVE MODAL] GEMINI_MODELS array is empty or not loaded.");
-        return;
+      alert("No Gemini models loaded from config. AI features unavailable.");
+      console.error(
+        "[IMPROVE MODAL] GEMINI_MODELS array is empty or not loaded."
+      );
+      return;
     }
 
     const isJournal = !!(
-        currentJsonData.entity && Array.isArray(currentJsonData.entity.posts)
+      currentJsonData.entity && Array.isArray(currentJsonData.entity.posts)
     );
     const contentForImprovement = getContentForEditingOrAI(isJournal);
     if (contextTreeRootUl) contextTreeRootUl.innerHTML = ""; // Check if exists
-    
+
     improveModalEntryNameSpan.textContent =
-        currentJsonData.name || currentFilePath.split("/").pop();
-    if (isJournal) improveModalEntryNameSpan.textContent += " (Journal - Combined)";
-    
-    console.log(`[IMPROVE MODAL] Entry: ${improveModalEntryNameSpan.textContent}`);
-    
+      currentJsonData.name || currentFilePath.split("/").pop();
+    if (isJournal)
+      improveModalEntryNameSpan.textContent += " (Journal - Combined)";
+
+    console.log(
+      `[IMPROVE MODAL] Entry: ${improveModalEntryNameSpan.textContent}`
+    );
+
     geminiModelSelect.innerHTML = "";
     console.log("[IMPROVE MODAL] Populating AI models:", GEMINI_MODELS);
     let modelsAdded = 0;
     GEMINI_MODELS.forEach((model) => {
-        if (model && model.id && model.name) {
-            const option = document.createElement("option");
-            option.value = model.id;
-            option.textContent = model.name;
-            geminiModelSelect.appendChild(option);
-            modelsAdded++;
-        } else {
-            console.warn("[IMPROVE MODAL] Skipping invalid model data:", model);
-        }
+      if (model && model.id && model.name) {
+        const option = document.createElement("option");
+        option.value = model.id;
+        option.textContent = model.name;
+        geminiModelSelect.appendChild(option);
+        modelsAdded++;
+      } else {
+        console.warn("[IMPROVE MODAL] Skipping invalid model data:", model);
+      }
     });
-    
+
     console.log(`[IMPROVE MODAL] Added ${modelsAdded} models to dropdown.`);
 
     if (modelsAdded === 0) {
-        console.error("[IMPROVE MODAL] No valid models found!");
-        const option = document.createElement("option");
-        option.value = "";
-        option.textContent = "No models available";
-        option.disabled = true;
-        geminiModelSelect.appendChild(option);
-        geminiModelSelect.disabled = true;
-        if (proceedWithImprovementBtn) proceedWithImprovementBtn.disabled = true;
-        if (copyPromptBtn) copyPromptBtn.disabled = true;
-        if (selectAllContextBtn) selectAllContextBtn.disabled = true; // Disable if no models
-        if (deselectAllContextBtn) deselectAllContextBtn.disabled = true; // Disable if no models
+      console.error("[IMPROVE MODAL] No valid models found!");
+      const option = document.createElement("option");
+      option.value = "";
+      option.textContent = "No models available";
+      option.disabled = true;
+      geminiModelSelect.appendChild(option);
+      geminiModelSelect.disabled = true;
+      if (proceedWithImprovementBtn) proceedWithImprovementBtn.disabled = true;
+      if (copyPromptBtn) copyPromptBtn.disabled = true;
+      if (selectAllContextBtn) selectAllContextBtn.disabled = true; // Disable if no models
+      if (deselectAllContextBtn) deselectAllContextBtn.disabled = true; // Disable if no models
     } else {
-        const defaultModel =
-            GEMINI_MODELS.find((m) => m.id && m.id.includes("flash")) || GEMINI_MODELS[0];
-        if (defaultModel && defaultModel.id) {
-            geminiModelSelect.value = defaultModel.id;
-            console.log(`[IMPROVE MODAL] Default model selected: ${defaultModel.id}`);
-        }
-        geminiModelSelect.disabled = false;
-        if (proceedWithImprovementBtn) proceedWithImprovementBtn.disabled = false;
-        if (copyPromptBtn) copyPromptBtn.disabled = false;
-        if (selectAllContextBtn) selectAllContextBtn.disabled = false; // Enable if models available
-        if (deselectAllContextBtn) deselectAllContextBtn.disabled = false; // Enable if models available
+      const defaultModel =
+        GEMINI_MODELS.find((m) => m.id && m.id.includes("flash")) ||
+        GEMINI_MODELS[0];
+      if (defaultModel && defaultModel.id) {
+        geminiModelSelect.value = defaultModel.id;
+        console.log(
+          `[IMPROVE MODAL] Default model selected: ${defaultModel.id}`
+        );
+      }
+      geminiModelSelect.disabled = false;
+      if (proceedWithImprovementBtn) proceedWithImprovementBtn.disabled = false;
+      if (copyPromptBtn) copyPromptBtn.disabled = false;
+      if (selectAllContextBtn) selectAllContextBtn.disabled = false; // Enable if models available
+      if (deselectAllContextBtn) deselectAllContextBtn.disabled = false; // Enable if models available
     }
 
     const contextTreeWithoutCurrent = filterTree(fileTree, currentFilePath);
-    if (contextTreeRootUl) renderContextTree(contextTreeWithoutCurrent, contextTreeRootUl); // Check if exists
-    
+    if (contextTreeRootUl)
+      renderContextTree(contextTreeWithoutCurrent, contextTreeRootUl); // Check if exists
+
     updateTokenEstimate(contentForImprovement);
     improveModal.style.display = "block";
     console.log("[IMPROVE MODAL] Modal displayed.");
-}
+  }
 
   function filterTree(nodes, excludePath) {
     return nodes
@@ -3318,26 +3591,30 @@ function openImproveModal() {
     });
   }
 
-function updateTokenEstimate(baseContent = null) {
+  function updateTokenEstimate(baseContent = null) {
     const isJournal = !!(
-        currentJsonData?.entity && Array.isArray(currentJsonData.entity.posts)
+      currentJsonData?.entity && Array.isArray(currentJsonData.entity.posts)
     );
     const contentToEstimate =
-        baseContent ?? getContentForEditingOrAI(isJournal);
+      baseContent ?? getContentForEditingOrAI(isJournal);
     let totalEstimate = estimateTokens(contentToEstimate);
 
-    if (contextTreeRootUl) { // Check if the element exists
-        const checkboxes = contextTreeRootUl.querySelectorAll(
-            'input[type="checkbox"][data-type="file"]:checked'
-        );
-        checkboxes.forEach((cb) => {
-            totalEstimate += parseInt(cb.dataset.baseTokens || "0", 10);
-        });
+    if (contextTreeRootUl) {
+      // Check if the element exists
+      const checkboxes = contextTreeRootUl.querySelectorAll(
+        'input[type="checkbox"][data-type="file"]:checked'
+      );
+      checkboxes.forEach((cb) => {
+        totalEstimate += parseInt(cb.dataset.baseTokens || "0", 10);
+      });
     } else {
-        console.warn("[Token Estimate] contextTreeRootUl not found. Cannot estimate context tokens.");
+      console.warn(
+        "[Token Estimate] contextTreeRootUl not found. Cannot estimate context tokens."
+      );
     }
-    if (contextTokenEstimateSpan) contextTokenEstimateSpan.textContent = totalEstimate;
-}
+    if (contextTokenEstimateSpan)
+      contextTokenEstimateSpan.textContent = totalEstimate;
+  }
 
   async function improveHtmlWithGeminiContext() {
     if (!currentJsonData || !currentFilePath) {
@@ -3558,11 +3835,11 @@ function updateTokenEstimate(baseContent = null) {
     let imageFetchErrors = 0;
     console.log(`Found ${imageUUIDs.length} images to process for PDF.`);
     if (Array.isArray(imageUUIDs) && imageUUIDs.length > 0) {
-  console.log(`[LOAD] Found ${imageUUIDs.length} linked image UUIDs.`);
-    let successfullyRenderedImagesCount = 0; // Track successfully rendered images
-    imageListContainer.innerHTML = ""; // Clear previous images
+      console.log(`[LOAD] Found ${imageUUIDs.length} linked image UUIDs.`);
+      let successfullyRenderedImagesCount = 0; // Track successfully rendered images
+      imageListContainer.innerHTML = ""; // Clear previous images
 
-    const imageLoadPromises = imageUUIDs.map(async (uuid) => {
+      const imageLoadPromises = imageUUIDs.map(async (uuid) => {
         const imageData = imageFileMap[uuid];
         if (imageData && imageData.download_url && imageData.sha) {
           try {
@@ -3717,212 +3994,227 @@ function updateTokenEstimate(baseContent = null) {
     }
   }
 
-        
-function setupCreateNewFolderListener() {
+  function setupCreateNewFolderListener() {
     if (createNewFolderBtn) {
-        createNewFolderBtn.addEventListener("click", async () => {
-            // Check for GITHUB_WRITE_TOKEN because creating a folder is a write operation
-            if (!GITHUB_WRITE_TOKEN) {
-                showApiKeyModal(true, false, "write_action"); // true for GitHub (write) required
-                alert("A GitHub token with write permissions is required to create a new folder.");
-                return;
-            }
-            if (!appConfig || !GITHUB_DATA_PATH) {
-                alert("Configuration not loaded or base path is missing.");
-                return;
-            }
-            const folderName = prompt(
-                "Enter new folder name (at root of data path):"
-            );
-            if (folderName && folderName.trim() !== "") {
-                const newFolderName = folderName.trim();
-                if (newFolderName.includes("/") || newFolderName.includes(".")) {
-                    alert(
-                        "Invalid folder name. Do not use '/' or '.' in the folder name."
-                    );
-                    return;
-                }
-                const newFolderPathInRepo = `${GITHUB_DATA_PATH}/${newFolderName}`;
-                const pathExists = allFetchedFiles.some(
-                    (item) =>
-                    item.path === newFolderPathInRepo ||
-                    item.path === `${newFolderPathInRepo}/.gitkeep`
-                );
-                if (pathExists) {
-                    alert(
-                        `A folder or file named "${newFolderName}" already exists at the root of your data path.`
-                    );
-                    return;
-                }
-                showLoading(`Creating folder ${newFolderName}...`);
-                try {
-                    const gitkeepPath = `${newFolderPathInRepo}/.gitkeep`;
-                    // commitFileToGitHub will internally call getGitHubHeaders(true) for write token
-                    const commitResult = await commitFileToGitHub(
-                        gitkeepPath,
-                        "", // Empty content for .gitkeep
-                        `feat: Create folder ${newFolderName}`
-                    );
-                    if (commitResult) {
-                        alert(
-                            `Folder "${newFolderName}" created successfully in '${GITHUB_DATA_PATH}'.`
-                        );
-                        await fetchFileList();
-                    } else {
-                        // commitFileToGitHub should have handled its own error display
-                        console.warn("Folder creation might have failed as commitFileToGitHub returned null/false.");
-                    }
-                } catch (error) { // Catch errors from commitFileToGitHub if it re-throws
-                    console.error("Error creating folder:", error);
-                    alert(`Error creating folder: ${error.message}`);
-                } finally {
-                    hideLoading();
-                }
-            }
-        });
-    } else {
-        console.warn(
-            "Create New Folder (Root) button (createNewFolderBtn) not found."
+      createNewFolderBtn.addEventListener("click", async () => {
+        // Check for GITHUB_WRITE_TOKEN because creating a folder is a write operation
+        if (!GITHUB_WRITE_TOKEN) {
+          showApiKeyModal(true, false, "write_action"); // true for GitHub (write) required
+          alert(
+            "A GitHub token with write permissions is required to create a new folder."
+          );
+          return;
+        }
+        if (!appConfig || !GITHUB_DATA_PATH) {
+          alert("Configuration not loaded or base path is missing.");
+          return;
+        }
+        const folderName = prompt(
+          "Enter new folder name (at root of data path):"
         );
-    }
-}
-
-function setupRenameEntryListener() {
-    if (renameEntryBtn) {
-        renameEntryBtn.addEventListener("click", async () => {
-            // Check for GITHUB_WRITE_TOKEN because renaming is a write operation (create new, delete old)
-            if (!GITHUB_WRITE_TOKEN) {
-                showApiKeyModal(true, false, "write_action"); // true for GitHub (write) required
-                alert("A GitHub token with write permissions is required to rename an entry.");
-                return;
-            }
-            if (!currentFilePath || !currentJsonData || !currentFileSha) {
-                alert(
-                    "Cannot rename: No file selected or essential data is missing."
-                );
-                return;
-            }
-            const oldPath = currentFilePath;
-            const oldNameWithExt = oldPath.substring(oldPath.lastIndexOf("/") + 1);
-            const oldNameWithoutExt = oldNameWithExt.replace(/\.json$/i, "");
-            const directory = oldPath.substring(0, oldPath.lastIndexOf("/"));
-
-            let newNameWithoutExt = prompt(
-                `Enter new name for "${oldNameWithoutExt}":`,
-                oldNameWithoutExt
+        if (folderName && folderName.trim() !== "") {
+          const newFolderName = folderName.trim();
+          if (newFolderName.includes("/") || newFolderName.includes(".")) {
+            alert(
+              "Invalid folder name. Do not use '/' or '.' in the folder name."
             );
-            if (!newNameWithoutExt || newNameWithoutExt.trim() === "") {
-                // User cancelled prompt or entered empty
-                return;
-            }
-            newNameWithoutExt = newNameWithoutExt.trim();
-            const sanitizedNewNameBase = newNameWithoutExt
-                .toLowerCase()
-                .replace(/[^a-z0-9\-_]+/g, "-")
-                .replace(/^-+|-+$/g, "");
-            if (!sanitizedNewNameBase) {
-                alert("Invalid new name after sanitization. Please use letters, numbers, hyphens, or underscores.");
-                return;
-            }
-            const newNameWithExt = `${sanitizedNewNameBase}.json`;
-            if (newNameWithExt.toLowerCase() === oldNameWithExt.toLowerCase()) {
-                // alert("New name is the same as the old name."); // Optional: could allow if user wants to "resave" with sanitization
-                return;
-            }
-            const newPath = directory ?
-                `${directory}/${newNameWithExt}` :
-                newNameWithExt;
-            const targetPathExists = flatJsonData.some(
-                (item) => item.path.toLowerCase() === newPath.toLowerCase()
+            return;
+          }
+          const newFolderPathInRepo = `${GITHUB_DATA_PATH}/${newFolderName}`;
+          const pathExists = allFetchedFiles.some(
+            (item) =>
+              item.path === newFolderPathInRepo ||
+              item.path === `${newFolderPathInRepo}/.gitkeep`
+          );
+          if (pathExists) {
+            alert(
+              `A folder or file named "${newFolderName}" already exists at the root of your data path.`
             );
-            if (targetPathExists) {
-                alert(
-                    `A file named "${newNameWithExt}" already exists in this location. Please choose a different name.`
-                );
-                return;
+            return;
+          }
+          showLoading(`Creating folder ${newFolderName}...`);
+          try {
+            const gitkeepPath = `${newFolderPathInRepo}/.gitkeep`;
+            // commitFileToGitHub will internally call getGitHubHeaders(true) for write token
+            const commitResult = await commitFileToGitHub(
+              gitkeepPath,
+              "", // Empty content for .gitkeep
+              `feat: Create folder ${newFolderName}`
+            );
+            if (commitResult) {
+              alert(
+                `Folder "${newFolderName}" created successfully in '${GITHUB_DATA_PATH}'.`
+              );
+              await fetchFileList();
+            } else {
+              // commitFileToGitHub should have handled its own error display
+              console.warn(
+                "Folder creation might have failed as commitFileToGitHub returned null/false."
+              );
             }
-
-            if (
-                confirm(
-                    `Are you sure you want to rename "${oldNameWithoutExt}" to "${sanitizedNewNameBase}"?\nFile will be: ${newNameWithExt}\n\nWarning: This action might not update internal links in other entries.`
-                )
-            ) {
-                showLoading(`Renaming ${oldNameWithExt} to ${newNameWithExt}...`);
-                try {
-                    const oldContentString = JSON.stringify(currentJsonData, null, 2);
-                    // commitFileToGitHub for createNewResult will call getGitHubHeaders(true)
-                    const createNewResult = await commitFileToGitHub(
-                        newPath,
-                        oldContentString,
-                        `feat: Rename - Create new file ${newNameWithExt} from ${oldNameWithExt}`
-                    );
-                    if (!createNewResult || !createNewResult.sha) {
-                        throw new Error("Failed to create the new file during rename operation.");
-                    }
-                    
-                    // deleteFileFromGitHub will also call getGitHubHeaders(true)
-                    const deleteOldResult = await deleteFileFromGitHub(
-                        oldPath,
-                        currentFileSha,
-                        `feat: Rename - Delete old file ${oldNameWithExt}`
-                    );
-
-                    if (!deleteOldResult) {
-                        alert(
-                            `CRITICAL: Renamed file to "${newNameWithExt}", but FAILED to delete the old file "${oldNameWithExt}". You now have a duplicate. Please resolve this manually in your GitHub repository.`
-                        );
-                    } else {
-                        alert(`File renamed successfully to "${newNameWithExt}".`);
-                    }
-
-                    currentFilePath = newPath;
-                    currentFileSha = createNewResult.sha;
-                    if (
-                        currentJsonData.name &&
-                        currentJsonData.name === oldNameWithoutExt
-                    ) {
-                        currentJsonData.name = sanitizedNewNameBase;
-                        // Also update the name within the entity object if it exists and matches
-                        if (currentJsonData.entity && currentJsonData.entity.name === oldNameWithoutExt) {
-                            currentJsonData.entity.name = sanitizedNewNameBase;
-                        }
-                    }
-                    // The content in currentJsonData is from the *old* file.
-                    // For consistency, after rename, we might want to re-fetch the *new* file's content,
-                    // or ensure currentJsonData accurately reflects the (now potentially renamed) content.
-                    // For now, fetchFileList will refresh everything.
-
-                    await fetchFileList(); // Refresh the entire file list
-
-                    // Attempt to re-select the renamed file in the new tree
-                    const newFileLi = findFileInTreeByPath(newPath);
-                    if (newFileLi) {
-                        const linkElement = newFileLi.querySelector('a.node-text');
-                        if (linkElement) {
-                            // Since fetchFileList was called, loadFileContentAndDisplay will get fresh data
-                            await loadFileContentAndDisplay(newPath, linkElement);
-                        }
-                    } else {
-                        // If not found (should be rare after fetchFileList), clear view
-                        if(currentFileNameH2) currentFileNameH2.textContent = "Select an entry";
-                        if(jsonEntryContentDiv) jsonEntryContentDiv.innerHTML = "<p>Select an entry from the tree.</p>";
-                        updateButtonStatesBasedOnTokens(); // Reset button states
-                    }
-                } catch (error) {
-                    console.error("Error renaming file:", error);
-                    alert(
-                        `Error renaming file: ${error.message}\nThe repository might be in an inconsistent state (e.g., duplicated file or old file not deleted). Please check your repository and the console.`
-                    );
-                } finally {
-                    hideLoading();
-                }
-            }
-        });
+          } catch (error) {
+            // Catch errors from commitFileToGitHub if it re-throws
+            console.error("Error creating folder:", error);
+            alert(`Error creating folder: ${error.message}`);
+          } finally {
+            hideLoading();
+          }
+        }
+      });
     } else {
-        console.warn("Rename Entry button (renameEntryBtn) not found.");
+      console.warn(
+        "Create New Folder (Root) button (createNewFolderBtn) not found."
+      );
     }
-}
+  }
 
+  function setupRenameEntryListener() {
+    if (renameEntryBtn) {
+      renameEntryBtn.addEventListener("click", async () => {
+        // Check for GITHUB_WRITE_TOKEN because renaming is a write operation (create new, delete old)
+        if (!GITHUB_WRITE_TOKEN) {
+          showApiKeyModal(true, false, "write_action"); // true for GitHub (write) required
+          alert(
+            "A GitHub token with write permissions is required to rename an entry."
+          );
+          return;
+        }
+        if (!currentFilePath || !currentJsonData || !currentFileSha) {
+          alert(
+            "Cannot rename: No file selected or essential data is missing."
+          );
+          return;
+        }
+        const oldPath = currentFilePath;
+        const oldNameWithExt = oldPath.substring(oldPath.lastIndexOf("/") + 1);
+        const oldNameWithoutExt = oldNameWithExt.replace(/\.json$/i, "");
+        const directory = oldPath.substring(0, oldPath.lastIndexOf("/"));
+
+        let newNameWithoutExt = prompt(
+          `Enter new name for "${oldNameWithoutExt}":`,
+          oldNameWithoutExt
+        );
+        if (!newNameWithoutExt || newNameWithoutExt.trim() === "") {
+          // User cancelled prompt or entered empty
+          return;
+        }
+        newNameWithoutExt = newNameWithoutExt.trim();
+        const sanitizedNewNameBase = newNameWithoutExt
+          .toLowerCase()
+          .replace(/[^a-z0-9\-_]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+        if (!sanitizedNewNameBase) {
+          alert(
+            "Invalid new name after sanitization. Please use letters, numbers, hyphens, or underscores."
+          );
+          return;
+        }
+        const newNameWithExt = `${sanitizedNewNameBase}.json`;
+        if (newNameWithExt.toLowerCase() === oldNameWithExt.toLowerCase()) {
+          // alert("New name is the same as the old name."); // Optional: could allow if user wants to "resave" with sanitization
+          return;
+        }
+        const newPath = directory
+          ? `${directory}/${newNameWithExt}`
+          : newNameWithExt;
+        const targetPathExists = flatJsonData.some(
+          (item) => item.path.toLowerCase() === newPath.toLowerCase()
+        );
+        if (targetPathExists) {
+          alert(
+            `A file named "${newNameWithExt}" already exists in this location. Please choose a different name.`
+          );
+          return;
+        }
+
+        if (
+          confirm(
+            `Are you sure you want to rename "${oldNameWithoutExt}" to "${sanitizedNewNameBase}"?\nFile will be: ${newNameWithExt}\n\nWarning: This action might not update internal links in other entries.`
+          )
+        ) {
+          showLoading(`Renaming ${oldNameWithExt} to ${newNameWithExt}...`);
+          try {
+            const oldContentString = JSON.stringify(currentJsonData, null, 2);
+            // commitFileToGitHub for createNewResult will call getGitHubHeaders(true)
+            const createNewResult = await commitFileToGitHub(
+              newPath,
+              oldContentString,
+              `feat: Rename - Create new file ${newNameWithExt} from ${oldNameWithExt}`
+            );
+            if (!createNewResult || !createNewResult.sha) {
+              throw new Error(
+                "Failed to create the new file during rename operation."
+              );
+            }
+
+            // deleteFileFromGitHub will also call getGitHubHeaders(true)
+            const deleteOldResult = await deleteFileFromGitHub(
+              oldPath,
+              currentFileSha,
+              `feat: Rename - Delete old file ${oldNameWithExt}`
+            );
+
+            if (!deleteOldResult) {
+              alert(
+                `CRITICAL: Renamed file to "${newNameWithExt}", but FAILED to delete the old file "${oldNameWithExt}". You now have a duplicate. Please resolve this manually in your GitHub repository.`
+              );
+            } else {
+              alert(`File renamed successfully to "${newNameWithExt}".`);
+            }
+
+            currentFilePath = newPath;
+            currentFileSha = createNewResult.sha;
+            if (
+              currentJsonData.name &&
+              currentJsonData.name === oldNameWithoutExt
+            ) {
+              currentJsonData.name = sanitizedNewNameBase;
+              // Also update the name within the entity object if it exists and matches
+              if (
+                currentJsonData.entity &&
+                currentJsonData.entity.name === oldNameWithoutExt
+              ) {
+                currentJsonData.entity.name = sanitizedNewNameBase;
+              }
+            }
+            // The content in currentJsonData is from the *old* file.
+            // For consistency, after rename, we might want to re-fetch the *new* file's content,
+            // or ensure currentJsonData accurately reflects the (now potentially renamed) content.
+            // For now, fetchFileList will refresh everything.
+
+            await fetchFileList(); // Refresh the entire file list
+
+            // Attempt to re-select the renamed file in the new tree
+            const newFileLi = findFileInTreeByPath(newPath);
+            if (newFileLi) {
+              const linkElement = newFileLi.querySelector("a.node-text");
+              if (linkElement) {
+                // Since fetchFileList was called, loadFileContentAndDisplay will get fresh data
+                await loadFileContentAndDisplay(newPath, linkElement);
+              }
+            } else {
+              // If not found (should be rare after fetchFileList), clear view
+              if (currentFileNameH2)
+                currentFileNameH2.textContent = "Select an entry";
+              if (jsonEntryContentDiv)
+                jsonEntryContentDiv.innerHTML =
+                  "<p>Select an entry from the tree.</p>";
+              updateButtonStatesBasedOnTokens(); // Reset button states
+            }
+          } catch (error) {
+            console.error("Error renaming file:", error);
+            alert(
+              `Error renaming file: ${error.message}\nThe repository might be in an inconsistent state (e.g., duplicated file or old file not deleted). Please check your repository and the console.`
+            );
+          } finally {
+            hideLoading();
+          }
+        }
+      });
+    } else {
+      console.warn("Rename Entry button (renameEntryBtn) not found.");
+    }
+  }
 
   function findFileInTreeByPath(filePathToFind) {
     if (!fileTreeRootUl) return null;
@@ -3964,33 +4256,35 @@ function setupRenameEntryListener() {
             .forEach((cb) => (cb.checked = false));
       });
   }
- function openReorganizeModal() {
+  function openReorganizeModal() {
     // Reorganizing files requires write access
     if (!GITHUB_WRITE_TOKEN) {
-        showApiKeyModal(true, false, "write_action"); // true for GitHub (write) required
-        alert("A GitHub token with write permissions is required to reorganize entries.");
-        return;
+      showApiKeyModal(true, false, "write_action"); // true for GitHub (write) required
+      alert(
+        "A GitHub token with write permissions is required to reorganize entries."
+      );
+      return;
     }
 
     if (!fileTree || fileTree.length === 0) {
-        alert("File list not loaded. Cannot reorganize entries yet.");
-        return;
+      alert("File list not loaded. Cannot reorganize entries yet.");
+      return;
     }
     if (!reorganizeModal) {
-        console.error("Reorganize modal element not found!");
-        return;
+      console.error("Reorganize modal element not found!");
+      return;
     }
 
     reorganizeModal.style.display = "block";
     if (reorganizeStatusMessage) {
-        reorganizeStatusMessage.textContent = ""; // Clear any previous status
-        reorganizeStatusMessage.style.color = 'red'; // Default to red for errors, or set to neutral
+      reorganizeStatusMessage.textContent = ""; // Clear any previous status
+      reorganizeStatusMessage.style.color = "red"; // Default to red for errors, or set to neutral
     }
 
     selectedTargetFolderForReorg = GITHUB_DATA_PATH; // Default to the root of your data path
 
     if (selectedTargetFolderPathDisplaySpan) {
-        selectedTargetFolderPathDisplaySpan.textContent = "Root"; // Display 'Root' for the base data path
+      selectedTargetFolderPathDisplaySpan.textContent = "Root"; // Display 'Root' for the base data path
     }
 
     populateTargetFolderSelector(); // Populates target folder choices
@@ -4000,63 +4294,67 @@ function setupRenameEntryListener() {
     // Or, you might want to disable it initially until a target AND source items are selected.
     // For now, enabling it as the modal is open.
     if (proceedWithReorganizationBtn) {
-        proceedWithReorganizationBtn.disabled = false; 
+      proceedWithReorganizationBtn.disabled = false;
     }
-}
+  }
 
-function updateTokenStatusDisplay() {
+  function updateTokenStatusDisplay() {
     if (!tokenStatusIndicatorDiv || !addEditTokensBtn) return;
 
     if (GITHUB_WRITE_TOKEN) {
-        tokenStatusIndicatorDiv.textContent = "Edit Mode: ENABLED (Write Token Present)";
-        tokenStatusIndicatorDiv.className = "write-token-present";
-        addEditTokensBtn.textContent = "Update Edit Tokens"; // Or "Change Edit Tokens"
-        addEditTokensBtn.style.display = "block"; // Always show if initialized
+      tokenStatusIndicatorDiv.textContent =
+        "Edit Mode: ENABLED (Write Token Present)";
+      tokenStatusIndicatorDiv.className = "write-token-present";
+      addEditTokensBtn.textContent = "Update Edit Tokens"; // Or "Change Edit Tokens"
     } else {
-        tokenStatusIndicatorDiv.textContent = "Edit Mode: DISABLED (No Write Token)";
-        tokenStatusIndicatorDiv.className = "no-write-token";
-        addEditTokensBtn.textContent = "Add Edit Tokens to Enable Editing";
-        addEditTokensBtn.style.display = "block";
+      tokenStatusIndicatorDiv.textContent =
+        "Edit Mode: DISABLED (No Write Token)";
+      tokenStatusIndicatorDiv.className = "no-write-token";
+      addEditTokensBtn.textContent = "Add Edit Tokens to Enable Editing";
     }
 
     // Also update display for Gemini key (optional, but good to show status)
     let geminiStatus = "";
     if (GEMINI_API_KEY && GEMINI_MODELS && GEMINI_MODELS.length > 0) {
-        geminiStatus = "AI Features: ENABLED";
-        // (Optionally add a class for styling)
-    } else if (GEMINI_API_KEY && (!GEMINI_MODELS || GEMINI_MODELS.length === 0)) {
-        geminiStatus = "AI Features: API Key Present, Models Missing (Check Config)";
+      geminiStatus = "AI Features: ENABLED";
+      // (Optionally add a class for styling)
+    } else if (
+      GEMINI_API_KEY &&
+      (!GEMINI_MODELS || GEMINI_MODELS.length === 0)
+    ) {
+      geminiStatus =
+        "AI Features: API Key Present, Models Missing (Check Config)";
     } else {
-        geminiStatus = "AI Features: DISABLED (No Gemini Key)";
+      geminiStatus = "AI Features: DISABLED (No Gemini Key)";
     }
     // You can append this to tokenStatusIndicatorDiv or create a new element for it
     // For simplicity, appending here:
-    const geminiP = document.createElement('p');
+    const geminiP = document.createElement("p");
     geminiP.textContent = geminiStatus;
-    geminiP.style.fontSize = '0.8em';
-    geminiP.style.marginTop = '5px';
-    geminiP.style.textAlign = 'center';
+    geminiP.style.fontSize = "0.8em";
+    geminiP.style.marginTop = "5px";
+    geminiP.style.textAlign = "center";
 
     // Clear previous Gemini status if it exists
-    const existingGeminiP = tokenStatusIndicatorDiv.querySelector('.gemini-status');
+    const existingGeminiP =
+      tokenStatusIndicatorDiv.querySelector(".gemini-status");
     if (existingGeminiP) existingGeminiP.remove();
-    geminiP.classList.add('gemini-status'); // For potential removal
+    geminiP.classList.add("gemini-status"); // For potential removal
     tokenStatusIndicatorDiv.appendChild(geminiP);
+  }
 
-}
-
-// No changes needed for closeReorganizeModal based on token:
-function closeReorganizeModal() {
+  // No changes needed for closeReorganizeModal based on token:
+  function closeReorganizeModal() {
     if (!reorganizeModal) return;
     reorganizeModal.style.display = "none";
     if (reorganizeTargetFolderSelectorDiv) {
-        const currentSelected =
-            reorganizeTargetFolderSelectorDiv.querySelector(".selected-target");
-        if (currentSelected) currentSelected.classList.remove("selected-target");
+      const currentSelected =
+        reorganizeTargetFolderSelectorDiv.querySelector(".selected-target");
+      if (currentSelected) currentSelected.classList.remove("selected-target");
     }
     selectedTargetFolderForReorg = null; // Reset selected target
     // Optionally, clear selected source items checkboxes as well
-}
+  }
 
   function populateTargetFolderSelector() {
     if (!reorganizeTargetFolderSelectorDiv) return;

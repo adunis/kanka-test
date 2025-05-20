@@ -19,18 +19,17 @@
         <p>Path: <span id="repoPath">/</span></p>
 
         <!-- NEW: Token Status Indicator -->
-        <div id="tokenStatusIndicator" style="margin-top: 8px; margin-bottom: 8px; padding: 8px; border-radius: 3px; font-weight: bold; text-align: center;">
+        <div id="tokenStatusIndicator">
             Loading token status...
         </div>
         <!-- END NEW -->
 
-        <button id="refreshFileListBtn">Refresh List</button>
-        <button id="clearKeysBtn" style="margin-top: 5px; background-color: #d9534f; color:white; border-color: #c9302c; font-size:0.8em; padding: 4px 8px;">Clear API Keys</button>
-
-        <!-- NEW: Add Edit Tokens Button -->
-        <button id="addEditTokensBtn" style="margin-top: 10px; width: 100%; display: none; background-color: #5cb85c; color: white; border-color: #4cae4c;">
-            Add/Update Edit Tokens
-        </button>
+        <div>
+        <button id="refreshFileListBtn">Refresh</button>
+        <button id="clearKeysBtn">Clear Tokens</button>
+        <button id="addEditTokensBtn">
+            Add/Update Tokens </button>
+        </div>
         <!-- END NEW -->
 
         <div id="loadingIndicator" style="display: none; margin-top: 10px;">
@@ -73,7 +72,8 @@
                               <button id="generatePdfBtn" disabled>Generate PDF</button>
                               <button id="formatBtn" disabled>Format AI</button>
                               <button id="improveBtn" disabled disabled>Improve AI</button> <!-- Added disabled here -->
-                          </div>
+                                      <button id="createImagePromptBtn" disabled>Create Image Prompt</button> <!-- NEW BUTTON -->
+                            </div>
                       </div>
                       <div id="jsonEntryContent" class="markdown-body">
                           <p>Loading configuration and entries...</p>
