@@ -2,7 +2,7 @@
   "id": 1714713,
   "name": "Venthrum Vecnarius - Altopiano delle Ossa",
   "created_at": "2025-05-01T21:47:32.000000Z",
-  "updated_at": "2025-05-20T09:21:32.832.000000Z",
+  "updated_at": "2025-05-20T09:21:36.510.000000Z",
   "is_private": 0,
   "is_destroyed": 0,
   "location_id": 1714714,
@@ -21,7 +21,7 @@
     "focus_x": null,
     "focus_y": null,
     "created_at": "2025-05-01T21:47:32.000000Z",
-    "updated_at": "2025-05-20T09:21:32.832.000000Z",
+    "updated_at": "2025-05-20T09:21:36.510.000000Z",
     "created_by": 275646,
     "updated_by": 275646,
     "image_path": null,
@@ -99,7 +99,8 @@
       "898d597a-18c2-43ae-8600-05347cc20b71",
       "37aba72d-f90c-4c69-a110-f9a2d211157c",
       "e4a48b6e-f2b6-49b6-9317-fdc30b23be5c",
-      "b1df714a-508f-47dd-ba34-a23e4e1891a6"
+      "b1df714a-508f-47dd-ba34-a23e4e1891a6",
+      "c19180f5-d414-4671-a82b-e2169c286ebc"
     ]
   }
 }
