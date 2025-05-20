@@ -12,29 +12,40 @@
 </head>
 <body>
   <div class="container">
-      <aside class="sidebar" id="sidebar">
-          <h1>Entries</h1>
-          <div class="repo-info">
-              <p>Repo: <span id="repoName">Loading...</span></p>
-              <p>Path: <span id="repoPath">/</span></p>
-              <button id="refreshFileListBtn">Refresh List</button>
-              <!-- Clear Keys Button -->
-              <button id="clearKeysBtn" style="margin-top: 5px; background-color: #d9534f; color:white; border-color: #c9302c; font-size:0.8em; padding: 4px 8px;">Clear API Keys</button>
+<aside class="sidebar" id="sidebar">
+    <h1>Entries</h1>
+    <div class="repo-info">
+        <p>Repo: <span id="repoName">Loading...</span></p>
+        <p>Path: <span id="repoPath">/</span></p>
 
-              <!-- Keep only ONE instance of loadingIndicator and fileCount within repo-info -->
-              <div id="loadingIndicator" style="display: none; margin-top: 10px;">
-                  <span class="spinner"></span> <span class="loading-text">Loading...</span>
-              </div>
-              <p id="fileCount" class="instructions" style="margin-top: 10px;"></p>
-          </div>
+        <!-- NEW: Token Status Indicator -->
+        <div id="tokenStatusIndicator" style="margin-top: 8px; margin-bottom: 8px; padding: 8px; border-radius: 3px; font-weight: bold; text-align: center;">
+            Loading token status...
+        </div>
+        <!-- END NEW -->
 
-          <nav id="fileTreeContainer">
-              <ul id="fileTreeRoot"></ul>
-          </nav>
-           <button id="createNewFileBtn" style="margin-top: 15px;" disabled>Create New Entry (Root)</button>
-           <button id="createNewFolderBtn" style="margin-top: 10px;" disabled>Create New Folder (Root)</button>
-           <button id="reorganizeEntriesBtn" style="margin-top: 10px;" disabled>Reorganize Entries</button>
-      </aside>
+        <button id="refreshFileListBtn">Refresh List</button>
+        <button id="clearKeysBtn" style="margin-top: 5px; background-color: #d9534f; color:white; border-color: #c9302c; font-size:0.8em; padding: 4px 8px;">Clear API Keys</button>
+
+        <!-- NEW: Add Edit Tokens Button -->
+        <button id="addEditTokensBtn" style="margin-top: 10px; width: 100%; display: none; background-color: #5cb85c; color: white; border-color: #4cae4c;">
+            Add/Update Edit Tokens
+        </button>
+        <!-- END NEW -->
+
+        <div id="loadingIndicator" style="display: none; margin-top: 10px;">
+            <span class="spinner"></span> <span class="loading-text">Loading...</span>
+        </div>
+        <p id="fileCount" class="instructions" style="margin-top: 10px;"></p>
+    </div>
+
+    <nav id="fileTreeContainer">
+        <ul id="fileTreeRoot"></ul>
+    </nav>
+    <button id="createNewFileBtn" style="margin-top: 15px;" disabled>Create New Entry (Root)</button>
+    <button id="createNewFolderBtn" style="margin-top: 10px;" disabled>Create New Folder (Root)</button>
+    <button id="reorganizeEntriesBtn" style="margin-top: 10px;" disabled>Reorganize Entries</button>
+</aside>
 
       <div class="resizer" id="resizer"></div>
 

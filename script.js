@@ -22,7 +22,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const cancelBtn = document.getElementById("cancelBtn"); // Editor Cancel
   const createNewFileBtn = document.getElementById("createNewFileBtn"); // Root file
   const createNewFolderBtn = document.getElementById("createNewFolderBtn"); // Root folder - Added
-
+// Add to your DOM Element References section
+const tokenStatusIndicatorDiv = document.getElementById("tokenStatusIndicator");
+const addEditTokensBtn = document.getElementById("addEditTokensBtn");
   const reorganizeEntriesBtn = document.getElementById("reorganizeEntriesBtn");
   const reorganizeModal = document.getElementById("reorganizeModal");
   const closeReorganizeModalBtn = document.getElementById(
@@ -169,6 +171,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         hideApiKeyModal();
+        updateTokenStatusDisplay(); // Update display after saving
         // Instead of full proceedWithAppInitialization, just update states and maybe fetch if needed
         // If a write token was just added, we might not need to refetch everything immediately,
         // but button states should update.
@@ -203,6 +206,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       });
     }
+
+if (addEditTokensBtn) {
+    addEditTokensBtn.addEventListener("click", () => {
+        // When this button is clicked, we always want to prompt for both,
+        // focusing on the GitHub write token.
+        // The showApiKeyModal logic will pre-fill if values exist.
+        showApiKeyModal(true, false, "write_action"); // true for GitHub (write), false for Gemini, context
+    });
+}
+
+
   }
 
   // --- APP FEATURE EVENT LISTENERS SETUP ---
@@ -543,6 +557,8 @@ if (createNewFileBtn) {
         console.log("[INIT] Gemini API Key found in sessionStorage.");
       }
 
+      updateTokenStatusDisplay(); // Initial display based on session
+
       // Determine if we can proceed with initial (read-only) load
       if (GITHUB_READ_TOKEN || GITHUB_WRITE_TOKEN) {
         await proceedWithAppInitialization(true); // true for initial read-only load
@@ -557,6 +573,7 @@ if (createNewFileBtn) {
       showError(`Initialization failed: ${error.message}.`);
       disableAppControls();
       if (clearKeysBtn) clearKeysBtn.disabled = false;
+      updateTokenStatusDisplay(); // Final update of status
     }
   }
 
@@ -694,6 +711,7 @@ if (createNewFileBtn) {
   function hideApiKeyModal() {
     if (apiKeyModal) apiKeyModal.style.display = "none";
     updateButtonStatesBasedOnTokens(); // Re-enable app controls based on current token status
+      updateTokenStatusDisplay();      // <--- ADD THIS LINE
   }
 
   // --- Update Button States ---
@@ -804,10 +822,8 @@ function switchToViewMode() {
         if (cancelBtn) cancelBtn.disabled = false;
     }
 
-  function disableAppControls() {
+function disableAppControls() {
     console.warn("Disabling main app controls.");
-    // Disable all buttons that are part of the main application UI,
-    // but not part of the API key modal itself or the clear keys button.
     const controlsToDisable = [
       refreshFileListBtn,
       createNewFileBtn,
@@ -818,23 +834,24 @@ function switchToViewMode() {
       generatePdfBtn,
       formatBtn,
       improveBtn,
-      saveBtn,
-      cancelBtn,
+      saveBtn, // Editor save
+      cancelBtn, // Editor cancel
       addImageBtn,
       reorganizeEntriesBtn,
-      selectAllContextBtn,
-      deselectAllContextBtn,
-      proceedWithImprovementBtn,
-      copyPromptBtn,
-      proceedWithReorganizationBtn,
+      // REMOVE THESE TWO:
+      // selectAllContextBtn, 
+      // deselectAllContextBtn, 
+      proceedWithImprovementBtn, // This IS an AI modal button, but handled in openImproveModal
+      copyPromptBtn,             // This IS an AI modal button, but handled in openImproveModal
+      proceedWithReorganizationBtn, // Reorg modal button
       // Add any other app-specific controls here
     ];
     controlsToDisable.forEach((control) => {
       if (control) control.disabled = true;
     });
     if (htmlEditorTextarea) htmlEditorTextarea.disabled = true;
-    if (geminiModelSelect) geminiModelSelect.disabled = true;
-  }
+    if (geminiModelSelect) geminiModelSelect.disabled = true; // This IS in the AI modal, disable it if general controls are off
+}
 
   // --- Utility, GitHub, and Feature Functions ---
 
@@ -855,13 +872,15 @@ function switchToViewMode() {
       );
     }
   }
-  function hideModalLoading() {
-    /* ... (from your original code) ... */
-    if (modalLoadingIndicator) {
-      modalLoadingIndicator.style.display = "none";
-    }
-  }
 
+function hideModalLoading() {
+    if (modalLoadingIndicator) {
+        modalLoadingIndicator.style.display = "none";
+    }
+    // After ANY modal loading is hidden (even AI modal's),
+    // refresh main app button states based on current file and token availability.
+    updateButtonStatesBasedOnTokens();
+}
   function showLoading(message = "Loading...") {
     if (loadingIndicator) {
       const textElement = loadingIndicator.querySelector(".loading-text");
@@ -1896,287 +1915,401 @@ async function commitFileToGitHub(
     }
   }
 
-  async function loadFileContentAndDisplay(filePath, linkElement = null) {
-    console.log(`[LOAD] Attempting to load: ${filePath}`);
-    if (
-      editorDiv.style.display !== "none" &&
-      !confirm("Discard current editor changes?")
-    ) {
-      return;
+async function loadFileContentAndDisplay(filePath, linkElement = null, isReloadAfterStaleLinkRemoval = false) { // <-- NEW PARAMETER    console.log(`[LOAD] Attempting to load: ${filePath}`);
+    if (editorDiv.style.display !== "none") {
+        if (!confirm("You have unsaved changes. Discard them and load the new entry?")) {
+            // Revert hash if user cancels
+            if (currentFilePath && filePath !== currentFilePath) { // Only if loading a *different* file
+                let oldRelativePath = currentFilePath;
+                 if (GITHUB_DATA_PATH && currentFilePath.startsWith(GITHUB_DATA_PATH + '/')) {
+                    oldRelativePath = currentFilePath.substring(GITHUB_DATA_PATH.length + 1);
+                } else if (currentFilePath.startsWith(GITHUB_DATA_PATH)) {
+                    oldRelativePath = currentFilePath.substring(GITHUB_DATA_PATH.length);
+                     if(oldRelativePath.startsWith('/')) oldRelativePath = oldRelativePath.substring(1);
+                }
+                window.location.hash = `#${getSlug(oldRelativePath)}`;
+            }
+            return;
+        }
     }
-    let result = null;
-    let isJournal = false;
-    imagePreviewSidebar.style.display = "block";
-    imageListContainer.innerHTML = "";
-    noImageTextElement.style.display = "block";
-    noImageTextElement.textContent = "Loading image info...";
-    addImageBtn.style.display = "none";
-    addImageBtn.disabled = true;
-    currentFileNameH2.textContent = "Loading...";
-    jsonEntryContentDiv.innerHTML = "<p>Loading content...</p>";
-    htmlEditorTextarea.value = "";
-    htmlEditorTextarea.dataset.rawHtmlEntry = "";
-    htmlEditorTextarea.dataset.concatenatedJournalHtml = "";
-    htmlEditorTextarea.disabled = true;
+
+  
+    showLoading(`Loading ${filePath.split("/").pop()}...`);
+
+
+    if (currentFileNameH2) currentFileNameH2.textContent = "Loading...";
+    if (jsonEntryContentDiv) jsonEntryContentDiv.innerHTML = "<p>Loading content...</p>";
+    if (htmlEditorTextarea) {
+        htmlEditorTextarea.value = "";
+        htmlEditorTextarea.dataset.rawHtmlEntry = "";
+        htmlEditorTextarea.dataset.concatenatedJournalHtml = "";
+        htmlEditorTextarea.disabled = true;
+    }
+    if(imagePreviewSidebar) imagePreviewSidebar.style.display = "block"; // Show it, text will indicate loading
+    if(imageListContainer) imageListContainer.innerHTML = "";
+    if(noImageTextElement) {
+        noImageTextElement.textContent = "Loading image info...";
+        noImageTextElement.style.display = "block";
+    }
+    if(addImageBtn) {
+        addImageBtn.style.display = "none"; // Hide until file loaded and write access confirmed
+        addImageBtn.disabled = true;
+    }
+
+    let entrySuccessfullyLoaded = false; // Flag to track overall success of this function call
+
+    let staleImageUUIDs = isReloadAfterStaleLinkRemoval ? [] : []; // <-- MODIFIED INITIALIZATION
+
 
     try {
-      result = await fetchFileContent(filePath, false);
-      console.log(
-        `[LOAD] fetchFileContent result for ${filePath}:`,
-        result ? "Success" : "Failure/Null",
-        result?.sha
-      );
-      if (result && result.jsonData) {
-        currentFilePath = filePath;
-        currentJsonData = result.jsonData;
-        currentFileSha = result.sha;
-        console.log(
-          `[LOAD] Successfully fetched data for ${filePath} with SHA: ${currentFileSha}`
-        );
-        isJournal = !!(
-          currentJsonData.entity &&
-          Array.isArray(currentJsonData.entity.posts) &&
-          currentJsonData.entity.posts.length >= 0
-        );
-        console.log(
-          `[LOAD] File Type Detected: ${
-            isJournal ? "Journal" : "Standard Entry"
-          }`
-        );
-        if (activeLinkElement && activeLinkElement !== linkElement) {
-          activeLinkElement.classList.remove("active");
-        }
-        if (linkElement) {
-          linkElement.classList.add("active");
-          activeLinkElement = linkElement;
-        } else {
-          activeLinkElement = null;
-        }
-        if (linkElement) {
-          let parentLi = linkElement.closest("li.folder");
-          while (parentLi) {
-            parentLi.classList.remove("collapsed");
-            const grandParentUl = parentLi.parentElement;
-            if (grandParentUl && grandParentUl.id !== "fileTreeRoot") {
-              parentLi = grandParentUl.closest("li.folder");
-            } else {
-              parentLi = null;
+        const result = await fetchFileContent(filePath, false); // false to force fetch
+        console.log(`[LOAD] fetchFileContent result for ${filePath}:`, result ? "Success" : "Failure/Null", result?.sha);
+
+        if (result && result.jsonData) {
+            currentFilePath = filePath;
+            currentJsonData = result.jsonData; // Store the pristine, unmodified data
+            currentFileSha = result.sha;
+            entrySuccessfullyLoaded = true;
+            console.log(`[LOAD] Successfully fetched data for ${filePath} with SHA: ${currentFileSha}`);
+
+            if (activeLinkElement && activeLinkElement !== linkElement) {
+                activeLinkElement.classList.remove("active");
             }
-          }
-        }
-        currentFileNameH2.textContent =
-          currentJsonData?.name ||
-          filePath
-            .split("/")
-            .pop()
-            .replace(/\.json$/, "");
-        console.log(`[LOAD] Set header to: ${currentFileNameH2.textContent}`);
-        if (isJournal) {
-          console.log("[LOAD] Processing as Journal...");
-          const posts = currentJsonData.entity.posts || [];
-          const separator = "\n<hr />\n";
-          const concatenatedHtml = posts
-            .map((p) => p.entry || "")
-            .join(separator);
-          htmlEditorTextarea.dataset.concatenatedJournalHtml = concatenatedHtml;
-          try {
-            console.log(
-              `[LOAD] Rendering Journal structured view for ${filePath}`
-            );
-            renderJournalContent(posts);
-            console.log(
-              `[LOAD] Finished rendering Journal structured view for ${filePath}`
-            );
-          } catch (renderError) {
-            console.error(
-              `[LOAD] Error during renderJournalContent for ${filePath}:`,
-              renderError
-            );
-            jsonEntryContentDiv.innerHTML = `<p style="color: red;">Error rendering journal content. Check console.</p>`;
-          }
-          htmlEditorTextarea.disabled = false;
-        } else {
-          console.log("[LOAD] Processing as Standard Entry...");
-          const entryHtml =
-            currentJsonData?.entity?.entry ?? currentJsonData?.entry ?? "";
-          console.log(`[LOAD] Standard Entry HTML length: ${entryHtml.length}`);
-          htmlEditorTextarea.dataset.rawHtmlEntry = entryHtml;
-          htmlEditorTextarea.disabled = false;
-          try {
-            console.log(
-              `[LOAD] Rendering standard entry content for ${filePath}...`
-            );
-            renderHtmlEntry(
-              entryHtml || "<p><em>(Entry content is empty)</em></p>",
-              jsonEntryContentDiv
-            );
-            console.log(
-              `[LOAD] Finished rendering standard entry content for ${filePath}`
-            );
-          } catch (renderError) {
-            console.error(
-              `[LOAD] Error during renderHtmlEntry for ${filePath}:`,
-              renderError
-            );
-            jsonEntryContentDiv.innerHTML = `<p style="color: red;">Error rendering standard content. Check console.</p>`;
-          }
-        }
-        console.log(`[LOAD] Starting image handling for ${filePath}`);
-        let imageUUIDs = currentJsonData?.entity?.image_uuids;
-        if (!Array.isArray(imageUUIDs) && currentJsonData?.entity?.image_uuid) {
-          imageUUIDs = [currentJsonData.entity.image_uuid];
-        }
-        if (Array.isArray(imageUUIDs) && imageUUIDs.length > 0) {
-          console.log(`[LOAD] Found ${imageUUIDs.length} linked image UUIDs.`);
-          let imagesFoundCount = 0;
-          imageListContainer.innerHTML = "";
-          const imageLoadPromises = imageUUIDs.map(async (uuid) => {
-            const imageData = imageFileMap[uuid];
-            if (imageData && imageData.download_url && imageData.sha) {
-              imagesFoundCount++;
-              const cacheBustedUrl = `${imageData.download_url}?v=${imageData.sha}`;
-              console.log(
-                `[LOAD] - Loading image: UUID=${uuid}, Name=${imageData.name}, URL=${cacheBustedUrl}`
-              );
-              const imageContainerDiv = document.createElement("div");
-              imageContainerDiv.style.position = "relative";
-              imageContainerDiv.style.marginBottom = "15px";
-              const imgElement = document.createElement("img");
-              let loadedSuccessfully = false;
-              await new Promise((resolve) => {
-                imgElement.onload = () => {
-                  console.log(`[LOAD] Image loaded: ${cacheBustedUrl}`);
-                  loadedSuccessfully = true;
-                  resolve();
-                };
-                imgElement.onerror = () => {
-                  console.error(
-                    `[LOAD] Failed to load image: ${cacheBustedUrl}`
-                  );
-                  imgElement.style.display = "none";
-                  const errorText = document.createElement("p");
-                  errorText.textContent = `[Failed: ${imageData.name || uuid}]`;
-                  errorText.style.cssText =
-                    "color: red; font-size: 0.8em; text-align: center;";
-                  imageContainerDiv.insertBefore(errorText, imgElement);
-                  resolve();
-                };
-                imgElement.src = cacheBustedUrl;
-                imgElement.alt = `Linked image ${uuid}`;
-                imgElement.title = `${imageData.name} (UUID: ${uuid}) - Click to enlarge`;
-                imgElement.style.cssText = `display: block; max-width: 100%; height: auto; border: 1px solid #d4c8b8; border-radius: 3px; background-color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin: 0 auto; cursor: pointer;`;
-                imgElement.addEventListener("click", () =>
-                  openImageLightbox(cacheBustedUrl)
-                );
-              });
-              if (loadedSuccessfully) {
-                const deleteBtn = document.createElement("button");
-                deleteBtn.textContent = "×";
-                deleteBtn.title = `Delete image: ${imageData.name}`;
-                deleteBtn.style.cssText = `position: absolute; top: 2px; right: 2px; background-color: rgba(200, 0, 0, 0.7); color: white; border: 1px solid rgba(100, 0, 0, 0.8); border-radius: 50%; width: 20px; height: 20px; line-height: 18px; text-align: center; font-size: 14px; font-weight: bold; cursor: pointer; padding: 0; z-index: 10;`;
-                deleteBtn.dataset.uuid = uuid;
-                deleteBtn.dataset.filename = imageData.name;
-                deleteBtn.addEventListener("click", handleDeleteImageClick);
-                imageContainerDiv.appendChild(deleteBtn);
-              }
-              imageContainerDiv.appendChild(imgElement);
-              imageListContainer.appendChild(imageContainerDiv);
+            if (linkElement) {
+                linkElement.classList.add("active");
+                activeLinkElement = linkElement;
+                // Expand parent folders
+                let parentLi = linkElement.closest("li.folder");
+                while (parentLi) {
+                    parentLi.classList.remove("collapsed");
+                    const grandParentUl = parentLi.parentElement;
+                    if (grandParentUl && grandParentUl.id !== "fileTreeRoot") {
+                        parentLi = grandParentUl.closest("li.folder");
+                    } else {
+                        parentLi = null;
+                    }
+                }
             } else {
-              console.warn(
-                `[LOAD] Image data not found or incomplete for UUID: ${uuid}.`
-              );
-              const errorP = document.createElement("p");
-              errorP.textContent = `[Data missing: ${uuid}]`;
-              errorP.style.cssText =
-                "font-size: 0.8em; color: orange; text-align: center; margin-bottom: 10px;";
-              imageListContainer.appendChild(errorP);
+                activeLinkElement = null;
             }
-          });
-          await Promise.all(imageLoadPromises);
-          const actualRenderedImages = imageListContainer.querySelectorAll(
-            'img:not([style*="display: none"])'
-          ).length;
-          if (actualRenderedImages > 0) {
-            noImageTextElement.style.display = "none";
-          } else if (imageUUIDs.length > 0) {
-            noImageTextElement.textContent =
-              "Linked images found, but failed to load.";
-            noImageTextElement.style.display = "block";
-          } else {
-            noImageTextElement.textContent = "No images linked.";
-            noImageTextElement.style.display = "block";
-          }
-        } else {
-          console.log("[LOAD] No image UUIDs found for this entry.");
-          imageListContainer.innerHTML = "";
-          noImageTextElement.textContent = "No images linked.";
-          noImageTextElement.style.display = "block";
+
+            const entryDisplayName = currentJsonData?.name || filePath.split("/").pop().replace(/\.json$/, "");
+            if (currentFileNameH2) currentFileNameH2.textContent = entryDisplayName;
+            document.title = `${entryDisplayName} - Kanka Editor`;
+            console.log(`[LOAD] Set header to: ${entryDisplayName}`);
+
+            const isJournal = !!(currentJsonData.entity && Array.isArray(currentJsonData.entity.posts) && currentJsonData.entity.posts.length >= 0);
+            console.log(`[LOAD] File Type Detected: ${isJournal ? "Journal" : "Standard Entry"}`);
+
+            if (isJournal) {
+                console.log("[LOAD] Processing as Journal...");
+                const posts = currentJsonData.entity.posts || [];
+                const separator = "\n<hr />\n";
+                const concatenatedHtml = posts.map(p => p.entry || "").join(separator);
+                if (htmlEditorTextarea) htmlEditorTextarea.dataset.concatenatedJournalHtml = concatenatedHtml;
+                try {
+                    console.log(`[LOAD] Rendering Journal structured view for ${filePath}`);
+                    renderJournalContent(posts);
+                    console.log(`[LOAD] Finished rendering Journal structured view for ${filePath}`);
+                } catch (renderError) {
+                    console.error(`[LOAD] Error during renderJournalContent for ${filePath}:`, renderError);
+                    if (jsonEntryContentDiv) jsonEntryContentDiv.innerHTML = `<p style="color: red;">Error rendering journal content. Check console.</p>`;
+                }
+            } else {
+                console.log("[LOAD] Processing as Standard Entry...");
+                const entryHtml = currentJsonData?.entity?.entry ?? currentJsonData?.entry ?? "";
+                console.log(`[LOAD] Standard Entry HTML length: ${entryHtml.length}`);
+                if (htmlEditorTextarea) htmlEditorTextarea.dataset.rawHtmlEntry = entryHtml;
+                try {
+                    console.log(`[LOAD] Rendering standard entry content for ${filePath}...`);
+                    renderHtmlEntry(entryHtml || "<p><em>(Entry content is empty)</em></p>", jsonEntryContentDiv);
+                    console.log(`[LOAD] Finished rendering standard entry content for ${filePath}`);
+                } catch (renderError) {
+                    console.error(`[LOAD] Error during renderHtmlEntry for ${filePath}:`, renderError);
+                    if (jsonEntryContentDiv) jsonEntryContentDiv.innerHTML = `<p style="color: red;">Error rendering standard content. Check console.</p>`;
+                }
+            }
+            if (htmlEditorTextarea) htmlEditorTextarea.disabled = false;
+
+            // --- Image Handling with Stale Link Detection ---
+            console.log(`[LOAD] Starting image handling for ${filePath}`);
+            let imageUUIDs = currentJsonData.entity?.image_uuids;
+            if (!Array.isArray(imageUUIDs) && currentJsonData.entity?.image_uuid) { // Handle legacy single image_uuid
+                imageUUIDs = [currentJsonData.entity.image_uuid];
+            }
+
+            if (Array.isArray(imageUUIDs) && imageUUIDs.length > 0) {
+                console.log(`[LOAD] Found ${imageUUIDs.length} linked image UUIDs.`);
+                if (imageListContainer) imageListContainer.innerHTML = ""; // Clear previous images
+                let validImagesAttempted = 0;
+
+                const imageLoadPromises = imageUUIDs.map(async (uuid) => {
+                    const imageData = imageFileMap[uuid];
+                    const imageContainerDiv = document.createElement("div");
+                    imageContainerDiv.style.position = "relative";
+                    imageContainerDiv.style.marginBottom = "15px";
+
+                    if (imageData && imageData.download_url && imageData.sha) {
+                        validImagesAttempted++;
+                        const imgElement = document.createElement("img");
+                        const cacheBustedUrl = `${imageData.download_url}?v=${imageData.sha}`;
+                        let imageLoadedSuccessfully = false;
+
+                        await new Promise(resolve => {
+                            imgElement.onload = () => {
+                                console.log(`[LOAD] Image loaded successfully: ${cacheBustedUrl}`);
+                                imageLoadedSuccessfully = true;
+                                resolve();
+                            };
+                            imgElement.onerror = () => {
+                                console.error(`[LOAD] Failed to load image: ${cacheBustedUrl}. Marking UUID ${uuid} as stale.`);
+                                staleImageUUIDs.push(uuid);
+                                const errorText = document.createElement("p");
+                                errorText.textContent = `[Image data for ${uuid} failed to load. Possible stale link.]`;
+                                errorText.style.cssText = "color: red; font-size: 0.8em; text-align: center;";
+                                imageContainerDiv.innerHTML = ''; // Clear previous attempts
+                                imageContainerDiv.appendChild(errorText);
+                                resolve(); // Resolve even on error to not block Promise.all
+                            };
+                            imgElement.src = cacheBustedUrl;
+                            imgElement.alt = `Linked image ${uuid}`;
+                            imgElement.title = `${imageData.name} (UUID: ${uuid}) - Click to enlarge`;
+                            imgElement.style.cssText = `display: block; max-width: 100%; height: auto; border: 1px solid #d4c8b8; border-radius: 3px; background-color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin: 0 auto; cursor: pointer;`;
+                            imgElement.addEventListener("click", () => openImageLightbox(cacheBustedUrl));
+                        });
+
+                        if (imageLoadedSuccessfully) {
+                             imageContainerDiv.appendChild(imgElement); // Add image first
+                            if (GITHUB_WRITE_TOKEN) { // Only add delete button if write token exists
+                                const deleteBtn = document.createElement("button");
+                                deleteBtn.textContent = "×";
+                                deleteBtn.title = `Delete image: ${imageData.name}`;
+                                deleteBtn.style.cssText = `position: absolute; top: 2px; right: 2px; background-color: rgba(200, 0, 0, 0.7); color: white; border: 1px solid rgba(100, 0, 0, 0.8); border-radius: 50%; width: 20px; height: 20px; line-height: 18px; text-align: center; font-size: 14px; font-weight: bold; cursor: pointer; padding: 0; z-index: 10;`;
+                                deleteBtn.dataset.uuid = uuid;
+                                deleteBtn.dataset.filename = imageData.name;
+                                deleteBtn.addEventListener("click", handleDeleteImageClick);
+                                imageContainerDiv.appendChild(deleteBtn);
+                            }
+                        }
+                        if (imageListContainer && (imageContainerDiv.querySelector('img') || imageContainerDiv.querySelector('p[style*="color: red"]'))) {
+                           imageListContainer.appendChild(imageContainerDiv);
+                        }
+
+                    } else {
+                        console.warn(`[LOAD] Image data or essential properties missing for UUID: ${uuid} in imageFileMap. Marking as stale.`);
+                        staleImageUUIDs.push(uuid);
+                        const errorP = document.createElement("p");
+                        errorP.textContent = `[Image data for ${uuid} is missing or invalid. Possible stale link.]`;
+                        errorP.style.cssText = "color: orange; font-size: 0.8em; text-align: center; margin-bottom: 10px;";
+                        if(imageListContainer) imageListContainer.appendChild(errorP);
+                    }
+                });
+
+                await Promise.all(imageLoadPromises);
+
+                if (noImageTextElement) {
+                    if (imageListContainer && imageListContainer.children.length > 0) {
+                        noImageTextElement.style.display = "none";
+                    } else {
+                        noImageTextElement.textContent = "No images linked or all linked images are invalid/missing.";
+                        noImageTextElement.style.display = "block";
+                    }
+                }
+            } else {
+                console.log("[LOAD] No image UUIDs found for this entry.");
+                if(imageListContainer) imageListContainer.innerHTML = "";
+                if(noImageTextElement) {
+                    noImageTextElement.textContent = "No images linked.";
+                    noImageTextElement.style.display = "block";
+                }
+            }
+            console.log(`[LOAD] Finished image handling for ${filePath}`);
+
+            // --- Handle Stale Links ---
+         if (staleImageUUIDs.length > 0 && GITHUB_WRITE_TOKEN && !isReloadAfterStaleLinkRemoval) {
+                const changesMade = await handleStaleImageLinks(staleImageUUIDs, filePath, linkElement);
+                if (changesMade) {
+                    // If changes were made and saved, handleStaleImageLinks already re-triggered
+                    // loadFileContentAndDisplay. We should return here to prevent this instance
+                    // from continuing to the finally block and potentially messing with UI states
+                    // that the re-triggered call will handle.
+                    console.log("[LOAD] Stale links handled and entry reloaded. Exiting current load cycle.");
+                    return; // Important to prevent double UI updates from 'finally'
+                }
+            } else if (staleImageUUIDs.length > 0 && !GITHUB_WRITE_TOKEN) {
+                console.log("[LOAD] Stale image links detected, but no write token. Cannot offer to remove them.");
+            } else if (staleImageUUIDs.length > 0 && isReloadAfterStaleLinkRemoval) {
+                console.log("[LOAD] Stale links were detected on a reload after removal attempt. Ignoring to prevent loop. User may need to refresh if GitHub sync was slow.");
+            }  
+        } else { // if (!result || !result.jsonData)
+            entrySuccessfullyLoaded = false;
+            console.error(`[LOAD] fetchFileContent failed or returned no JSON data for ${filePath}.`);
+            showError(`Failed to load entry content for ${filePath}.`);
+            if (activeLinkElement) {
+                activeLinkElement.classList.remove("active");
+                activeLinkElement = null;
+            }
+            if (currentFileNameH2) currentFileNameH2.textContent = "Error loading entry";
+            if (imagePreviewSidebar) imagePreviewSidebar.style.display = "none";
+            currentFilePath = null; // Clear current file if load fails
+            currentJsonData = null;
+            currentFileSha = null;
         }
-        console.log(`[LOAD] Finished image handling for ${filePath}`);
-      } else {
-        console.error(
-          `[LOAD] fetchFileContent failed or returned no JSON data for ${filePath}.`
-        );
-        result = null;
-        showError(`Failed to load entry content for ${filePath}.`);
-        if (activeLinkElement) {
-          activeLinkElement.classList.remove("active");
-          activeLinkElement = null;
-        }
-        imagePreviewSidebar.style.display = "none";
-      }
     } catch (error) {
-      console.error(
-        `[LOAD] Critical error loading/displaying file ${filePath}:`,
-        error
-      );
-      result = null;
-      showError(
-        `Critical error processing entry: ${error.message}. Check console.`
-      );
-      if (activeLinkElement) {
-        activeLinkElement.classList.remove("active");
-        activeLinkElement = null;
-      }
-      imagePreviewSidebar.style.display = "none";
+        entrySuccessfullyLoaded = false;
+        console.error(`[LOAD] Critical error loading/displaying file ${filePath}:`, error);
+        showError(`Critical error processing entry: ${error.message}. Check console.`);
+        if (activeLinkElement) {
+            activeLinkElement.classList.remove("active");
+            activeLinkElement = null;
+        }
+        if (currentFileNameH2) currentFileNameH2.textContent = "Error";
+        if (imagePreviewSidebar) imagePreviewSidebar.style.display = "none";
+        currentFilePath = null;
+        currentJsonData = null;
+        currentFileSha = null;
     } finally {
-      console.log(
-        `[LOAD] Finally block for ${filePath}. Result status: ${!!result}`
-      );
-      const enableButtons = !!result;
-      if (result) {
-        addImageBtn.style.display = "block";
-        addImageBtn.disabled = false;
-      } else {
-        addImageBtn.style.display = "none";
-        addImageBtn.disabled = true;
-      }
-      editBtn.disabled = !enableButtons;
-      deleteEntryBtn.disabled = !enableButtons;
-      generatePdfBtn.disabled = !enableButtons;
-      if (document.getElementById("renameEntryBtn"))
-        document.getElementById("renameEntryBtn").disabled = !enableButtons;
-      formatBtn.disabled =
-        !enableButtons ||
-        !GEMINI_API_KEY ||
-        GEMINI_API_KEY.startsWith("YOUR_") ||
-        GEMINI_MODELS.length === 0;
-      improveBtn.disabled =
-        !enableButtons ||
-        !GEMINI_API_KEY ||
-        GEMINI_API_KEY.startsWith("YOUR_") ||
-        GEMINI_MODELS.length === 0;
-      editBtn.title = "";
-      formatBtn.title = "";
-      improveBtn.title = "";
-      htmlEditorTextarea.disabled = !enableButtons;
-      switchToViewMode();
-      if (!result) {
-        imagePreviewSidebar.style.display = "none";
-      }
-      console.log(`[LOAD] Load process finished for ${filePath}`);
+        // This block will execute even if `handleStaleImageLinks` causes a reload,
+        // UNLESS we explicitly returned from within the try block.
+        // If `entrySuccessfullyLoaded` is true, but `handleStaleImageLinks` didn't make changes or wasn't called,
+        // we still need to update button states.
+        // If `entrySuccessfullyLoaded` is false, it means the initial load failed, so buttons should reflect that.
+
+        if(addImageBtn){
+            if (entrySuccessfullyLoaded && GITHUB_WRITE_TOKEN) {
+                addImageBtn.style.display = "block";
+                addImageBtn.disabled = false;
+            } else {
+                addImageBtn.style.display = "none";
+                addImageBtn.disabled = true;
+            }
+        }
+
+        switchToViewMode(); // This calls updateButtonStatesBasedOnTokens which is aware of currentFilePath etc.
+        if (!entrySuccessfullyLoaded && imagePreviewSidebar) { // Hide image sidebar if the main entry load failed
+            imagePreviewSidebar.style.display = "none";
+        }
+        hideLoading();
+        console.log(`[LOAD] Load process finished for ${filePath}. Success: ${entrySuccessfullyLoaded}`);
     }
-  }
+}
+
+
+
+
+// Ensure these are accessible or passed as parameters if needed:
+// GITHUB_WRITE_TOKEN, currentJsonData, currentFilePath, currentFileSha,
+// showLoading, hideLoading, commitFileToGitHub, flatJsonData, contextCache,
+// loadFileContentAndDisplay (and its signature is updated to accept the third param)
+
+async function handleStaleImageLinks(staleUUIDs, entryPathToUpdate, linkElementForReload) {
+    if (!currentJsonData || entryPathToUpdate !== currentFilePath || !currentFileSha || !GITHUB_WRITE_TOKEN) {
+        console.warn("[STALE_LINKS] Pre-conditions not met for handling stale links:", {
+            currentJsonDataExists: !!currentJsonData,
+            pathMatch: entryPathToUpdate === currentFilePath,
+            shaExists: !!currentFileSha,
+            writeTokenExists: !!GITHUB_WRITE_TOKEN
+        });
+        // Do not alert here, as this function is called internally.
+        // The calling function (loadFileContentAndDisplay) should handle UI if these pre-conditions fail.
+        return false; // Indicate no action taken or failed pre-check
+    }
+
+    const entryName = currentJsonData.name || entryPathToUpdate.split("/").pop();
+    const confirmMessage = `The entry "${entryName}" contains ${staleUUIDs.length} image link(s) that appear to be stale or broken (image data not found/loadable):\n\n${staleUUIDs.join("\n")}\n\nDo you want to PERMANENTLY REMOVE these broken links from this entry's data? This action cannot be undone. (This will not delete any actual image files from the gallery, only the references in this entry).`;
+
+    if (confirm(confirmMessage)) {
+        showLoading(`Removing ${staleUUIDs.length} stale image link(s) from "${entryName}"...`);
+        try {
+            const modifiedJsonData = JSON.parse(JSON.stringify(currentJsonData)); // Deep copy
+
+            // Ensure entity object and image_uuids array exist and are correctly formatted
+            if (!modifiedJsonData.entity) {
+                console.log("[STALE_LINKS] Entry was missing 'entity' object. Creating it for consistency, though no image_uuids to remove if it was missing.");
+                modifiedJsonData.entity = { image_uuids: [] }; // Initialize with image_uuids array
+            }
+            if (!Array.isArray(modifiedJsonData.entity.image_uuids)) {
+                if (typeof modifiedJsonData.entity.image_uuid === 'string') {
+                    console.log("[STALE_LINKS] Found legacy 'image_uuid' string. Converting to 'image_uuids' array.");
+                    modifiedJsonData.entity.image_uuids = [modifiedJsonData.entity.image_uuid];
+                    delete modifiedJsonData.entity.image_uuid;
+                } else {
+                    console.log("[STALE_LINKS] 'entity.image_uuids' was not an array and no legacy string found. Initializing as empty array.");
+                    modifiedJsonData.entity.image_uuids = [];
+                }
+            }
+
+            const originalUUIDs = [...modifiedJsonData.entity.image_uuids];
+            modifiedJsonData.entity.image_uuids = modifiedJsonData.entity.image_uuids.filter(
+                uuid => !staleUUIDs.includes(uuid)
+            );
+            const removedCount = originalUUIDs.length - modifiedJsonData.entity.image_uuids.length;
+
+            console.log(`[STALE_LINKS] Original UUIDs: ${originalUUIDs.join(', ')}. Filtered UUIDs: ${modifiedJsonData.entity.image_uuids.join(', ')}. Removed: ${removedCount}`);
+
+            if (removedCount > 0) {
+                const now = new Date().toISOString().replace("Z", ".000000Z");
+                modifiedJsonData.updated_at = now;
+                if (modifiedJsonData.entity) modifiedJsonData.entity.updated_at = now;
+
+                const updatedJsonString = JSON.stringify(modifiedJsonData, null, 2);
+                const commitMessage = `fix: Remove ${removedCount} stale image link(s) from entry: ${entryName}`;
+
+                // Use currentFileSha for the update commit of the entry itself
+                const commitResult = await commitFileToGitHub(
+                    entryPathToUpdate, // This should be currentFilePath
+                    updatedJsonString,
+                    commitMessage,
+                    currentFileSha
+                );
+
+                if (commitResult && commitResult.sha) {
+                    console.log("[STALE_LINKS] Entry updated successfully on GitHub after removing stale links. New SHA:", commitResult.sha);
+                    // Update global state with the new SHA and modified data
+                    currentFileSha = commitResult.sha;
+                    currentJsonData = modifiedJsonData;
+                    contextCache[entryPathToUpdate] = modifiedJsonData;
+
+                    const fileIndex = flatJsonData.findIndex(item => item.path === entryPathToUpdate);
+                    if (fileIndex !== -1) {
+                        flatJsonData[fileIndex].sha = commitResult.sha;
+                         // If the kankaName was based on the jsonData, update it too (though unlikely needed here)
+                        flatJsonData[fileIndex].kankaName = modifiedJsonData.name || flatJsonData[fileIndex].name.replace(/\.json$/, "");
+                    }
+
+
+                    alert(`${removedCount} stale image link(s) removed successfully from "${entryName}". Reloading entry view.`);
+                    hideLoading(); // Hide loading *before* the recursive call
+                    // Call loadFileContentAndDisplay with the flag to prevent immediate re-prompting
+                    await loadFileContentAndDisplay(entryPathToUpdate, linkElementForReload, true);
+                    return true; // Indicate changes were made and successfully saved
+                } else {
+                    // commitFileToGitHub would have shown an alert
+                    console.error("[STALE_LINKS] Failed to save updated entry JSON to GitHub after attempting to remove stale links. Commit result:", commitResult);
+                    // No throw here, allow finally to hide loading
+                    hideLoading();
+                    return false; // Indicate save failure
+                }
+            } else {
+                console.log("[STALE_LINKS] No UUIDs were actually removed from the array. This might happen if staleUUIDs list was empty or didn't match existing UUIDs in the entry.");
+                alert("No stale links found in the entry's list to remove, or an issue occurred matching them.");
+                hideLoading();
+                return false; // No changes made to the file
+            }
+        } catch (error) {
+            console.error("[STALE_LINKS] Error during stale image link handling:", error);
+            alert(`Failed to remove stale image links: ${error.message}`);
+            hideLoading();
+            return false; // Indicate error
+        }
+    } else { // User cancelled the confirm dialog
+        console.log("[STALE_LINKS] User chose not to remove stale image links.");
+        alert("Stale image links will remain. You can manually edit the entry or GitHub JSON if needed.");
+        // No need to call hideLoading() here as it wasn't shown for the confirm dialog itself
+        return false; // Indicate no action taken by user
+    }
+}
+
 
   function handleInternalLinkClick(event) {
     event.preventDefault();
@@ -2716,7 +2849,22 @@ async function commitFileToGitHub(
       );
       if (!metadataDeleted)
         throw new Error(`Failed to delete metadata file ${metadataFile.path}`);
+
       console.log("Metadata file deleted successfully.");
+
+if (imageData && imageFileMap[uuid]) {
+    delete imageFileMap[uuid];
+    console.log(`[DELETE] Removed ${uuid} from local imageFileMap.`);
+}
+if (imageData && metadataFile) {
+    allFetchedFiles = allFetchedFiles.filter(
+        f => f.path !== imageData.path && f.path !== metadataFile.path
+    );
+    console.log(`[DELETE] Removed image and metadata files for ${uuid} from allFetchedFiles.`);
+} else {
+    console.warn(`[DELETE] Could not fully clean up ${uuid} from local caches due to missing imageData or metadataFile entry.`);
+}
+
       showLoading(`Updating entry: ${currentJsonData.name}...`);
       const modifiedJsonData = JSON.parse(JSON.stringify(currentJsonData));
       if (
@@ -3020,78 +3168,85 @@ async function commitFileToGitHub(
     }
   }
 
-  function openImproveModal() {
+function openImproveModal() {
     console.log("[IMPROVE MODAL] Opening modal...");
     if (!currentJsonData || !currentFilePath || !fileTree) {
-      console.error("[IMPROVE MODAL] Missing current data or file tree.");
-      return;
+        console.error("[IMPROVE MODAL] Missing current data or file tree.");
+        return;
     }
-    if (!GEMINI_API_KEY || GEMINI_API_KEY.startsWith("YOUR_")) {
-      alert("Gemini API Key invalid.");
-      return;
+    if (!GEMINI_API_KEY || GEMINI_API_KEY.startsWith("YOUR_")) { // Check if it's a placeholder
+        alert("A valid Gemini API Key is required for AI features. Please provide one.");
+        showApiKeyModal(false, true, "ai_action"); // Gemini required, GH not for this specific prompt
+        return;
     }
     if (!Array.isArray(GEMINI_MODELS) || GEMINI_MODELS.length === 0) {
-      alert("No Gemini models loaded.");
-      console.error("[IMPROVE MODAL] GEMINI_MODELS empty.");
-      return;
+        alert("No Gemini models loaded from config. AI features unavailable.");
+        console.error("[IMPROVE MODAL] GEMINI_MODELS array is empty or not loaded.");
+        return;
     }
+
     const isJournal = !!(
-      currentJsonData.entity && Array.isArray(currentJsonData.entity.posts)
+        currentJsonData.entity && Array.isArray(currentJsonData.entity.posts)
     );
     const contentForImprovement = getContentForEditingOrAI(isJournal);
-    contextTreeRootUl.innerHTML = "";
+    if (contextTreeRootUl) contextTreeRootUl.innerHTML = ""; // Check if exists
+    
     improveModalEntryNameSpan.textContent =
-      currentJsonData.name || currentFilePath.split("/").pop();
-    if (isJournal)
-      improveModalEntryNameSpan.textContent += " (Journal - Combined)";
-    console.log(
-      `[IMPROVE MODAL] Entry: ${improveModalEntryNameSpan.textContent}`
-    );
+        currentJsonData.name || currentFilePath.split("/").pop();
+    if (isJournal) improveModalEntryNameSpan.textContent += " (Journal - Combined)";
+    
+    console.log(`[IMPROVE MODAL] Entry: ${improveModalEntryNameSpan.textContent}`);
+    
     geminiModelSelect.innerHTML = "";
     console.log("[IMPROVE MODAL] Populating AI models:", GEMINI_MODELS);
     let modelsAdded = 0;
     GEMINI_MODELS.forEach((model) => {
-      if (model && model.id && model.name) {
-        const option = document.createElement("option");
-        option.value = model.id;
-        option.textContent = model.name;
-        geminiModelSelect.appendChild(option);
-        modelsAdded++;
-      } else {
-        console.warn("[IMPROVE MODAL] Skipping invalid model data:", model);
-      }
+        if (model && model.id && model.name) {
+            const option = document.createElement("option");
+            option.value = model.id;
+            option.textContent = model.name;
+            geminiModelSelect.appendChild(option);
+            modelsAdded++;
+        } else {
+            console.warn("[IMPROVE MODAL] Skipping invalid model data:", model);
+        }
     });
+    
     console.log(`[IMPROVE MODAL] Added ${modelsAdded} models to dropdown.`);
+
     if (modelsAdded === 0) {
-      console.error("[IMPROVE MODAL] No valid models found!");
-      const option = document.createElement("option");
-      option.value = "";
-      option.textContent = "No models available";
-      option.disabled = true;
-      geminiModelSelect.appendChild(option);
-      geminiModelSelect.disabled = true;
-      proceedWithImprovementBtn.disabled = true;
-      copyPromptBtn.disabled = true;
+        console.error("[IMPROVE MODAL] No valid models found!");
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = "No models available";
+        option.disabled = true;
+        geminiModelSelect.appendChild(option);
+        geminiModelSelect.disabled = true;
+        if (proceedWithImprovementBtn) proceedWithImprovementBtn.disabled = true;
+        if (copyPromptBtn) copyPromptBtn.disabled = true;
+        if (selectAllContextBtn) selectAllContextBtn.disabled = true; // Disable if no models
+        if (deselectAllContextBtn) deselectAllContextBtn.disabled = true; // Disable if no models
     } else {
-      const defaultModel =
-        GEMINI_MODELS.find((m) => m.id && m.id.includes("flash")) ||
-        GEMINI_MODELS[0];
-      if (defaultModel && defaultModel.id) {
-        geminiModelSelect.value = defaultModel.id;
-        console.log(
-          `[IMPROVE MODAL] Default model selected: ${defaultModel.id}`
-        );
-      }
-      geminiModelSelect.disabled = false;
-      proceedWithImprovementBtn.disabled = false;
-      copyPromptBtn.disabled = false;
+        const defaultModel =
+            GEMINI_MODELS.find((m) => m.id && m.id.includes("flash")) || GEMINI_MODELS[0];
+        if (defaultModel && defaultModel.id) {
+            geminiModelSelect.value = defaultModel.id;
+            console.log(`[IMPROVE MODAL] Default model selected: ${defaultModel.id}`);
+        }
+        geminiModelSelect.disabled = false;
+        if (proceedWithImprovementBtn) proceedWithImprovementBtn.disabled = false;
+        if (copyPromptBtn) copyPromptBtn.disabled = false;
+        if (selectAllContextBtn) selectAllContextBtn.disabled = false; // Enable if models available
+        if (deselectAllContextBtn) deselectAllContextBtn.disabled = false; // Enable if models available
     }
+
     const contextTreeWithoutCurrent = filterTree(fileTree, currentFilePath);
-    renderContextTree(contextTreeWithoutCurrent, contextTreeRootUl);
+    if (contextTreeRootUl) renderContextTree(contextTreeWithoutCurrent, contextTreeRootUl); // Check if exists
+    
     updateTokenEstimate(contentForImprovement);
     improveModal.style.display = "block";
     console.log("[IMPROVE MODAL] Modal displayed.");
-  }
+}
 
   function filterTree(nodes, excludePath) {
     return nodes
@@ -3163,21 +3318,26 @@ async function commitFileToGitHub(
     });
   }
 
-  function updateTokenEstimate(baseContent = null) {
+function updateTokenEstimate(baseContent = null) {
     const isJournal = !!(
-      currentJsonData?.entity && Array.isArray(currentJsonData.entity.posts)
+        currentJsonData?.entity && Array.isArray(currentJsonData.entity.posts)
     );
     const contentToEstimate =
-      baseContent ?? getContentForEditingOrAI(isJournal);
+        baseContent ?? getContentForEditingOrAI(isJournal);
     let totalEstimate = estimateTokens(contentToEstimate);
-    const checkboxes = contextTreeRootUl.querySelectorAll(
-      'input[type="checkbox"][data-type="file"]:checked'
-    );
-    checkboxes.forEach((cb) => {
-      totalEstimate += parseInt(cb.dataset.baseTokens || "0", 10);
-    });
-    contextTokenEstimateSpan.textContent = totalEstimate;
-  }
+
+    if (contextTreeRootUl) { // Check if the element exists
+        const checkboxes = contextTreeRootUl.querySelectorAll(
+            'input[type="checkbox"][data-type="file"]:checked'
+        );
+        checkboxes.forEach((cb) => {
+            totalEstimate += parseInt(cb.dataset.baseTokens || "0", 10);
+        });
+    } else {
+        console.warn("[Token Estimate] contextTreeRootUl not found. Cannot estimate context tokens.");
+    }
+    if (contextTokenEstimateSpan) contextTokenEstimateSpan.textContent = totalEstimate;
+}
 
   async function improveHtmlWithGeminiContext() {
     if (!currentJsonData || !currentFilePath) {
@@ -3398,8 +3558,11 @@ async function commitFileToGitHub(
     let imageFetchErrors = 0;
     console.log(`Found ${imageUUIDs.length} images to process for PDF.`);
     if (Array.isArray(imageUUIDs) && imageUUIDs.length > 0) {
-      showLoading(`Loading ${imageUUIDs.length} images for PDF...`);
-      const imagePromises = imageUUIDs.map(async (uuid) => {
+  console.log(`[LOAD] Found ${imageUUIDs.length} linked image UUIDs.`);
+    let successfullyRenderedImagesCount = 0; // Track successfully rendered images
+    imageListContainer.innerHTML = ""; // Clear previous images
+
+    const imageLoadPromises = imageUUIDs.map(async (uuid) => {
         const imageData = imageFileMap[uuid];
         if (imageData && imageData.download_url && imageData.sha) {
           try {
@@ -3839,6 +4002,47 @@ function setupRenameEntryListener() {
     if (proceedWithReorganizationBtn) {
         proceedWithReorganizationBtn.disabled = false; 
     }
+}
+
+function updateTokenStatusDisplay() {
+    if (!tokenStatusIndicatorDiv || !addEditTokensBtn) return;
+
+    if (GITHUB_WRITE_TOKEN) {
+        tokenStatusIndicatorDiv.textContent = "Edit Mode: ENABLED (Write Token Present)";
+        tokenStatusIndicatorDiv.className = "write-token-present";
+        addEditTokensBtn.textContent = "Update Edit Tokens"; // Or "Change Edit Tokens"
+        addEditTokensBtn.style.display = "block"; // Always show if initialized
+    } else {
+        tokenStatusIndicatorDiv.textContent = "Edit Mode: DISABLED (No Write Token)";
+        tokenStatusIndicatorDiv.className = "no-write-token";
+        addEditTokensBtn.textContent = "Add Edit Tokens to Enable Editing";
+        addEditTokensBtn.style.display = "block";
+    }
+
+    // Also update display for Gemini key (optional, but good to show status)
+    let geminiStatus = "";
+    if (GEMINI_API_KEY && GEMINI_MODELS && GEMINI_MODELS.length > 0) {
+        geminiStatus = "AI Features: ENABLED";
+        // (Optionally add a class for styling)
+    } else if (GEMINI_API_KEY && (!GEMINI_MODELS || GEMINI_MODELS.length === 0)) {
+        geminiStatus = "AI Features: API Key Present, Models Missing (Check Config)";
+    } else {
+        geminiStatus = "AI Features: DISABLED (No Gemini Key)";
+    }
+    // You can append this to tokenStatusIndicatorDiv or create a new element for it
+    // For simplicity, appending here:
+    const geminiP = document.createElement('p');
+    geminiP.textContent = geminiStatus;
+    geminiP.style.fontSize = '0.8em';
+    geminiP.style.marginTop = '5px';
+    geminiP.style.textAlign = 'center';
+
+    // Clear previous Gemini status if it exists
+    const existingGeminiP = tokenStatusIndicatorDiv.querySelector('.gemini-status');
+    if (existingGeminiP) existingGeminiP.remove();
+    geminiP.classList.add('gemini-status'); // For potential removal
+    tokenStatusIndicatorDiv.appendChild(geminiP);
+
 }
 
 // No changes needed for closeReorganizeModal based on token:

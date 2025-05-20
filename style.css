@@ -1075,3 +1075,31 @@ blockquote {
         max-height: 20vh;
     }
 }
+
+#tokenStatusIndicator {
+    font-size: 0.9em;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+#tokenStatusIndicator.no-write-token {
+    background-color: #f2dede; /* Light red for warning */
+    color: #a94442;
+    border: 1px solid #ebccd1;
+}
+
+#tokenStatusIndicator.write-token-present {
+    background-color: #dff0d8; /* Light green for success */
+    color: #3c763d;
+    border: 1px solid #d6e9c6;
+}
+
+#addEditTokensBtn { /* Style for the new button */
+    padding: 8px 15px;
+    font-size: 0.9em;
+    font-weight: bold;
+    border-radius: 3px;
+    cursor: pointer;
+}
+#addEditTokensBtn:hover {
+    background-color: #449d44; /* Darker green on hover */
+}
