@@ -7,7 +7,7 @@
   "sex": null,
   "pronouns": null,
   "created_at": "2024-11-22T21:48:15.000000Z",
-  "updated_at": "2025-05-04T22:21:26.272.000000Z",
+  "updated_at": "2025-05-20T12:29:27.572.000000Z",
   "location_id": 1714715,
   "title": "The Friendly",
   "family_id": null,
@@ -34,14 +34,16 @@
     "focus_x": null,
     "focus_y": null,
     "created_at": "2024-11-22T21:48:15.000000Z",
-    "updated_at": "2025-05-04T22:21:26.272.000000Z",
+    "updated_at": "2025-05-20T12:29:27.572.000000Z",
     "created_by": 275646,
     "updated_by": 275646,
     "image_path": null,
-    "image_uuid": null,
     "header_image": null,
     "header_uuid": null,
-    "marketplace_uuid": null
+    "marketplace_uuid": null,
+    "image_uuids": [
+      "3cfa5184-ac98-4db7-8ab5-e6d7530766e7"
+    ]
   },
   "character_traits": [],
   "character_families": [],
