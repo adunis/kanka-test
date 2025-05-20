@@ -615,26 +615,30 @@ document.addEventListener("DOMContentLoaded", async () => {
       repoNameSpan.textContent = `${GITHUB_USERNAME}/${GITHUB_REPO}`;
     if (repoPathSpan) repoPathSpan.textContent = `/${GITHUB_DATA_PATH}`;
 
-    if (isReadOnlyLoad) {
-      // First load, potentially with read-only token
-      setupAppEventListeners(); // Setup all listeners, their internal logic will handle token checks
-      if (sidebar && resizer) makeResizable(sidebar, resizer);
-      console.log(
-        "[PROCEED_INIT] Fetching initial file list (read-only possible)..."
-      );
-      await fetchFileList(); // Uses getGitHubHeaders which picks the best available token
+ if (isReadOnlyLoad) {
+        setupAppEventListeners();
+        if (sidebar && resizer) makeResizable(sidebar, resizer);
+        console.log("[PROCEED_INIT] Fetching initial file list...");
+        await fetchFileList(); // This populates flatJsonData
+
+        // After file list is loaded, try to load from URL and set up listener
+        await loadEntryFromURL(); // Load entry based on initial URL hash
+        window.addEventListener('hashchange', loadEntryFromURL);
+
     } else {
-      // This block is for when keys are saved from the modal - full re-init or selective update
-      // If we just saved keys from modal, we likely want to re-fetch or enable features.
-      console.log(
-        "[PROCEED_INIT] API keys possibly updated from modal. Re-evaluating UI and fetching list."
-      );
-      updateButtonStatesBasedOnTokens(); // Make sure buttons reflect new token availability
-      await fetchFileList();
+        console.log("[PROCEED_INIT] API keys possibly updated. Re-evaluating UI and fetching list.");
+        updateButtonStatesBasedOnTokens();
+        await fetchFileList();
+        
+        // Also handle URL loading and listener if not already done
+        if (!window.onhashchange) { // Simple check if listener already added
+             await loadEntryFromURL();
+             window.addEventListener('hashchange', loadEntryFromURL);
+        }
     }
     console.log("[PROCEED_INIT] Application initialization/update complete.");
     if (clearKeysBtn) clearKeysBtn.disabled = false;
-  }
+}
 
   let PROMPT_IMAGE_GENERATION; // Declare it with other prompt variables
 
@@ -1849,9 +1853,97 @@ function hideLoading() {
     }
   }
 
-  function handleFileLinkClick(filePath, linkElement) {
-    loadFileContentAndDisplay(filePath, linkElement);
-  }
+function handleFileLinkClick(filePath, linkElement) {
+    // Create a slug from the path relative to GITHUB_DATA_PATH
+    let relativePathForSlug = filePath;
+    if (GITHUB_DATA_PATH && filePath.startsWith(GITHUB_DATA_PATH + '/')) {
+        relativePathForSlug = filePath.substring(GITHUB_DATA_PATH.length + 1);
+    } else if (filePath.startsWith(GITHUB_DATA_PATH)) { // Is a root file in data_path
+        relativePathForSlug = filePath.substring(GITHUB_DATA_PATH.length);
+        if (relativePathForSlug.startsWith('/')) relativePathForSlug = relativePathForSlug.substring(1);
+    }
+    // else, filePath might already be relative or an issue with GITHUB_DATA_PATH
+
+    const slug = getSlug(relativePathForSlug);
+    const newHash = `#${slug}`;
+
+    // Only push to history if the hash is actually changing
+    if (window.location.hash !== newHash) {
+        window.location.hash = newHash; // This will trigger the 'hashchange' event
+    } else {
+        // If hash is the same (e.g., user clicked the same link again, or initial load matched),
+        // and not currently editing, just load the content directly.
+        if (editorDiv.style.display !== 'none') {
+            if (!confirm("Discard current editor changes?")) {
+                return;
+            }
+        }
+        loadFileContentAndDisplay(filePath, linkElement);
+    }
+}
+
+async function loadEntryFromURL() {
+    const hash = window.location.hash.substring(1); // Remove #
+    console.log("[URL] Hash change or initial load. Hash:", hash);
+
+    if (!hash) { // No hash, default view
+        if (currentFilePath) { // If a file was loaded, clear it
+            currentFilePath = null;
+            currentJsonData = null;
+            currentFileSha = null;
+            if(activeLinkElement) activeLinkElement.classList.remove("active");
+            activeLinkElement = null;
+            if (currentFileNameH2) currentFileNameH2.textContent = "Select an entry";
+            if (jsonEntryContentDiv) jsonEntryContentDiv.innerHTML = "<p>Select an entry from the tree.</p>";
+            if (imagePreviewSidebar) imagePreviewSidebar.style.display = "none";
+            updateButtonStatesBasedOnTokens();
+        }
+        // If flatJsonData is empty, fetchFileList will handle initial message.
+        return;
+    }
+
+    if (flatJsonData.length === 0) {
+        console.log("[URL] flatJsonData is empty. Waiting for fetchFileList to complete and re-trigger.");
+        // fetchFileList will call this again after populating data if there's a hash.
+        return;
+    }
+
+    const targetFile = flatJsonData.find(file => {
+        let relativePathForSlug = file.path;
+        if (GITHUB_DATA_PATH && file.path.startsWith(GITHUB_DATA_PATH + '/')) {
+            relativePathForSlug = file.path.substring(GITHUB_DATA_PATH.length + 1);
+        } else if (file.path.startsWith(GITHUB_DATA_PATH)) {
+            relativePathForSlug = file.path.substring(GITHUB_DATA_PATH.length);
+            if(relativePathForSlug.startsWith('/')) relativePathForSlug = relativePathForSlug.substring(1);
+        }
+        return getSlug(relativePathForSlug) === hash;
+    });
+
+    if (targetFile) {
+        console.log("[URL] Found matching file for hash:", targetFile.path);
+        // Find the corresponding link element in the tree to highlight it
+        const linkElement = fileTreeRootUl ? fileTreeRootUl.querySelector(`a[data-file-path="${CSS.escape(targetFile.path)}"]`) : null;
+        
+        // Before loading, check if we are in edit mode for a *different* file
+        if (currentFilePath && currentFilePath !== targetFile.path && editorDiv.style.display !== 'none') {
+            if (!confirm("You have unsaved changes in the current entry. Discard them and load the new entry?")) {
+                // User cancelled, revert hash to previous file if possible, or to root
+                const previousSlug = currentFilePath ? getSlug(currentFilePath.substring(GITHUB_DATA_PATH.length + 1)) : '';
+                window.location.hash = `#${previousSlug}`; // This might re-trigger loadEntryFromURL
+                return;
+            }
+        }
+        await loadFileContentAndDisplay(targetFile.path, linkElement);
+    } else {
+        console.warn("[URL] No file found matching hash:", hash);
+        if (jsonEntryContentDiv) jsonEntryContentDiv.innerHTML = `<p>Entry for URL path "${hash}" not found.</p>`;
+        if (currentFileNameH2) currentFileNameH2.textContent = "Entry not found";
+        if (activeLinkElement) activeLinkElement.classList.remove("active");
+        activeLinkElement = null;
+        currentFilePath = null; // Clear current file if hash is invalid
+        updateButtonStatesBasedOnTokens();
+    }
+}
 
   function handleCreateInFolderClick(event) {
     event.stopPropagation();
@@ -2050,6 +2142,12 @@ function hideLoading() {
     showLoading(`Loading ${filePath.split("/").pop()}...`);
 
     if (currentFileNameH2) currentFileNameH2.textContent = "Loading...";
+
+currentFileNameH2.textContent = currentJsonData?.name || filePath.split("/").pop().replace(/\.json$/, "");
+document.title = `${currentJsonData?.name || "Entry"} - Globeseekers`; // Update browser tab title
+
+
+
     if (jsonEntryContentDiv)
       jsonEntryContentDiv.innerHTML = "<p>Loading content...</p>";
     if (htmlEditorTextarea) {
@@ -3960,6 +4058,24 @@ function hideLoading() {
       hideLoading();
     }
   }
+
+  function getSlug(inputString) {
+    if (!inputString) return "unknown-entry";
+    // Remove .json, then basic slugification
+    let base = inputString.replace(/\.json$/i, '');
+    // Remove GITHUB_DATA_PATH prefix if present for a cleaner slug
+    if (GITHUB_DATA_PATH && base.startsWith(GITHUB_DATA_PATH)) {
+        base = base.substring(GITHUB_DATA_PATH.length);
+        if (base.startsWith('/')) base = base.substring(1);
+    }
+    return base
+        .toLowerCase()
+        .replace(/\s+/g, '-') // Replace spaces with -
+        .replace(/[^a-z0-9\-_/]+/g, '') // Allow slashes for path structure in slug
+        .replace(/\/+/g, '/') // Normalize multiple slashes
+        .replace(/^-+|-+$/g, '') // Trim - from start/end
+        .replace(/^\/+|\/+$/g, ''); // Trim / from start/end
+}
 
   function makeResizable(element, resizerElement) {
     let isResizing = false;
