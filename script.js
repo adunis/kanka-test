@@ -490,18 +490,43 @@ if (createNewFileBtn) {
     setupCoreControls(); // Setup modal buttons, clear keys
 
     try {
-      await loadConfig(); // Load base config including DEFAULT_READ_TOKEN
-      console.log("[INIT] Base config loaded.");
+      await loadConfig(); // Load base config
+      console.log("[INIT] Base config loaded into appConfig.");
 
-      // Attempt to use default read token from config.json if provided
+      // ---MODIFIED PART---
+      // Attempt to use default read token constructed from parts
       if (
+        appConfig.github.DEFAULT_READ_TOKEN_PARTS &&
+        Array.isArray(appConfig.github.DEFAULT_READ_TOKEN_PARTS) &&
+        appConfig.github.DEFAULT_READ_TOKEN_PARTS.length === 3 && // Expecting 3 parts
+        appConfig.github.DEFAULT_READ_TOKEN_PARTS.every(part => typeof part === 'string' && part.trim() !== "")
+      ) {
+        const potentialTokenFromParts = appConfig.github.DEFAULT_READ_TOKEN_PARTS.join('');
+        // Check if the joined token is not a placeholder
+        if (potentialTokenFromParts &&
+            !potentialTokenFromParts.includes("YOUR_TOKEN_PART") && // Generic check for "YOUR_TOKEN_PART_1_HERE" etc.
+            !potentialTokenFromParts.includes("YOUR_READ_ONLY_GITHUB_TOKEN_HERE") // Check for old placeholder too
+           ) {
+          GITHUB_READ_TOKEN = potentialTokenFromParts;
+          console.log("[INIT] Using default read-only GitHub token constructed from 3 parts from config.");
+        } else {
+          console.log("[INIT] DEFAULT_READ_TOKEN_PARTS from config resulted in a placeholder or invalid token. Not using.");
+        }
+      }
+      // Fallback to single DEFAULT_READ_TOKEN if parts weren't used or are invalid,
+      // and GITHUB_READ_TOKEN is not yet set.
+      else if (
+        !GITHUB_READ_TOKEN && // Only if not already set by parts
         appConfig.github.DEFAULT_READ_TOKEN &&
-        appConfig.github.DEFAULT_READ_TOKEN !==
-          "ghp_YOUR_READ_ONLY_GITHUB_TOKEN_HERE"
+        appConfig.github.DEFAULT_READ_TOKEN !== "ghp_YOUR_READ_ONLY_GITHUB_TOKEN_HERE" &&
+        !appConfig.github.DEFAULT_READ_TOKEN.includes("YOUR_TOKEN_PART") // Paranoia
       ) {
         GITHUB_READ_TOKEN = appConfig.github.DEFAULT_READ_TOKEN;
-        console.log("[INIT] Using default read-only GitHub token from config.");
+        console.log("[INIT] Using single default read-only GitHub token from config (parts not used/valid).");
+      } else if (!GITHUB_READ_TOKEN) {
+        console.log("[INIT] No valid default read token found in config (neither parts nor single field).");
       }
+      // ---END MODIFIED PART---
 
       // Check sessionStorage for user-provided WRITE token and Gemini key
       GITHUB_WRITE_TOKEN = sessionStorage.getItem(
