@@ -7,7 +7,7 @@
   "sex": "Female",
   "pronouns": null,
   "created_at": "2024-11-15T23:11:38.000000Z",
-  "updated_at": "2025-05-05T00:45:51.470.000000Z",
+  "updated_at": "2025-05-20T12:28:47.028.000000Z",
   "location_id": 1714715,
   "title": null,
   "family_id": null,
@@ -34,11 +34,10 @@
     "focus_x": null,
     "focus_y": null,
     "created_at": "2024-11-15T23:11:38.000000Z",
-    "updated_at": "2025-05-05T00:45:51.470.000000Z",
+    "updated_at": "2025-05-20T12:28:47.028.000000Z",
     "created_by": 275646,
     "updated_by": 275646,
     "image_path": null,
-    "image_uuid": "9d7f91d0-55b4-4d27-8ae3-b51ddc6d2bc2",
     "header_image": null,
     "header_uuid": null,
     "marketplace_uuid": null,
@@ -55,6 +54,10 @@
         "colour": "",
         "marketplace_uuid": null
       }
+    ],
+    "image_uuids": [
+      "9d7f91d0-55b4-4d27-8ae3-b51ddc6d2bc2",
+      "95393e46-e7d7-4ead-afcb-32419ccc0ef1"
     ]
   },
   "character_traits": [],
