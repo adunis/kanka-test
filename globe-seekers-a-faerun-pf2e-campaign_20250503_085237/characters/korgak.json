@@ -7,7 +7,7 @@
   "sex": null,
   "pronouns": null,
   "created_at": "2024-10-01T21:25:46.000000Z",
-  "updated_at": "2025-05-20T12:52:55.075.000000Z",
+  "updated_at": "2025-05-20T12:52:58.836.000000Z",
   "location_id": 1714715,
   "title": "Aspirante Dio",
   "family_id": null,
@@ -34,7 +34,7 @@
     "focus_x": null,
     "focus_y": null,
     "created_at": "2024-10-01T21:25:46.000000Z",
-    "updated_at": "2025-05-20T12:52:55.075.000000Z",
+    "updated_at": "2025-05-20T12:52:58.836.000000Z",
     "created_by": 275646,
     "updated_by": 275646,
     "image_path": null,
@@ -102,7 +102,8 @@
     "image_uuids": [
       "9d6aa1eb-cf82-4256-b688-b69d15c842cc",
       "4b35a1a2-df20-49ea-be81-d4b6f206f08b",
-      "843b931e-889a-4b9a-b1ed-5c23e5fa92bd"
+      "843b931e-889a-4b9a-b1ed-5c23e5fa92bd",
+      "4d7b6781-4773-40e9-b82e-66529bdff213"
     ]
   },
   "character_traits": [],
