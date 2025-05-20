@@ -7,7 +7,7 @@
   "sex": null,
   "pronouns": null,
   "created_at": "2024-11-05T18:48:17.000000Z",
-  "updated_at": "2025-05-19T20:30:44.433.000000Z",
+  "updated_at": "2025-05-20T09:24:46.858.000000Z",
   "location_id": 1714715,
   "title": null,
   "family_id": null,
@@ -34,16 +34,14 @@
     "focus_x": null,
     "focus_y": null,
     "created_at": "2024-11-05T18:48:17.000000Z",
-    "updated_at": "2025-05-19T20:30:44.433.000000Z",
+    "updated_at": "2025-05-20T09:24:46.858.000000Z",
     "created_by": 275646,
     "updated_by": 275646,
     "image_path": null,
     "header_image": null,
     "header_uuid": null,
     "marketplace_uuid": null,
-    "image_uuids": [
-      "cfc61478-3a44-46de-9f1c-ef8b2e364c1e"
-    ]
+    "image_uuids": []
   },
   "character_traits": [],
   "character_families": [],
