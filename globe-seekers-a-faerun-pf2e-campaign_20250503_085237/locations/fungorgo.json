@@ -2,7 +2,7 @@
   "id": 1714712,
   "name": "Fungorgo",
   "created_at": "2025-05-01T21:45:35.000000Z",
-  "updated_at": "2025-05-23T07:41:28.107.000000Z",
+  "updated_at": "2025-05-23T07:41:30.740.000000Z",
   "is_private": 0,
   "is_destroyed": 0,
   "location_id": 1714713,
@@ -21,7 +21,7 @@
     "focus_x": null,
     "focus_y": null,
     "created_at": "2025-05-01T21:45:35.000000Z",
-    "updated_at": "2025-05-23T07:41:28.107.000000Z",
+    "updated_at": "2025-05-23T07:41:30.740.000000Z",
     "created_by": 275646,
     "updated_by": 275646,
     "image_path": null,
@@ -64,7 +64,8 @@
       "3a7155ff-77db-4de6-ad20-ef4cd34600cd",
       "ab4cf6a8-e1d2-4c85-980a-127c9bfe7f4c",
       "c125bd6c-6736-41dc-b980-dda8bf54e140",
-      "a882c0df-17ab-43d1-9e41-52515f4deb3c"
+      "a882c0df-17ab-43d1-9e41-52515f4deb3c",
+      "eafdf369-cb08-4381-9c33-edbf33890d8b"
     ]
   }
 }
