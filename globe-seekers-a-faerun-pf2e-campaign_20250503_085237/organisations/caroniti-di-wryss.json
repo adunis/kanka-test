@@ -4,7 +4,7 @@
   "campaign_id": null,
   "entry": "<p>New entry: Caroniti di Wryss.</p>",
   "created_at": "2025-05-06T21:45:45.255.000000Z",
-  "updated_at": "2025-05-23T07:54:02.054.000000Z",
+  "updated_at": "2025-05-23T07:54:04.314.000000Z",
   "is_private": 0,
   "tags": [],
   "entity": {
@@ -21,7 +21,7 @@
     "focus_x": null,
     "focus_y": null,
     "created_at": "2025-05-06T21:45:45.255.000000Z",
-    "updated_at": "2025-05-23T07:54:02.054.000000Z",
+    "updated_at": "2025-05-23T07:54:04.314.000000Z",
     "created_by": null,
     "updated_by": null,
     "image_uuids": [
@@ -54,7 +54,8 @@
       "ecfdd60b-c838-4fa5-8463-9597c9ffc097",
       "d747b8b4-9065-4a37-b393-8e973fa6ce3d",
       "fab55f30-0f48-4c41-96d5-98da5ca1ce8e",
-      "d0750cac-43da-4b8b-b832-886f5ddfeb35"
+      "d0750cac-43da-4b8b-b832-886f5ddfeb35",
+      "0ea21117-68ac-4f19-a9c3-6fc58eaa1db9"
     ],
     "header_uuid": null,
     "image_path": null,
