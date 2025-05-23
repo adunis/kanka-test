@@ -4,7 +4,7 @@
   "campaign_id": null,
   "entry": "<p>New entry: piante carnivore.</p>",
   "created_at": "2025-05-23T07:48:35.904.000000Z",
-  "updated_at": "2025-05-23T07:48:35.904.000000Z",
+  "updated_at": "2025-05-23T07:49:25.903.000000Z",
   "is_private": 0,
   "tags": [],
   "entity": {
@@ -21,10 +21,12 @@
     "focus_x": null,
     "focus_y": null,
     "created_at": "2025-05-23T07:48:35.904.000000Z",
-    "updated_at": "2025-05-23T07:48:35.904.000000Z",
+    "updated_at": "2025-05-23T07:49:25.903.000000Z",
     "created_by": null,
     "updated_by": null,
-    "image_uuids": [],
+    "image_uuids": [
+      "7bb63a18-f88a-4c9d-89af-4d773ffe9348"
+    ],
     "header_uuid": null,
     "image_path": null,
     "header_image": null,
