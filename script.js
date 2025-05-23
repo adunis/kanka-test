@@ -3305,20 +3305,58 @@ document.title = `${currentJsonData?.name || "Entry"} - Globeseekers`; // Update
     }
   }
 
+ let lightboxTransitionEndHandler = null;
+
   function openImageLightbox(imageUrl) {
     if (lightboxImage && imageLightboxModal) {
       console.log("Opening lightbox for:", imageUrl);
       lightboxImage.src = imageUrl;
-      imageLightboxModal.style.display = "flex";
+      imageLightboxModal.style.display = "flex"; // Use flex to center content via CSS
+      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+
+      // Ensure any previous transitionend listener is removed if close was interrupted
+      if (lightboxTransitionEndHandler) {
+          imageLightboxModal.removeEventListener("transitionend", lightboxTransitionEndHandler);
+          lightboxTransitionEndHandler = null;
+      }
+
+      // Force reflow/repaint to ensure transition starts from opacity:0 after display change
+      // Accessing offsetHeight is a common way to trigger reflow.
+      void imageLightboxModal.offsetHeight; // Or imageLightboxModal.getBoundingClientRect();
+
+      imageLightboxModal.classList.add("show");
     } else {
       console.error("Lightbox elements not found.");
     }
   }
 
   function closeImageLightbox() {
-    if (imageLightboxModal) {
-      imageLightboxModal.style.display = "none";
+    if (imageLightboxModal && imageLightboxModal.classList.contains("show")) { // Only if it's shown
+      imageLightboxModal.classList.remove("show");
+      document.body.style.overflow = ''; // Restore background scrolling
+
+      // Define the handler
+      lightboxTransitionEndHandler = (event) => {
+          // Make sure the transitionend is for the opacity property and the target is the modal itself
+          if (event.propertyName === 'opacity' && imageLightboxModal === event.target) {
+              imageLightboxModal.style.display = "none";
+              if (lightboxImage) lightboxImage.src = ""; // Clear src after it's hidden
+              imageLightboxModal.removeEventListener("transitionend", lightboxTransitionEndHandler);
+              lightboxTransitionEndHandler = null; // Clear the stored handler
+          }
+      };
+      imageLightboxModal.addEventListener("transitionend", lightboxTransitionEndHandler);
+    } else if (imageLightboxModal && imageLightboxModal.style.display !== 'none' && imageLightboxModal.style.display !== '') {
+      // Fallback if .show was not present but modal is somehow still displayed
+      // (and not already display: none or empty string which implies not explicitly set)
+      console.warn("Closing lightbox via fallback - .show class was not present.");
+      imageLightboxModal.style.display = 'none';
       if (lightboxImage) lightboxImage.src = "";
+      document.body.style.overflow = '';
+      if (lightboxTransitionEndHandler) { // Clean up listener if somehow set without .show
+          imageLightboxModal.removeEventListener("transitionend", lightboxTransitionEndHandler);
+          lightboxTransitionEndHandler = null;
+      }
     }
   }
 

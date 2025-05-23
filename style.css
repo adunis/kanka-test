@@ -907,7 +907,18 @@ img {
 }
 
 .image-lightbox {
-    background-color: rgba(0,0,0,0.85); /* BW - already grayscale */
+    /* display: flex; is set by JS when opening */
+    align-items: center; /* Moved from inline style */
+    justify-content: center; /* Moved from inline style */
+    background-color: rgb(255, 255, 255); /* Opaque White */
+    opacity: 0;
+    visibility: hidden; /* Start hidden and non-interactive */
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    /* Inherits position, z-index etc. from .modal class */
+}
+.image-lightbox.show {
+    opacity: 1;
+    visibility: visible; /* Become visible and interactive */
 }
 
 .image-lightbox .lightbox-content {
@@ -915,10 +926,8 @@ img {
     border: none;
     padding: 0;
     margin: auto;
-    width: auto;
-    height: auto;
-    max-width: 90vw;
-    max-height: 90vh;
+    width: 100%;
+    height: 100%;
     box-shadow: 0 5px 25px rgba(0,0,0,0.5); /* BW - already grayscale */
 }
 .image-lightbox .lightbox-content img {
@@ -927,15 +936,15 @@ img {
 
 
 .image-lightbox .lightbox-close {
-    color: #ffffff; /* BW */
-    text-shadow: 0 1px 3px rgba(0,0,0,0.7); /* BW - already grayscale */
-    opacity: 0.8;
-    transition: opacity 0.2s ease;
+    color: #333333; /* Dark color for white background */
+    text-shadow: none; /* Remove shadow or use a light one if needed */
+    opacity: 0.7;
+    transition: opacity 0.2s ease, color 0.2s ease;
 }
 
 .image-lightbox .lightbox-close:hover {
     opacity: 1;
-    color: #eeeeee; /* BW */
+    color: #000000; /* Even darker on hover */
 }
 
 .create-subfolder-btn {
