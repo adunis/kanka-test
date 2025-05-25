@@ -5,6 +5,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   const sidebar = document.getElementById("sidebar");
   const resizer = document.getElementById("resizer");
   const mainContent = document.getElementById("mainContent");
+  const containerDiv = document.querySelector(".container"); // Added
+  const collapseSidebarBtn = document.getElementById("collapseSidebarBtn"); // Added
+  const collapseImagePreviewBtn = document.getElementById("collapseImagePreviewBtn"); // Added
+  // imagePreviewSidebar is already defined further down, ensure it's used correctly.
+  // sidebar and resizer are defined above.
+
   const fileTreeRootUl = document.getElementById("fileTreeRoot");
   const jsonEntryContentDiv = document.getElementById("jsonEntryContent");
   const currentFileNameH2 = document.getElementById("currentFileName");
@@ -145,6 +151,45 @@ document.addEventListener("DOMContentLoaded", async () => {
     PROMPT_IMPROVE_CONTEXT_FOOTER,
     PROMPT_IMPROVE_MAIN_HEADER;
   const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"];
+
+  // --- Sidebar Collapse Functions ---
+  function toggleMainSidebar(collapse, isInitialLoad = false) {
+    if (!sidebar || !containerDiv || !resizer || !collapseSidebarBtn) {
+        console.error("Error: Main sidebar toggle components not found.");
+        return;
+    }
+    const actuallyCollapsing = typeof collapse === 'boolean' ? collapse : !sidebar.classList.contains("collapsed");
+
+    if (!isInitialLoad) console.log(`[SIDEBAR] Toggling main sidebar. Collapsing: ${actuallyCollapsing}`);
+
+    sidebar.classList.toggle("collapsed", actuallyCollapsing);
+    containerDiv.classList.toggle("sidebar-collapsed", actuallyCollapsing);
+    resizer.style.display = actuallyCollapsing ? "none" : "flex"; // 'flex' or 'block' depending on original display
+    localStorage.setItem("sidebarCollapsed", actuallyCollapsing ? "true" : "false");
+    collapseSidebarBtn.textContent = actuallyCollapsing ? "»" : "«";
+  }
+
+  function toggleImagePreviewSidebar(collapse, isInitialLoad = false) {
+    if (!imagePreviewSidebar || !collapseImagePreviewBtn) {
+        console.error("Error: Image preview sidebar toggle components not found.");
+        return;
+    }
+    // Ensure imagePreviewSidebar is defined (it's declared later in the original script)
+    // For safety, could re-get it here if there's doubt:
+    // const imagePreviewSidebar = document.getElementById("imagePreviewSidebar");
+    // const collapseImagePreviewBtn = document.getElementById("collapseImagePreviewBtn");
+
+    const actuallyCollapsing = typeof collapse === 'boolean' ? collapse : !imagePreviewSidebar.classList.contains("collapsed");
+
+    if (!isInitialLoad) console.log(`[SIDEBAR] Toggling image preview. Collapsing: ${actuallyCollapsing}`);
+    
+    imagePreviewSidebar.classList.toggle("collapsed", actuallyCollapsing);
+    // Optional: Add class to mainContentWrapper if specific styling needed beyond flex auto-adjust
+    // const mainContentWrapper = document.querySelector('.main-content-wrapper');
+    // if (mainContentWrapper) mainContentWrapper.classList.toggle("image-sidebar-collapsed", actuallyCollapsing);
+    localStorage.setItem("imagePreviewSidebarCollapsed", actuallyCollapsing ? "true" : "false");
+    collapseImagePreviewBtn.textContent = actuallyCollapsing ? "«" : "»";
+  }
 
   // --- CORE CONTROLS SETUP (API Modal, Clear Keys) ---
   function setupCoreControls() {
@@ -508,6 +553,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     setupRenameEntryListener();
     setupReorganizeModalListeners();
 
+    // Add sidebar collapse button listeners
+    if (collapseSidebarBtn) {
+        collapseSidebarBtn.addEventListener("click", () => toggleMainSidebar());
+    } else {
+        console.warn("collapseSidebarBtn not found during setupAppEventListeners.");
+    }
+
+    if (collapseImagePreviewBtn) {
+        collapseImagePreviewBtn.addEventListener("click", () => toggleImagePreviewSidebar());
+    } else {
+        console.warn("collapseImagePreviewBtn not found during setupAppEventListeners.");
+    }
+
     console.log(
       "[SETUP_APP] Application-specific event listeners setup complete."
     );
@@ -615,9 +673,25 @@ document.addEventListener("DOMContentLoaded", async () => {
       repoNameSpan.textContent = `${GITHUB_USERNAME}/${GITHUB_REPO}`;
     if (repoPathSpan) repoPathSpan.textContent = `/${GITHUB_DATA_PATH}`;
 
- if (isReadOnlyLoad) {
-        setupAppEventListeners();
-        if (sidebar && resizer) makeResizable(sidebar, resizer);
+    // Setup listeners and resizer functionality before trying to load states
+    setupAppEventListeners();
+    if (sidebar && resizer) makeResizable(sidebar, resizer);
+
+    // Load sidebar states from localStorage
+    if (localStorage.getItem('sidebarCollapsed') === 'true') {
+        toggleMainSidebar(true, true); // true for collapse, true for initialLoad
+    }
+    if (localStorage.getItem('imagePreviewSidebarCollapsed') === 'true') {
+        toggleImagePreviewSidebar(true, true); // true for collapse, true for initialLoad
+    }
+    // Ensure button text is correct after initial load based on state
+    if (collapseSidebarBtn && sidebar) collapseSidebarBtn.textContent = sidebar.classList.contains("collapsed") ? "»" : "«";
+    if (collapseImagePreviewBtn && imagePreviewSidebar) collapseImagePreviewBtn.textContent = imagePreviewSidebar.classList.contains("collapsed") ? "«" : "»";
+
+
+    if (isReadOnlyLoad) {
+        // setupAppEventListeners(); // Moved up
+        // if (sidebar && resizer) makeResizable(sidebar, resizer); // Moved up
         console.log("[PROCEED_INIT] Fetching initial file list...");
         await fetchFileList(); // This populates flatJsonData
 
@@ -2187,6 +2261,12 @@ document.title = `${currentJsonData?.name || "Entry"} - Globeseekers`; // Update
         console.log(
           `[LOAD] Successfully fetched data for ${filePath} with SHA: ${currentFileSha}`
         );
+
+        // E. Automatic Main Sidebar Collapse on File Open
+        if (sidebar && !sidebar.classList.contains('collapsed')) {
+            console.log("[AUTO-COLLAPSE] File opened, collapsing main sidebar.");
+            toggleMainSidebar(true); // Explicitly collapse
+        }
 
         if (activeLinkElement && activeLinkElement !== linkElement) {
           activeLinkElement.classList.remove("active");
