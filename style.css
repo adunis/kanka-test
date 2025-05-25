@@ -1239,3 +1239,86 @@ img {
         max-height: 20vh;
     }
 }
+
+/* --- Collapse Button Styles --- */
+
+#collapseSidebarBtn {
+    display: block; 
+    width: calc(100% - 10px); 
+    margin: 10px 5px;
+    padding: 8px;
+    font-size: 1.2em; 
+    text-align: center;
+    background-color: #e0e0e0;
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+    cursor: pointer;
+    order: 99; /* Place it at the bottom of flex container, assuming other buttons don't have higher order */
+    /* order: -1; was suggested for top, but previous button was added at the end of html, so bottom seems more natural with current html */
+}
+
+#collapseSidebarBtn:hover {
+    background-color: #d0d0d0;
+}
+
+.image-preview-sidebar h2 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#collapseImagePreviewBtn {
+    padding: 3px 8px;
+    font-size: 1.2em; 
+    background-color: #e0e0e0;
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-left: 10px; 
+}
+
+#collapseImagePreviewBtn:hover {
+    background-color: #d0d0d0;
+}
+
+/* --- Sidebar Collapsed State --- */
+
+.collapsed {
+    width: 0 !important; 
+    min-width: 0 !important; 
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    border-left-width: 0 !important;
+    border-right-width: 0 !important;
+    box-shadow: none !important;
+    overflow: hidden !important; 
+    visibility: hidden !important; /* Changed from visibility: hidden to ensure it's fully hidden */
+    /* margin-left: 0 !important; /* Added to remove any margin when collapsed */
+    /* margin-right: 0 !important; /* Added to remove any margin when collapsed */
+}
+
+/* Adjustments when main sidebar is collapsed */
+.container.sidebar-collapsed .resizer {
+    display: none !important;
+}
+
+/* Alternative specific resizer hiding if not using global container class */
+/* #sidebar.collapsed + .resizer {
+    display: none !important;
+} */
+
+/*
+  No specific styles needed for .container.image-sidebar-collapsed or .main-content-wrapper.image-sidebar-collapsed
+  as the .collapsed class on #imagePreviewSidebar itself should handle its dimensions,
+  and flexbox should allow .entry-view-edit-area to expand.
+*/
+
+/* Ensure buttons inside collapsed sidebars are not focusable/visible if somehow not hidden by overflow */
+.sidebar.collapsed > button,
+.sidebar.collapsed > nav,
+.image-preview-sidebar.collapsed > button,
+.image-preview-sidebar.collapsed > div {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
