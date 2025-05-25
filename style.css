@@ -1182,6 +1182,20 @@ img {
         padding: 0 8px; /* Better tap area */
         opacity: 0.6;
     }
+
+    /* Collapse Button Adjustments for Tablet/Mobile */
+    #collapseSidebarBtn {
+        padding: 12px; /* Increased padding for touch */
+        font-size: 1.4em; /* Slightly larger icon */
+        /* width: 100%; Ensure it spans well if margin was an issue, but calc(100% - 10px) should be fine */
+        /* margin: 10px 0; Center it if full width */
+    }
+
+    #collapseImagePreviewBtn {
+        padding: 10px 12px; /* Increased padding for touch */
+        font-size: 1.4em; /* Slightly larger icon */
+    }
+    
      /* Reorganize Modal specific adjustments */
     #reorganizeModal .modal-section h3 {
         font-size: 1.1em;
