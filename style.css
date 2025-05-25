@@ -1328,10 +1328,21 @@ img {
 */
 
 /* Ensure buttons inside collapsed sidebars are not focusable/visible if somehow not hidden by overflow */
-.sidebar.collapsed > button,
-.sidebar.collapsed > nav,
-.image-preview-sidebar.collapsed > button,
-.image-preview-sidebar.collapsed > div {
+/* These rules are intended to hide direct children ONLY when the sidebar is collapsed. */
+/* If elements are hidden when the sidebar is EXPANDED, the issue likely lies elsewhere */
+/* (e.g., JavaScript not removing '.collapsed', or other CSS rules). */
+
+/* For the main sidebar (#sidebar, which has class .sidebar) */
+.sidebar.collapsed > button, /* Targets buttons like #collapseSidebarBtn, #createNewFileBtn etc. */
+.sidebar.collapsed > nav {   /* Targets nav like #fileTreeContainer */
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* For the image preview sidebar */
+.image-preview-sidebar.collapsed > button, /* Targets buttons like #addImageBtn */
+.image-preview-sidebar.collapsed > div {    /* Targets divs like #imageListContainer */
     visibility: hidden !important;
     opacity: 0 !important;
     pointer-events: none !important;
