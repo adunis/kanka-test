@@ -1306,7 +1306,7 @@ img {
     border-right-width: 0 !important;
     box-shadow: none !important;
     overflow: hidden !important; 
-    visibility: hidden !important; /* Changed from visibility: hidden to ensure it's fully hidden */
+    /* visibility: hidden !important; /* MODIFIED - REMOVED */
     /* margin-left: 0 !important; /* Added to remove any margin when collapsed */
     /* margin-right: 0 !important; /* Added to remove any margin when collapsed */
 }
@@ -1333,15 +1333,81 @@ img {
 /* (e.g., JavaScript not removing '.collapsed', or other CSS rules). */
 
 /* For the main sidebar (#sidebar, which has class .sidebar) */
-.sidebar.collapsed > button, /* Targets buttons like #collapseSidebarBtn, #createNewFileBtn etc. */
 .sidebar.collapsed > nav {   /* Targets nav like #fileTreeContainer */
     visibility: hidden !important;
     opacity: 0 !important;
     pointer-events: none !important;
 }
 
+#imagePreviewSidebar.collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    visibility: visible !important; /* Allow positioned children to be visible */
+    overflow: visible !important; /* Allow positioned children to be visible */
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    border-left-width: 0 !important;
+    border-right-width: 0 !important;
+    box-shadow: none !important;
+}
+
+#imagePreviewSidebar.collapsed > *:not(h2):not(#collapseImagePreviewBtn) { /* Hide all direct children except h2 and the button itself */
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Specifically ensure the h2 (which contains the button) and the button are visible */
+#imagePreviewSidebar.collapsed > h2,
+#imagePreviewSidebar.collapsed #collapseImagePreviewBtn {
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+#imagePreviewSidebar.collapsed #collapseImagePreviewBtn {
+    position: fixed; /* Or absolute, depending on desired behavior relative to viewport or a parent */
+    top: 15px; /* Adjust as needed */
+    right: 10px; /* Adjust as needed, assuming it's on the right */
+    width: auto;
+    margin: 0;
+    padding: 8px 10px; /* Explicit padding */
+    z-index: 1050;
+}
+
+#sidebar.collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    visibility: visible !important; /* Allow positioned children to be visible */
+    overflow: visible !important; /* Allow positioned children to be visible */
+    /* Inherit other .collapsed styles like padding, border, box-shadow as needed or reset them */
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    border-left-width: 0 !important;
+    border-right-width: 0 !important;
+    box-shadow: none !important;
+}
+
+#sidebar.collapsed > *:not(#collapseSidebarBtn) {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+#sidebar.collapsed #collapseSidebarBtn {
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    position: fixed;
+    top: 15px;
+    left: 10px;
+    width: auto; /* Override general button styling within sidebar */
+    margin: 0;
+    padding: 8px 10px; /* Explicit padding */
+    z-index: 1050;
+}
+
 /* For the image preview sidebar */
-.image-preview-sidebar.collapsed > button, /* Targets buttons like #addImageBtn */
 .image-preview-sidebar.collapsed > div {    /* Targets divs like #imageListContainer */
     visibility: hidden !important;
     opacity: 0 !important;
