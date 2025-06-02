@@ -2175,18 +2175,42 @@ async function loadEntryFromURL() {
   }
 
   function renderHtmlEntry(htmlContent, targetDiv = jsonEntryContentDiv) {
-    // Regex to find @Links - THIS IS NO LONGER NEEDED
-    // The original feature of finding `@Entry Name` to create links is removed.
-    // If you still want *existing* HTML <a> tags to work or be styled, that's fine,
-    // but the automatic creation of links from `@text` is gone.
+    let cleanedHtml = htmlContent;
 
-    // For now, just set the HTML directly.
-    // If you had specific styling for `data-internal-link` before, that styling won't apply
-    // unless the HTML content already contains such attributes.
-    targetDiv.innerHTML = htmlContent;
+    if (typeof htmlContent === 'string' && htmlContent.length > 0) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlContent;
 
-    // If you still have a use case for `data-internal-link` attributes created *manually*
-    // in your HTML content, you can keep this part. Otherwise, it can be removed too.
+        // Remove empty Angular router outlet wrappers
+        const firstP = tempDiv.querySelector('p:first-child');
+        if (firstP &&
+            firstP.children.length === 1 &&
+            firstP.children[0].matches('span[class*="router-outlet-wrapper"]') &&
+            firstP.children[0].innerHTML.trim() === '') {
+            firstP.remove();
+        }
+
+        // Remove Angular-specific classes
+        tempDiv.querySelectorAll('*').forEach(el => {
+            if (el.classList.contains('ng-star-inserted')) {
+                el.classList.remove('ng-star-inserted');
+            }
+            // Remove any class starting with ng-tns- (Angular host/content projection)
+            const classesToRemove = [];
+            for (let i = 0; i < el.classList.length; i++) {
+                if (el.classList[i].startsWith('ng-tns-')) {
+                    classesToRemove.push(el.classList[i]);
+                }
+            }
+            classesToRemove.forEach(cls => el.classList.remove(cls));
+        });
+
+        cleanedHtml = tempDiv.innerHTML;
+    }
+
+    targetDiv.innerHTML = cleanedHtml;
+
+    // Re-apply internal link listeners after setting innerHTML
     targetDiv.querySelectorAll("a[data-internal-link]").forEach((link) => {
       link.addEventListener("click", handleInternalLinkClick);
     });
