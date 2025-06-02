@@ -678,11 +678,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (sidebar && resizer) makeResizable(sidebar, resizer);
 
     // Load sidebar states from localStorage
-    if (localStorage.getItem('sidebarCollapsed') === 'true') {
-        toggleMainSidebar(true, true); // true for collapse, true for initialLoad
-    }
+    // Force main sidebar to start expanded
+    toggleMainSidebar(false, true); // false for collapse (i.e., expand), true for initialLoad
+    localStorage.setItem("sidebarCollapsed", "false"); // Update localStorage to reflect this default
+
+    // Image preview sidebar can still respect localStorage
     if (localStorage.getItem('imagePreviewSidebarCollapsed') === 'true') {
-        toggleImagePreviewSidebar(true, true); // true for collapse, true for initialLoad
+        toggleImagePreviewSidebar(true, true);
     }
     // Ensure button text is correct after initial load based on state
     if (collapseSidebarBtn && sidebar) collapseSidebarBtn.textContent = sidebar.classList.contains("collapsed") ? "»" : "«";
