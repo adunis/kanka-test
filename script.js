@@ -2316,10 +2316,10 @@ document.title = `${currentJsonData?.name || "Entry"} - Globeseekers`; // Update
         );
 
         // E. Automatic Main Sidebar Collapse on File Open (Desktop only for this behavior)
-        if (window.innerWidth > MOBILE_BREAKPOINT && sidebar && !sidebar.classList.contains('sidebar-is-collapsed') && !sidebar.classList.contains('mobile-collapsed')) {
-            console.log("[AUTO-COLLAPSE] File opened on desktop, collapsing main sidebar.");
-            toggleMainSidebar(true); // Explicitly collapse
-        }
+        // if (window.innerWidth > MOBILE_BREAKPOINT && sidebar && !sidebar.classList.contains('sidebar-is-collapsed') && !sidebar.classList.contains('mobile-collapsed')) {
+        //     console.log("[AUTO-COLLAPSE] File opened on desktop, collapsing main sidebar.");
+        //     toggleMainSidebar(true); // Explicitly collapse
+        // }
 
         if (activeLinkElement && activeLinkElement !== linkElement) {
           activeLinkElement.classList.remove("active");

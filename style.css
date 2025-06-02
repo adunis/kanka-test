@@ -1058,9 +1058,41 @@ img {
         border-bottom: 2px solid #bbbbbb; /* BW */
     }
     .sidebar #createNewFileBtn, .sidebar #createNewFolderBtn, .sidebar #reorganizeEntriesBtn {
-        padding: 10px 12px; /* Easier to tap */
+        /* Default mobile padding and font-size, will be overridden by more specific icon-only styles below */
+        padding: 10px 12px; 
         font-size: 0.95em;
     }
+
+  /* Mobile styles for sidebar buttons - Icon only */
+  .sidebar #createNewFileBtn,
+  .sidebar #createNewFolderBtn,
+  .sidebar #reorganizeEntriesBtn {
+    padding: 8px; /* Adjust padding to make buttons smaller for icon */
+    text-align: center;
+    display: flex; 
+    align-items: center;
+    justify-content: center;
+    line-height: 1; 
+  }
+
+  .sidebar .button-icon {
+    display: inline; /* Show the icon */
+    font-size: 1.2em; /* Make icon slightly larger than text */
+    margin-right: 0; /* No margin as text will be hidden */
+  }
+
+  .sidebar .button-text {
+    display: none; /* Hide the text on mobile */
+  }
+  /* Optional: Adjust button width if they are full width by default and become too wide */
+  /*
+  .sidebar #createNewFileBtn,
+  .sidebar #createNewFolderBtn,
+  .sidebar #reorganizeEntriesBtn {
+    width: auto; /* Allow button to shrink to icon size + padding */
+    min-width: 40px; /* Example minimum width */
+  }
+  */
 
     .resizer {
         display: none;
