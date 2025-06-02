@@ -1185,11 +1185,42 @@ img {
 
     /* Collapse Button Adjustments for Tablet/Mobile */
     #collapseSidebarBtn {
-        padding: 12px; /* Increased padding for touch */
-        font-size: 1.4em; /* Slightly larger icon */
-        /* width: 100%; Ensure it spans well if margin was an issue, but calc(100% - 10px) should be fine */
-        /* margin: 10px 0; Center it if full width */
+        padding: 10px; /* Adjusted padding for touch */
+        font-size: 1.3em; /* Slightly larger icon */
+        width: 100%; /* Make it full width for easier tapping */
+        margin: 5px 0; /* Adjust margin for full width */
+        box-sizing: border-box; /* Include padding in width */
+        line-height: 1.5; /* Ensure text (☰ or ✕) is vertically centered */
+        display: flex; /* Use flex to center content */
+        align-items: center;
+        justify-content: center;
     }
+
+    /* Styles for the main sidebar when it's mobile-collapsed */
+    .sidebar.mobile-collapsed {
+        max-height: 50px !important; /* Adjust to fit button, e.g., 40px padding + 10px text = 50px */
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        border-top-width: 0 !important;
+        border-bottom-width: 0 !important; /* Keep bottom border for separation */
+        border-bottom: 2px solid #bbbbbb !important; /* Re-ensure this border */
+        overflow: hidden !important;
+        box-shadow: none !important;
+    }
+
+    .sidebar.mobile-collapsed > *:not(#collapseSidebarBtn) {
+        display: none !important;
+    }
+
+    /* Ensure the button inside mobile-collapsed sidebar is correctly styled */
+    .sidebar.mobile-collapsed #collapseSidebarBtn {
+        margin: 5px 0; /* Consistent margin */
+        width: 100%; /* Takes full width of the parent (which is now full screen width) */
+        /* Padding and font-size are inherited from the general #collapseSidebarBtn mobile style */
+        /* No need for fixed positioning here */
+        position: static !important; /* Override any fixed positioning from desktop rules */
+    }
+
 
     #collapseImagePreviewBtn {
         padding: 10px 12px; /* Increased padding for touch */
@@ -1298,17 +1329,16 @@ img {
 /* --- Sidebar Collapsed State --- */
 
 .collapsed {
-    width: 0 !important; 
-    min-width: 0 !important; 
+    width: 0 !important;
+    min-width: 0 !important;
     padding-left: 0 !important;
     padding-right: 0 !important;
     border-left-width: 0 !important;
     border-right-width: 0 !important;
     box-shadow: none !important;
-    overflow: hidden !important; 
-    /* visibility: hidden !important; /* MODIFIED - REMOVED */
-    /* margin-left: 0 !important; /* Added to remove any margin when collapsed */
-    /* margin-right: 0 !important; /* Added to remove any margin when collapsed */
+    overflow: hidden !important;
+    /* Ensure no visibility override that would make it visible when it shouldn't be */
+    /* visibility: hidden; /* This would hide it, but overflow:hidden on parent is preferred */
 }
 
 /* Adjustments when main sidebar is collapsed */
@@ -1333,17 +1363,63 @@ img {
 /* (e.g., JavaScript not removing '.collapsed', or other CSS rules). */
 
 /* For the main sidebar (#sidebar, which has class .sidebar) */
-.sidebar.collapsed > nav {   /* Targets nav like #fileTreeContainer */
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
+/* Children of a collapsed sidebar should be hidden by the parent's overflow: hidden and zero dimensions. */
+/* Remove explicit visibility/opacity rules on children like nav. */
+.sidebar.collapsed > nav {
+    /* visibility: hidden !important; /* REMOVED */
+    /* opacity: 0 !important; /* REMOVED */
+    /* pointer-events: none !important; /* REMOVED */
 }
 
+/* Specific styles for #sidebar.collapsed */
+/* This rule ensures that when #sidebar specifically is collapsed, */
+/* it correctly applies the zero-dimension and overflow properties. */
+/* It overrides any broader .sidebar styles that might conflict. */
+#sidebar.collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    border-left-width: 0 !important;
+    border-right-width: 0 !important;
+    box-shadow: none !important; /* Already in .collapsed but good to be explicit */
+    overflow: hidden !important; /* CRITICAL: This hides children */
+    /* visibility: hidden !important; /* AVOID: Use overflow and zero dimensions instead */
+}
+
+/* Remove rules that hide children of #sidebar.collapsed using visibility/opacity */
+#sidebar.collapsed > *:not(#collapseSidebarBtn) {
+    /* visibility: hidden !important; /* REMOVED */
+    /* opacity: 0 !important; /* REMOVED */
+    /* pointer-events: none !important; /* REMOVED */
+}
+
+/* Ensure the collapse button itself remains visible and interactive */
+/* This rule for #collapseSidebarBtn needs to be outside of #sidebar.collapsed > * if it's to override it,
+   or be more specific. The current fixed positioning might be okay.
+   The existing #sidebar.collapsed #collapseSidebarBtn rule handles this.
+*/
+#sidebar.collapsed #collapseSidebarBtn {
+    visibility: visible !important; /* Ensure button is visible */
+    opacity: 1 !important; /* Ensure button is fully opaque */
+    pointer-events: auto !important; /* Ensure button is interactive */
+    position: fixed; /* Keep fixed positioning */
+    top: 15px;
+    left: 10px;
+    width: auto;
+    margin: 0;
+    padding: 8px 10px;
+    z-index: 1050; /* Ensure it's above other elements */
+}
+
+
+/* Styles for #imagePreviewSidebar.collapsed (leaving as is for now, focusing on #sidebar first) */
 #imagePreviewSidebar.collapsed {
     width: 0 !important;
     min-width: 0 !important;
-    visibility: visible !important; /* Allow positioned children to be visible */
-    overflow: visible !important; /* Allow positioned children to be visible */
+    /* visibility: visible !important; /* REMOVED */
+    /* overflow: visible !important; /* REMOVED */
+    overflow: hidden !important; /* ADDED */
     padding-left: 0 !important;
     padding-right: 0 !important;
     border-left-width: 0 !important;
@@ -1351,13 +1427,15 @@ img {
     box-shadow: none !important;
 }
 
-#imagePreviewSidebar.collapsed > *:not(h2):not(#collapseImagePreviewBtn) { /* Hide all direct children except h2 and the button itself */
+/* This rule is no longer needed as parent's overflow:hidden should hide children. */
+/*
+#imagePreviewSidebar.collapsed > *:not(h2):not(#collapseImagePreviewBtn) {
     visibility: hidden !important;
     opacity: 0 !important;
     pointer-events: none !important;
 }
+*/
 
-/* Specifically ensure the h2 (which contains the button) and the button are visible */
 #imagePreviewSidebar.collapsed > h2,
 #imagePreviewSidebar.collapsed #collapseImagePreviewBtn {
     visibility: visible !important;
@@ -1366,50 +1444,21 @@ img {
 }
 
 #imagePreviewSidebar.collapsed #collapseImagePreviewBtn {
-    position: fixed; /* Or absolute, depending on desired behavior relative to viewport or a parent */
-    top: 15px; /* Adjust as needed */
-    right: 10px; /* Adjust as needed, assuming it's on the right */
-    width: auto;
-    margin: 0;
-    padding: 8px 10px; /* Explicit padding */
-    z-index: 1050;
-}
-
-#sidebar.collapsed {
-    width: 0 !important;
-    min-width: 0 !important;
-    visibility: visible !important; /* Allow positioned children to be visible */
-    overflow: visible !important; /* Allow positioned children to be visible */
-    /* Inherit other .collapsed styles like padding, border, box-shadow as needed or reset them */
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    border-left-width: 0 !important;
-    border-right-width: 0 !important;
-    box-shadow: none !important;
-}
-
-#sidebar.collapsed > *:not(#collapseSidebarBtn) {
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-}
-
-#sidebar.collapsed #collapseSidebarBtn {
-    visibility: visible !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
     position: fixed;
     top: 15px;
-    left: 10px;
-    width: auto; /* Override general button styling within sidebar */
+    right: 10px;
+    width: auto;
     margin: 0;
-    padding: 8px 10px; /* Explicit padding */
+    padding: 8px 10px;
     z-index: 1050;
 }
 
-/* For the image preview sidebar */
-.image-preview-sidebar.collapsed > div {    /* Targets divs like #imageListContainer */
+/* For the image preview sidebar's children (leaving as is) */
+/* This rule is also redundant if parent's overflow:hidden is effective. */
+/*
+.image-preview-sidebar.collapsed > div {
     visibility: hidden !important;
     opacity: 0 !important;
     pointer-events: none !important;
 }
+*/
