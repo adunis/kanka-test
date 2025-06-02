@@ -408,7 +408,7 @@ img {
   color: #000000; /* BW */
 }
 
-#fileTreeRoot li.collapsed > ul {
+#fileTreeRoot li.node-is-collapsed > ul {
   display: none;
 }
 
@@ -423,11 +423,11 @@ img {
   color: #555555; /* BW */
 }
 
-#fileTreeRoot li.folder.collapsed > .node-content::before {
+#fileTreeRoot li.folder.node-is-collapsed > .node-content::before {
   content: "+";
 }
 
-#fileTreeRoot li.folder:not(.collapsed) > .node-content::before {
+#fileTreeRoot li.folder:not(.node-is-collapsed) > .node-content::before {
   content: "-";
 }
 
@@ -869,7 +869,7 @@ img {
   cursor: pointer;
 }
 
-.context-tree li.collapsed > ul {
+.context-tree li.node-is-collapsed > ul {
   display: none;
 }
 
@@ -886,7 +886,7 @@ img {
   font-size: 1.1em;
 }
 
-.context-tree li.folder:not(.collapsed) > .context-node-content::before {
+.context-tree li.folder:not(.node-is-collapsed) > .context-node-content::before {
   content: "-";
 }
 
@@ -1344,12 +1344,12 @@ img {
 }
 
 /* Adjustments when main sidebar is collapsed */
-.container.sidebar-collapsed .resizer {
+.container.sidebar-is-collapsed .resizer {
     display: none !important;
 }
 
 /* Alternative specific resizer hiding if not using global container class */
-/* #sidebar.collapsed + .resizer {
+/* #sidebar.sidebar-is-collapsed + .resizer {
     display: none !important;
 } */
 
@@ -1367,7 +1367,7 @@ img {
 /* For the main sidebar (#sidebar, which has class .sidebar) */
 /* Children of a collapsed sidebar should be hidden by the parent's overflow: hidden and zero dimensions. */
 /* Remove explicit visibility/opacity rules on children like nav. */
-.sidebar.collapsed > nav {
+.sidebar.sidebar-is-collapsed > nav {
     /* visibility: hidden !important; /* REMOVED */
     /* opacity: 0 !important; /* REMOVED */
     /* pointer-events: none !important; /* REMOVED */
@@ -1377,7 +1377,7 @@ img {
 /* This rule ensures that when #sidebar specifically is collapsed, */
 /* it correctly applies the zero-dimension and overflow properties. */
 /* It overrides any broader .sidebar styles that might conflict. */
-#sidebar.collapsed {
+#sidebar.sidebar-is-collapsed {
     width: 0 !important;
     min-width: 0 !important;
     padding-left: 0 !important;
@@ -1389,19 +1389,19 @@ img {
     /* visibility: hidden !important; /* AVOID: Use overflow and zero dimensions instead */
 }
 
-/* Remove rules that hide children of #sidebar.collapsed using visibility/opacity */
-#sidebar.collapsed > *:not(#collapseSidebarBtn) {
+/* Remove rules that hide children of #sidebar.sidebar-is-collapsed using visibility/opacity */
+#sidebar.sidebar-is-collapsed > *:not(#collapseSidebarBtn) {
     /* visibility: hidden !important; /* REMOVED */
     /* opacity: 0 !important; /* REMOVED */
     /* pointer-events: none !important; /* REMOVED */
 }
 
 /* Ensure the collapse button itself remains visible and interactive */
-/* This rule for #collapseSidebarBtn needs to be outside of #sidebar.collapsed > * if it's to override it,
+/* This rule for #collapseSidebarBtn needs to be outside of #sidebar.sidebar-is-collapsed > * if it's to override it,
    or be more specific. The current fixed positioning might be okay.
-   The existing #sidebar.collapsed #collapseSidebarBtn rule handles this.
+   The existing #sidebar.sidebar-is-collapsed #collapseSidebarBtn rule handles this.
 */
-#sidebar.collapsed #collapseSidebarBtn {
+#sidebar.sidebar-is-collapsed #collapseSidebarBtn {
     visibility: visible !important; /* Ensure button is visible */
     opacity: 1 !important; /* Ensure button is fully opaque */
     pointer-events: auto !important; /* Ensure button is interactive */

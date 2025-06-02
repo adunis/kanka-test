@@ -175,8 +175,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       sidebar.classList.toggle("mobile-collapsed", actuallyCollapsingMobile);
       // Ensure desktop classes are removed on mobile
-      sidebar.classList.remove("collapsed");
-      containerDiv.classList.remove("sidebar-collapsed");
+      sidebar.classList.remove("sidebar-is-collapsed");
+      containerDiv.classList.remove("sidebar-is-collapsed");
       if (resizer) resizer.style.display = "none"; // Resizer typically hidden on mobile by CSS
 
       localStorage.setItem("sidebarMobileCollapsed", actuallyCollapsingMobile ? "true" : "false");
@@ -190,13 +190,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (typeof collapse === 'boolean') {
         actuallyCollapsingDesktop = collapse;
       } else {
-        actuallyCollapsingDesktop = !sidebar.classList.contains("collapsed");
+        actuallyCollapsingDesktop = !sidebar.classList.contains("sidebar-is-collapsed");
       }
 
       if (!isInitialLoad) console.log(`[SIDEBAR_DESKTOP] Toggling main sidebar. Collapsing: ${actuallyCollapsingDesktop}`);
 
-      sidebar.classList.toggle("collapsed", actuallyCollapsingDesktop);
-      containerDiv.classList.toggle("sidebar-collapsed", actuallyCollapsingDesktop);
+      sidebar.classList.toggle("sidebar-is-collapsed", actuallyCollapsingDesktop);
+      containerDiv.classList.toggle("sidebar-is-collapsed", actuallyCollapsingDesktop);
       if (resizer) resizer.style.display = actuallyCollapsingDesktop ? "none" : "flex";
 
       localStorage.setItem("sidebarCollapsed", actuallyCollapsingDesktop ? "true" : "false");
@@ -1849,7 +1849,7 @@ function hideLoading() {
       nodeDisplayElement.textContent = node.name.replace(/\.json$/i, "");
 
       if (node.type === "dir") {
-        li.classList.add("folder", "collapsed");
+        li.classList.add("folder", "node-is-collapsed");
         nodeDisplayElement.title = `Folder: ${node.name}`;
         nodeDisplayElement.addEventListener("click", (e) => {
           // Allow click on text to expand/collapse only if not clicking a button inside
@@ -1857,7 +1857,7 @@ function hideLoading() {
             e.target === nodeDisplayElement ||
             e.target.classList.contains("node-text")
           ) {
-            li.classList.toggle("collapsed");
+            li.classList.toggle("node-is-collapsed");
           }
         });
         nodeContentWrapper.style.cursor = "pointer";
@@ -2316,7 +2316,7 @@ document.title = `${currentJsonData?.name || "Entry"} - Globeseekers`; // Update
         );
 
         // E. Automatic Main Sidebar Collapse on File Open (Desktop only for this behavior)
-        if (window.innerWidth > MOBILE_BREAKPOINT && sidebar && !sidebar.classList.contains('collapsed') && !sidebar.classList.contains('mobile-collapsed')) {
+        if (window.innerWidth > MOBILE_BREAKPOINT && sidebar && !sidebar.classList.contains('sidebar-is-collapsed') && !sidebar.classList.contains('mobile-collapsed')) {
             console.log("[AUTO-COLLAPSE] File opened on desktop, collapsing main sidebar.");
             toggleMainSidebar(true); // Explicitly collapse
         }
@@ -2330,7 +2330,7 @@ document.title = `${currentJsonData?.name || "Entry"} - Globeseekers`; // Update
           // Expand parent folders
           let parentLi = linkElement.closest("li.folder");
           while (parentLi) {
-            parentLi.classList.remove("collapsed");
+            parentLi.classList.remove("node-is-collapsed");
             const grandParentUl = parentLi.parentElement;
             if (grandParentUl && grandParentUl.id !== "fileTreeRoot") {
               parentLi = grandParentUl.closest("li.folder");
@@ -3833,7 +3833,7 @@ document.title = `${currentJsonData?.name || "Entry"} - Globeseekers`; // Update
         nodeContent.appendChild(label);
         li.appendChild(nodeContent);
       } else {
-        li.classList.add("collapsed");
+        li.classList.add("node-is-collapsed");
         checkbox.addEventListener("change", (e) => {
           const isChecked = e.target.checked;
           const childCheckboxes = li.querySelectorAll(
@@ -3846,7 +3846,7 @@ document.title = `${currentJsonData?.name || "Entry"} - Globeseekers`; // Update
         nodeContent.appendChild(label);
         nodeContent.addEventListener("click", (e) => {
           if (e.target !== checkbox) {
-            li.classList.toggle("collapsed");
+            li.classList.toggle("node-is-collapsed");
           }
         });
         li.appendChild(nodeContent);
@@ -4823,7 +4823,7 @@ document.title = `${currentJsonData?.name || "Entry"} - Globeseekers`; // Update
         label.textContent = displayName;
         label.title = `Item: ${node.path}`;
         if (node.type === "dir") {
-          li.classList.add("collapsed");
+          li.classList.add("node-is-collapsed");
           checkbox.addEventListener("change", (e) => {
             const isChecked = e.target.checked;
             const childCheckboxes = li.querySelectorAll(
@@ -4835,7 +4835,7 @@ document.title = `${currentJsonData?.name || "Entry"} - Globeseekers`; // Update
           nodeContent.appendChild(label);
           nodeContent.addEventListener("click", (e) => {
             if (e.target !== checkbox) {
-              li.classList.toggle("collapsed");
+              li.classList.toggle("node-is-collapsed");
             }
           });
           li.appendChild(nodeContent);
