@@ -135,6 +135,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   let GEMINI_API_KEY = null; // From sessionStorage
 
   // --- Constants (populated from config) ---
+  const MOBILE_BREAKPOINT = 768; // Added
   let GITHUB_USERNAME,
     GITHUB_REPO,
     GITHUB_DATA_PATH,
@@ -155,18 +156,56 @@ document.addEventListener("DOMContentLoaded", async () => {
   // --- Sidebar Collapse Functions ---
   function toggleMainSidebar(collapse, isInitialLoad = false) {
     if (!sidebar || !containerDiv || !resizer || !collapseSidebarBtn) {
-        console.error("Error: Main sidebar toggle components not found.");
-        return;
+      console.error("Error: Main sidebar toggle components not found.");
+      return;
     }
-    const actuallyCollapsing = typeof collapse === 'boolean' ? collapse : !sidebar.classList.contains("collapsed");
 
-    if (!isInitialLoad) console.log(`[SIDEBAR] Toggling main sidebar. Collapsing: ${actuallyCollapsing}`);
+    const screenWidth = window.innerWidth;
 
-    sidebar.classList.toggle("collapsed", actuallyCollapsing);
-    containerDiv.classList.toggle("sidebar-collapsed", actuallyCollapsing);
-    resizer.style.display = actuallyCollapsing ? "none" : "flex"; // 'flex' or 'block' depending on original display
-    localStorage.setItem("sidebarCollapsed", actuallyCollapsing ? "true" : "false");
-    collapseSidebarBtn.textContent = actuallyCollapsing ? "»" : "«";
+    if (screenWidth <= MOBILE_BREAKPOINT) {
+      // Mobile behavior
+      let actuallyCollapsingMobile;
+      if (typeof collapse === 'boolean') {
+        actuallyCollapsingMobile = collapse;
+      } else {
+        actuallyCollapsingMobile = !sidebar.classList.contains("mobile-collapsed");
+      }
+
+      if (!isInitialLoad) console.log(`[SIDEBAR_MOBILE] Toggling main sidebar. Collapsing: ${actuallyCollapsingMobile}`);
+
+      sidebar.classList.toggle("mobile-collapsed", actuallyCollapsingMobile);
+      // Ensure desktop classes are removed on mobile
+      sidebar.classList.remove("collapsed");
+      containerDiv.classList.remove("sidebar-collapsed");
+      if (resizer) resizer.style.display = "none"; // Resizer typically hidden on mobile by CSS
+
+      localStorage.setItem("sidebarMobileCollapsed", actuallyCollapsingMobile ? "true" : "false");
+      // Clear desktop local storage if we are on mobile to avoid confusion on resize
+      // localStorage.removeItem("sidebarCollapsed");
+      collapseSidebarBtn.textContent = actuallyCollapsingMobile ? "☰" : "✕"; // Hamburger/Close icons
+
+    } else {
+      // Desktop behavior
+      let actuallyCollapsingDesktop;
+      if (typeof collapse === 'boolean') {
+        actuallyCollapsingDesktop = collapse;
+      } else {
+        actuallyCollapsingDesktop = !sidebar.classList.contains("collapsed");
+      }
+
+      if (!isInitialLoad) console.log(`[SIDEBAR_DESKTOP] Toggling main sidebar. Collapsing: ${actuallyCollapsingDesktop}`);
+
+      sidebar.classList.toggle("collapsed", actuallyCollapsingDesktop);
+      containerDiv.classList.toggle("sidebar-collapsed", actuallyCollapsingDesktop);
+      if (resizer) resizer.style.display = actuallyCollapsingDesktop ? "none" : "flex";
+
+      localStorage.setItem("sidebarCollapsed", actuallyCollapsingDesktop ? "true" : "false");
+      // Ensure mobile class is removed on desktop
+      sidebar.classList.remove("mobile-collapsed");
+      // Clear mobile local storage if we are on desktop
+      // localStorage.removeItem("sidebarMobileCollapsed");
+      collapseSidebarBtn.textContent = actuallyCollapsingDesktop ? "»" : "«"; // Arrows for desktop
+    }
   }
 
   function toggleImagePreviewSidebar(collapse, isInitialLoad = false) {
@@ -678,17 +717,29 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (sidebar && resizer) makeResizable(sidebar, resizer);
 
     // Load sidebar states from localStorage
-    // Force main sidebar to start expanded
-    toggleMainSidebar(false, true); // false for collapse (i.e., expand), true for initialLoad
-    localStorage.setItem("sidebarCollapsed", "false"); // Update localStorage to reflect this default
+    const screenWidthInitial = window.innerWidth;
+    if (screenWidthInitial <= MOBILE_BREAKPOINT) {
+      const mobileCollapsed = localStorage.getItem("sidebarMobileCollapsed") === "true";
+      toggleMainSidebar(mobileCollapsed, true);
+      // Optional: Default to expanded on mobile initial load, regardless of storage
+      // toggleMainSidebar(false, true);
+      // localStorage.setItem("sidebarMobileCollapsed", "false");
+    } else {
+      const desktopCollapsed = localStorage.getItem("sidebarCollapsed") === "true";
+      // Default to expanded on desktop initial load if nothing is stored
+      // toggleMainSidebar(desktopCollapsed || false, true);
+      // Forcing expanded on initial desktop load for now, as per original logic for desktop:
+      toggleMainSidebar(false, true);
+      localStorage.setItem("sidebarCollapsed", "false");
+    }
 
     // Image preview sidebar can still respect localStorage
     if (localStorage.getItem('imagePreviewSidebarCollapsed') === 'true') {
         toggleImagePreviewSidebar(true, true);
     }
-    // Ensure button text is correct after initial load based on state
-    if (collapseSidebarBtn && sidebar) collapseSidebarBtn.textContent = sidebar.classList.contains("collapsed") ? "»" : "«";
-    if (collapseImagePreviewBtn && imagePreviewSidebar) collapseImagePreviewBtn.textContent = imagePreviewSidebar.classList.contains("collapsed") ? "«" : "»";
+    // Ensure button text is correct after initial load based on state - toggleMainSidebar now handles this.
+    // if (collapseSidebarBtn && sidebar) collapseSidebarBtn.textContent = sidebar.classList.contains("collapsed") ? "»" : "«";
+    // if (collapseImagePreviewBtn && imagePreviewSidebar) collapseImagePreviewBtn.textContent = imagePreviewSidebar.classList.contains("collapsed") ? "«" : "»";
 
 
     if (isReadOnlyLoad) {
@@ -2264,9 +2315,9 @@ document.title = `${currentJsonData?.name || "Entry"} - Globeseekers`; // Update
           `[LOAD] Successfully fetched data for ${filePath} with SHA: ${currentFileSha}`
         );
 
-        // E. Automatic Main Sidebar Collapse on File Open
-        if (sidebar && !sidebar.classList.contains('collapsed')) {
-            console.log("[AUTO-COLLAPSE] File opened, collapsing main sidebar.");
+        // E. Automatic Main Sidebar Collapse on File Open (Desktop only for this behavior)
+        if (window.innerWidth > MOBILE_BREAKPOINT && sidebar && !sidebar.classList.contains('collapsed') && !sidebar.classList.contains('mobile-collapsed')) {
+            console.log("[AUTO-COLLAPSE] File opened on desktop, collapsing main sidebar.");
             toggleMainSidebar(true); // Explicitly collapse
         }
 
@@ -4201,7 +4252,17 @@ document.title = `${currentJsonData?.name || "Entry"} - Globeseekers`; // Update
     let isResizing = false;
     let startX, startWidth;
     if (!element || !resizerElement) return;
+
+    // Disable resizer on mobile explicitly if not already handled by CSS
+    if (window.innerWidth <= MOBILE_BREAKPOINT) {
+        if(resizerElement) resizerElement.style.display = 'none';
+        return;
+    } else {
+        if(resizerElement) resizerElement.style.display = 'flex'; // Or original display type
+    }
+
     resizerElement.addEventListener("mousedown", (e) => {
+      if (window.innerWidth <= MOBILE_BREAKPOINT) return; // Extra check
       isResizing = true;
       startX = e.clientX;
       startWidth = parseInt(window.getComputedStyle(element).width, 10);
@@ -4215,7 +4276,7 @@ document.title = `${currentJsonData?.name || "Entry"} - Globeseekers`; // Update
       const deltaX = e.clientX - startX;
       let newWidth = startWidth + deltaX;
       const minW = 200;
-      const maxW = window.innerWidth - 150;
+      const maxW = window.innerWidth - 150; // Ensure main content has some space
       newWidth = Math.max(minW, Math.min(newWidth, maxW));
       element.style.width = `${newWidth}px`;
     }
@@ -4229,6 +4290,34 @@ document.title = `${currentJsonData?.name || "Entry"} - Globeseekers`; // Update
       }
     }
   }
+
+  // --- Resize Handler for Sidebar State ---
+  function handleResizeForSidebarState() {
+    if (!sidebar || !containerDiv || !resizer || !collapseSidebarBtn) return;
+
+    const screenWidth = window.innerWidth;
+    const isCurrentlyMobile = sidebar.classList.contains("mobile-collapsed") || (localStorage.getItem("sidebarMobileCollapsed") === "true" && screenWidth <= MOBILE_BREAKPOINT);
+    const isCurrentlyDesktopCollapsed = sidebar.classList.contains("collapsed");
+
+    // Call toggleMainSidebar with null to make it re-evaluate based on current classes and new width
+    // The `true` for isInitialLoad prevents console logs and ensures it behaves like a state refresh.
+    toggleMainSidebar(null, true);
+
+    // Additional logic for resizer visibility if not covered by toggleMainSidebar
+    if (screenWidth <= MOBILE_BREAKPOINT) {
+        if (resizer) resizer.style.display = 'none';
+    } else {
+        // If switching to desktop, and sidebar is not collapsed, show resizer.
+        // toggleMainSidebar should handle this, but as a fallback:
+        if (resizer && !sidebar.classList.contains("collapsed")) {
+            resizer.style.display = 'flex'; // Or original display type
+        } else if (resizer && sidebar.classList.contains("collapsed")) {
+            resizer.style.display = 'none';
+        }
+    }
+  }
+  window.addEventListener('resize', handleResizeForSidebarState);
+
 
   function setupCreateNewFolderListener() {
     if (createNewFolderBtn) {
