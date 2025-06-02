@@ -110,7 +110,6 @@ img {
   padding: 15px 20px;
   box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.15), 2px 0 5px rgba(0, 0, 0, 0.1);
   border-right: 1px solid #bbbbbb; /* BW */
-  display: flex;
   flex-direction: column;
   height: 100vh;
   overflow-y: auto;
@@ -208,8 +207,10 @@ img {
     overflow-y: auto;
     padding: 20px 15px;
     box-sizing: border-box;
-    border-right: 1px solid #cccccc; /* BW */
+    /* border-right: 1px solid #cccccc; */ /* MODIFIED: Removed right border */
+    border-left: 1px solid #cccccc;   /* MODIFIED: Added left border for separation */
     background-color: #f5f5f5; /* BW */
+    order: 2; /* MODIFIED: Ensures it's the second item (right side) in desktop flex row */
 }
 
 #addImageBtn {
@@ -252,6 +253,7 @@ img {
   padding: 25px 35px;
   box-sizing: border-box;
   background-color: #ffffff; /* BW */
+  order: 1; /* MODIFIED: Ensures it's the first item (left side) in desktop flex row */
 }
 
 .repo-info {
@@ -348,7 +350,6 @@ img {
 #fileTreeContainer {
   flex-grow: 1;
   margin-top: 10px;
-  overflow-y: auto;
   min-height: 0;
 }
 
@@ -1059,7 +1060,7 @@ img {
     }
     .sidebar #createNewFileBtn, .sidebar #createNewFolderBtn, .sidebar #reorganizeEntriesBtn {
         /* Default mobile padding and font-size, will be overridden by more specific icon-only styles below */
-        padding: 10px 12px; 
+        padding: 10px 12px;
         font-size: 0.95em;
     }
 
@@ -1069,10 +1070,9 @@ img {
   .sidebar #reorganizeEntriesBtn {
     padding: 8px; /* Adjust padding to make buttons smaller for icon */
     text-align: center;
-    display: flex; 
     align-items: center;
     justify-content: center;
-    line-height: 1; 
+    line-height: 1;
   }
 
   .sidebar .button-icon {
@@ -1084,15 +1084,6 @@ img {
   .sidebar .button-text {
     display: none; /* Hide the text on mobile */
   }
-  /* Optional: Adjust button width if they are full width by default and become too wide */
-  /*
-  .sidebar #createNewFileBtn,
-  .sidebar #createNewFolderBtn,
-  .sidebar #reorganizeEntriesBtn {
-    width: auto; /* Allow button to shrink to icon size + padding */
-    min-width: 40px; /* Example minimum width */
-  }
-  */
 
     .resizer {
         display: none;
@@ -1103,7 +1094,7 @@ img {
         overflow-y: auto; /* Allow this section to scroll if needed */
         overflow-x: hidden;
     }
-    
+
     .main-content-wrapper {
         flex-direction: column; /* Stack entry view and image preview */
     }
@@ -1122,11 +1113,11 @@ img {
         max-height: 50vh; /* Generous height for image preview, scrollable */
         overflow-y: auto;
         border-right: none;
-        border-left: none;
+        border-left: none; /* Ensure left border added for desktop is removed here */
         border-top: 1px solid #cccccc; /* BW */
         padding: 10px;
     }
-    
+
     #addImageBtn { /* Ensure it's full width in its container */
         width: 100%;
         padding: 10px;
@@ -1166,7 +1157,7 @@ img {
     }
     @media (max-width: 420px) { /* For very small phones, make control buttons stack */
         .controls button {
-            flex-basis: 100%; 
+            flex-basis: 100%;
             margin-right: 0;
         }
     }
@@ -1260,7 +1251,7 @@ img {
         padding: 10px 12px; /* Increased padding for touch */
         font-size: 1.4em; /* Slightly larger icon */
     }
-    
+
      /* Reorganize Modal specific adjustments */
     #reorganizeModal .modal-section h3 {
         font-size: 1.1em;
@@ -1275,7 +1266,7 @@ img {
     h1 { font-size: 1.5em; }
     h2 { font-size: 1.2em; }
     h3 { font-size: 1.0em; }
-    body, html { font-size: 13px; } 
+    body, html { font-size: 13px; }
 
     .sidebar {
         padding: 8px;
@@ -1322,11 +1313,11 @@ img {
 /* --- Collapse Button Styles --- */
 
 #collapseSidebarBtn {
-    display: block; 
-    width: calc(100% - 10px); 
+    display: block;
+    width: calc(100% - 10px);
     margin: 10px 5px;
     padding: 8px;
-    font-size: 1.2em; 
+    font-size: 1.2em;
     text-align: center;
     background-color: #e0e0e0;
     border: 1px solid #cccccc;
@@ -1348,12 +1339,12 @@ img {
 
 #collapseImagePreviewBtn {
     padding: 3px 8px;
-    font-size: 1.2em; 
+    font-size: 1.2em;
     background-color: #e0e0e0;
     border: 1px solid #cccccc;
     border-radius: 3px;
     cursor: pointer;
-    margin-left: 10px; 
+    margin-left: 10px;
 }
 
 #collapseImagePreviewBtn:hover {
