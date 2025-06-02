@@ -348,6 +348,8 @@ img {
 #fileTreeContainer {
   flex-grow: 1;
   margin-top: 10px;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 #fileTreeRoot {
