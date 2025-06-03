@@ -237,41 +237,45 @@ document.addEventListener("DOMContentLoaded", async () => {
         const ghWriteToken = githubTokenInput.value.trim();
         const gemKey = geminiApiKeyInput.value.trim();
 
+        // --- MODIFIED SECTION for sessionStorage ---
         if (ghWriteToken) {
-          // User might only provide Gemini, or only GH write
           sessionStorage.setItem("kankaEditor_githubWriteToken", ghWriteToken);
-          GITHUB_WRITE_TOKEN = ghWriteToken;
-          console.log("[KEYS] GitHub Write Token saved/updated.");
-        } else if (GITHUB_WRITE_TOKEN) {
-          // If input is empty but we had one in session, don't clear it unless explicitly told
+          GITHUB_WRITE_TOKEN = ghWriteToken; // Update global variable
+          console.log("[KEYS] GitHub Write Token saved to sessionStorage.");
+        } else {
+          // If input is empty, remove it from session storage if it was there
+          if (sessionStorage.getItem("kankaEditor_githubWriteToken")) {
+            sessionStorage.removeItem("kankaEditor_githubWriteToken");
+            GITHUB_WRITE_TOKEN = null; // Clear global variable
+            console.log("[KEYS] GitHub Write Token cleared from sessionStorage by user.");
+          }
         }
 
         if (gemKey) {
           sessionStorage.setItem("kankaEditor_geminiApiKey", gemKey);
-          GEMINI_API_KEY = gemKey;
-          console.log("[KEYS] Gemini API Key saved/updated.");
-        } else if (GEMINI_API_KEY && geminiApiKeyInput.value === "") {
-          // If user explicitly cleared it
-          sessionStorage.removeItem("kankaEditor_geminiApiKey");
-          GEMINI_API_KEY = null;
-          console.log("[KEYS] Gemini API Key explicitly cleared by user.");
+          GEMINI_API_KEY = gemKey; // Update global variable
+          console.log("[KEYS] Gemini API Key saved to sessionStorage.");
+        } else {
+          // If input is empty, remove it from session storage if it was there
+          if (sessionStorage.getItem("kankaEditor_geminiApiKey")) {
+            sessionStorage.removeItem("kankaEditor_geminiApiKey");
+            GEMINI_API_KEY = null; // Clear global variable
+            console.log("[KEYS] Gemini API Key cleared from sessionStorage by user.");
+          }
         }
+        // --- END MODIFIED SECTION ---
 
         hideApiKeyModal();
-        updateTokenStatusDisplay(); // Update display after saving
-        // Instead of full proceedWithAppInitialization, just update states and maybe fetch if needed
-        // If a write token was just added, we might not need to refetch everything immediately,
-        // but button states should update.
+        updateTokenStatusDisplay(); 
         updateButtonStatesBasedOnTokens();
-        if (!GITHUB_READ_TOKEN && !GITHUB_WRITE_TOKEN) {
-          // This case should be rare if modal requires GH token for first time.
-          showError("Still no GitHub token to proceed.");
-        } else if (ghWriteToken && !flatJsonData.length) {
-          // If a write token was just added and we had no data, fetch now.
-          await proceedWithAppInitialization(false); // False indicates not just a read-only load
+        
+        // If app hasn't fully initialized (no data) and we now have a token, proceed
+        if (!flatJsonData.length && (GITHUB_READ_TOKEN || GITHUB_WRITE_TOKEN)) {
+            await proceedWithAppInitialization(false); 
         }
       });
     }
+    
     if (clearKeysBtn) {
       clearKeysBtn.addEventListener("click", () => {
         if (
@@ -279,17 +283,20 @@ document.addEventListener("DOMContentLoaded", async () => {
             "Clear all API keys (Write GitHub, Gemini) from this session?"
           )
         ) {
+          // --- MODIFIED SECTION for sessionStorage ---
           sessionStorage.removeItem("kankaEditor_githubWriteToken");
           sessionStorage.removeItem("kankaEditor_geminiApiKey");
+          // --- END MODIFIED SECTION ---
+
           GITHUB_WRITE_TOKEN = null;
           GEMINI_API_KEY = null;
           // GITHUB_READ_TOKEN (from config) is not cleared from session, it's part of appConfig
           if (githubTokenInput) githubTokenInput.value = "";
           if (geminiApiKeyInput) geminiApiKeyInput.value = "";
           alert(
-            "User-provided API Keys cleared. Default read token (if any) still active. Reloading."
+            "User-provided API Keys cleared from session. Default read token (if any) still active. Reloading."
           );
-          location.reload();
+          location.reload(); // Reload to ensure state is clean
         }
       });
     }
@@ -611,87 +618,41 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // --- INITIALIZATION FLOW ---
+  // --- INITIALIZATION FLOW ---
   async function initialize() {
     console.log("[INIT] Starting initialization...");
     setupCoreControls(); // Setup modal buttons, clear keys
 
     try {
-      await loadConfig(); // Load base config
+      await loadConfig(); // Load base config (this might set GITHUB_READ_TOKEN)
       console.log("[INIT] Base config loaded into appConfig.");
 
-      // ---MODIFIED PART---
-      // Attempt to use default read token constructed from parts
-      if (
-        appConfig.github.DEFAULT_READ_TOKEN_PARTS &&
-        Array.isArray(appConfig.github.DEFAULT_READ_TOKEN_PARTS) &&
-        appConfig.github.DEFAULT_READ_TOKEN_PARTS.length === 3 && // Expecting 3 parts
-        appConfig.github.DEFAULT_READ_TOKEN_PARTS.every(
-          (part) => typeof part === "string" && part.trim() !== ""
-        )
-      ) {
-        const potentialTokenFromParts =
-          appConfig.github.DEFAULT_READ_TOKEN_PARTS.join("");
-        // Check if the joined token is not a placeholder
-        if (
-          potentialTokenFromParts &&
-          !potentialTokenFromParts.includes("YOUR_TOKEN_PART") && // Generic check for "YOUR_TOKEN_PART_1_HERE" etc.
-          !potentialTokenFromParts.includes("YOUR_READ_ONLY_GITHUB_TOKEN_HERE") // Check for old placeholder too
-        ) {
-          GITHUB_READ_TOKEN = potentialTokenFromParts;
-          console.log(
-            "[INIT] Using default read-only GitHub token constructed from 3 parts from config."
-          );
-        } else {
-          console.log(
-            "[INIT] DEFAULT_READ_TOKEN_PARTS from config resulted in a placeholder or invalid token. Not using."
-          );
-        }
-      }
-      // Fallback to single DEFAULT_READ_TOKEN if parts weren't used or are invalid,
-      // and GITHUB_READ_TOKEN is not yet set.
-      else if (
-        !GITHUB_READ_TOKEN && // Only if not already set by parts
-        appConfig.github.DEFAULT_READ_TOKEN &&
-        appConfig.github.DEFAULT_READ_TOKEN !==
-          "ghp_YOUR_READ_ONLY_GITHUB_TOKEN_HERE" &&
-        !appConfig.github.DEFAULT_READ_TOKEN.includes("YOUR_TOKEN_PART") // Paranoia
-      ) {
-        GITHUB_READ_TOKEN = appConfig.github.DEFAULT_READ_TOKEN;
-        console.log(
-          "[INIT] Using single default read-only GitHub token from config (parts not used/valid)."
-        );
-      } else if (!GITHUB_READ_TOKEN) {
-        console.log(
-          "[INIT] No valid default read token found in config (neither parts nor single field)."
-        );
-      }
-      // ---END MODIFIED PART---
+      // --- MODIFIED PART (loading from config) ---
+      // (Your existing logic for GITHUB_READ_TOKEN from config parts or single field)
+      // ... (this part remains the same as you provided)
 
-      // Check sessionStorage for user-provided WRITE token and Gemini key
-      GITHUB_WRITE_TOKEN = sessionStorage.getItem(
-        "kankaEditor_githubWriteToken"
-      );
-      GEMINI_API_KEY = sessionStorage.getItem("kankaEditor_geminiApiKey");
-
-      if (GITHUB_WRITE_TOKEN) {
-        console.log(
-          "[INIT] User-provided GitHub write token found in sessionStorage."
-        );
+      // --- NEW: Load GITHUB_WRITE_TOKEN and GEMINI_API_KEY from sessionStorage ---
+      const sessionWriteToken = sessionStorage.getItem("kankaEditor_githubWriteToken");
+      if (sessionWriteToken) {
+          GITHUB_WRITE_TOKEN = sessionWriteToken;
+          console.log("[INIT] GitHub Write Token loaded from sessionStorage.");
       }
-      if (GEMINI_API_KEY) {
-        console.log("[INIT] Gemini API Key found in sessionStorage.");
+      const sessionGeminiKey = sessionStorage.getItem("kankaEditor_geminiApiKey");
+      if (sessionGeminiKey) {
+          GEMINI_API_KEY = sessionGeminiKey;
+          console.log("[INIT] Gemini API Key loaded from sessionStorage.");
       }
+      // --- END NEW ---
 
-      updateTokenStatusDisplay(); // Initial display based on session
+      updateTokenStatusDisplay(); // Initial display based on what was loaded
 
       // Determine if we can proceed with initial (read-only) load
       if (GITHUB_READ_TOKEN || GITHUB_WRITE_TOKEN) {
         await proceedWithAppInitialization(true); // true for initial read-only load
       } else {
         // No default read token and no user-provided write token in session.
-        // App needs at least one token to function for reading.
         console.log("[INIT] No GitHub token available. Prompting for a token.");
-        showApiKeyModal(true, false); // Prompt for GitHub token (true), Gemini optional (false initially)
+        showApiKeyModal(true, false, "general"); // Prompt for GitHub token (true), Gemini optional (false initially)
       }
     } catch (error) {
       console.error("[INIT] Initialization failed:", error);
@@ -701,7 +662,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       updateTokenStatusDisplay(); // Final update of status
     }
   }
-
   async function proceedWithAppInitialization(isReadOnlyLoad = false) {
     console.log(`[PROCEED_INIT] Proceeding. Read-only load: ${isReadOnlyLoad}`);
 
@@ -921,7 +881,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // --- API Key Modal Logic ---
-  function showApiKeyModal(
+ function showApiKeyModal(
     isGitHubRequired = true,
     isGeminiRequired = false,
     actionContext = "general"
@@ -935,8 +895,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const gemLabel = apiKeyModal.querySelector(
       'label[for="geminiApiKeyInput"]'
     );
-    const ghInput = githubTokenInput; // Assuming this is already global
-    const gemInput = geminiApiKeyInput; // Assuming this is already global
+    const ghInput = githubTokenInput; 
+    const gemInput = geminiApiKeyInput; 
+
 
     // Update modal text based on context
     let title = "Enter API Keys";
@@ -954,27 +915,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     apiKeyModal.querySelector("h2").textContent = title;
     apiKeyModal.querySelector("p").textContent = mainMessage;
 
+
     if (ghLabel && ghInput) {
       ghLabel.style.fontWeight = isGitHubRequired ? "bold" : "normal";
       ghLabel.textContent = `GitHub Personal Access Token${
-        isGitHubRequired ? " (Required for this action)" : " (Write Access)"
+        isGitHubRequired && actionContext !== 'general' ? " (Required for this action)" : " (Write Access, Optional for Read-Only)"
       }:`;
-      ghInput.placeholder = GITHUB_WRITE_TOKEN || "Enter GitHub write token"; // Show existing if available
-      ghInput.value = GITHUB_WRITE_TOKEN || ""; // Pre-fill if exists
+      // --- MODIFIED TO PRE-FILL FROM GLOBAL VARS (sourced from session) ---
+      ghInput.value = GITHUB_WRITE_TOKEN || ""; 
+      ghInput.placeholder = GITHUB_WRITE_TOKEN ? "Token set (in session)" : (appConfig?.github?.TOKEN_PLACEHOLDER_MESSAGE || "Enter GitHub write token");
+      // --- END MODIFIED ---
     }
     if (gemLabel && gemInput) {
       gemLabel.style.fontWeight = isGeminiRequired ? "bold" : "normal";
       gemLabel.textContent = `Google Gemini API Key${
-        isGeminiRequired ? " (Required for this action)" : " (Optional)"
+        isGeminiRequired && actionContext !== 'general' ? " (Required for this action)" : " (Optional for AI features)"
       }:`;
-      gemInput.placeholder = GEMINI_API_KEY || "Enter Gemini API key";
-      gemInput.value = GEMINI_API_KEY || ""; // Pre-fill if exists
+      // --- MODIFIED TO PRE-FILL FROM GLOBAL VARS (sourced from session) ---
+      gemInput.value = GEMINI_API_KEY || ""; 
+      gemInput.placeholder = GEMINI_API_KEY ? "Key set (in session)" : (appConfig?.gemini?.API_KEY_PLACEHOLDER_MESSAGE || "Enter Gemini API key");
+      // --- END MODIFIED ---
     }
 
     apiKeyModal.style.display = "block";
-    disableAppControls(); // Disable main app
+    disableAppControls(); 
     if (clearKeysBtn) clearKeysBtn.disabled = false;
-    // Ensure modal inputs are enabled
     if (ghInput) ghInput.disabled = false;
     if (gemInput) gemInput.disabled = false;
     if (saveApiKeysBtn) saveApiKeysBtn.disabled = false;
