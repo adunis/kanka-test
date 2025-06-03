@@ -4,7 +4,7 @@
   "campaign_id": null,
   "entry": "<p>New entry: Il Cuore Nero.</p>",
   "created_at": "2025-06-03T22:03:32.486.000000Z",
-  "updated_at": "2025-06-03T22:03:32.486.000000Z",
+  "updated_at": "2025-06-03T22:06:46.456.000000Z",
   "is_private": 0,
   "tags": [],
   "entity": {
@@ -21,10 +21,12 @@
     "focus_x": null,
     "focus_y": null,
     "created_at": "2025-06-03T22:03:32.486.000000Z",
-    "updated_at": "2025-06-03T22:03:32.486.000000Z",
+    "updated_at": "2025-06-03T22:06:46.456.000000Z",
     "created_by": null,
     "updated_by": null,
-    "image_uuids": [],
+    "image_uuids": [
+      "be81dab3-f000-4a8e-b49a-75765f9b8b94"
+    ],
     "header_uuid": null,
     "image_path": null,
     "header_image": null,
