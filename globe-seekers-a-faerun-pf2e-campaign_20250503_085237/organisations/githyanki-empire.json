@@ -1,1 +1,49 @@
-{"id":324719,"name":"Githyanki Empire","created_at":"2024-10-01T22:49:27.000000Z","updated_at":"2024-11-06T17:22:05.000000Z","is_private":0,"is_defunct":0,"organisation_id":330574,"entity":{"id":6752078,"entity_id":324719,"parent_id":null,"type_id":4,"name":"Githyanki Empire","type":"Empire","entry":"<div class=\"paragraph normal ng-star-inserted\" style=\"padding-left:1.25rem;\"><span class=\"ng-star-inserted\">The Githyanki are a faction working for an ancient Aboleth named Xul'koroth, the \"Patron.\"<\/span><span class=\"ng-star-inserted\"><\/span><\/div><div class=\"paragraph normal ng-star-inserted\" style=\"padding-left:1.25rem;\"><span class=\"ng-star-inserted\"><\/span><\/div><div class=\"bullet normal ng-star-inserted\" style=\"width:1.125rem;\">\u25cf<\/div><div class=\"paragraph normal ng-star-inserted\" style=\"padding-left:1.25rem;\"><span class=\"ng-star-inserted\">Azara, a Githzerai, betrayed her city by delivering a Netherese Globe to the Githyanki.<\/span><span class=\"ng-star-inserted\"><\/span><\/div><div class=\"paragraph normal ng-star-inserted\" style=\"padding-left:1.25rem;\"><span class=\"ng-star-inserted\"><\/span><\/div><div class=\"bullet normal ng-star-inserted\" style=\"width:1.125rem;\">\u25cf<\/div><div class=\"paragraph normal ng-star-inserted\" style=\"padding-left:1.25rem;\"><span class=\"ng-star-inserted\">Vordekai gave Githyanki brains and hearts to Githzerai guards as a gruesome gift.<\/span><span class=\"ng-star-inserted\"><\/span><\/div><div class=\"paragraph normal ng-star-inserted\" style=\"padding-left:1.25rem;\"><span class=\"ng-star-inserted\"><\/span><\/div><div class=\"bullet normal ng-star-inserted\" style=\"width:1.125rem;\">\u25cf<\/div><div class=\"paragraph normal ng-star-inserted\" style=\"padding-left:1.25rem;\"><span class=\"ng-star-inserted\">Vordekai later theorized about incorporating a time crystal into his phylactery to manipulate time and prolong his unlife. He envisioned using this artefact to rapidly age Githyanki.<\/span><span class=\"ng-star-inserted\"><\/span><\/div><div class=\"paragraph normal ng-star-inserted\" style=\"padding-left:1.25rem;\"><span class=\"ng-star-inserted\"><\/span><\/div><div class=\"bullet normal ng-star-inserted\" style=\"width:1.125rem;\">\u25cf<\/div><div class=\"paragraph normal ng-star-inserted\" style=\"padding-left:1.25rem;\"><span class=\"ng-star-inserted\">Zorvath, a Netherese mage, mentioned that the Githyanki are pawns in Xul'koroth's cosmic game to gather Netherese Globes and ascend to godhood.<\/span><span class=\"ng-star-inserted\"><\/span><\/div><div class=\"paragraph normal ng-star-inserted\" style=\"padding-left:1.25rem;\"><span class=\"ng-star-inserted\"><\/span><\/div><div class=\"paragraph normal ng-star-inserted\" style=\"padding-left:0rem;\"><span class=\"ng-star-inserted\">The sources suggest that the Githyanki Empire is involved in a multiversal conflict orchestrated by Xul'koroth. Their objective is to collect Netherese Globes, powerful artefacts that could potentially grant Xul'koroth divine power. They are enemies of the Githzerai, another faction mentioned in the sources.<\/span><\/div><p><\/p>","is_private":0,"tooltip":null,"is_template":null,"is_attributes_private":0,"focus_x":null,"focus_y":null,"created_at":"2024-10-01T22:49:27.000000Z","updated_at":"2024-11-06T17:22:05.000000Z","created_by":275646,"updated_by":275646,"image_path":null,"image_uuid":"9d44c2bf-198f-4135-9c0f-e3958d2af065","header_image":null,"header_uuid":null,"marketplace_uuid":null,"relationships":[{"id":686597,"owner_id":6752078,"target_id":6752071,"relation":"Vassal","visibility_id":1,"mirror_id":686598,"attitude":null,"is_pinned":0,"colour":"","marketplace_uuid":null}]},"members":[],"pivotLocations":[]}
+{
+  "id": 324719,
+  "name": "Githyanki Empire",
+  "created_at": "2024-10-01T22:49:27.000000Z",
+  "updated_at": "2025-06-03T09:32:01.224.000000Z",
+  "is_private": 0,
+  "is_defunct": 0,
+  "organisation_id": 330574,
+  "entity": {
+    "id": 6752078,
+    "entity_id": 324719,
+    "parent_id": null,
+    "type_id": 4,
+    "name": "Githyanki Empire",
+    "type": "Empire",
+    "entry": "<div>\n  <p>\n    In the shattered world after the Great Descent, the Githyanki, once\n    ruthless raiders from across the planes, are now a fragmented force,\n    their ancient pact with the aboleth Xul'koroth strained. Xul'koroth,\n    whose ambitions shifted after the divine war, now seeks a deeper\n    understanding of this changed reality.\n  </p>\n  <ul>\n    <li>\n      <strong>Azara's Choice:</strong> Azara, a githzerai fleeing the ruins of her\n      monastery after its collapse during the Great Descent, desperately sought\n      any means to preserve her people's traditions. Drawn in by promises of\n      knowledge, she delivered a Netherese Globe to the Githyanki hoping it\n      would be studied, a decision that continues to haunt her.\n    </li>\n    <li>\n      <strong>Vordekai's Experiment:</strong> Vordekai's morbid fascination led him to\n      offer githyanki brains and hearts to githzerai guards, a gesture meant\n      to understand their resilience and resilience. The act, a grotesque\n      attempt at diplomacy in a broken world, further deepened the divide\n      between the two peoples.\n    </li>\n    <li>\n      <strong>Time and Unlife:</strong> Haunted by visions of temporal anomalies after\n      the Great Descent, Vordekai theorized about incorporating a time crystal\n      into his phylactery. He envisioned using this artifact not to age\n      githyanki, but to unravel the mysteries of the celestial staircase in an\n      attempt to return it to its place in the heavens.\n    </li>\n    <li>\n      <strong>Cosmic Pawns:</strong> Zorvath, a Netherese mage reborn into a world he\n      barely recognizes after the Great Descent, revealed that the Githyanki,\n      now scattered remnants seeking purpose, had been manipulated by\n      Xul'koroth. He sought to use them to gather Netherese Globes, intending\n      to study their chaotic energies to understand the impact of the divine\n      war, not to ascend to godhood as Zorvath initially claimed.\n    </li>\n  </ul>\n  <p>\n    Driven by the need to navigate a post-apocalyptic world, the Githyanki\n    are caught between a desperate search for purpose and the manipulations of\n    Xul'koroth. Their conflict with the Githzerai continues, a tragic echo of\n    a war that shattered the multiverse.\n  </p>\n  <p>\n    <strong>Plot Hooks:</strong>\n  </p>\n  <ul>\n    <li>\n      Rumors surface of a hidden Githyanki enclave possessing a map leading\n      to a fragment of the Celestial Staircase, a relic said to hold the power\n      to mend the shattered connection between the planes. The PCs are tasked\n      with finding this map before Xul'koroth can claim it.\n    </li>\n    <li>\n      A Githzerai refugee seeks asylum in a community the PCs are protecting,\n      claiming to possess knowledge of Xul'koroth's plans. However, they are\n      pursued by Githyanki assassins, forcing the PCs to choose between\n      protecting the refugee and risking war with a powerful foe.\n    </li>\n    <li>\n      The PCs discover evidence that Vordekai, driven mad by the instability of\n      time after his failed temporal experiment, has allied with a faction of\n      Githyanki seeking to rewrite history and undo the Great Descent,\n      potentially unraveling the fabric of reality itself.\n    </li>\n  </ul>\n</div>",
+    "is_private": 0,
+    "tooltip": null,
+    "is_template": null,
+    "is_attributes_private": 0,
+    "focus_x": null,
+    "focus_y": null,
+    "created_at": "2024-10-01T22:49:27.000000Z",
+    "updated_at": "2025-06-03T09:32:01.224.000000Z",
+    "created_by": 275646,
+    "updated_by": 275646,
+    "image_path": null,
+    "image_uuid": "9d44c2bf-198f-4135-9c0f-e3958d2af065",
+    "header_image": null,
+    "header_uuid": null,
+    "marketplace_uuid": null,
+    "relationships": [
+      {
+        "id": 686597,
+        "owner_id": 6752078,
+        "target_id": 6752071,
+        "relation": "Vassal",
+        "visibility_id": 1,
+        "mirror_id": 686598,
+        "attitude": null,
+        "is_pinned": 0,
+        "colour": "",
+        "marketplace_uuid": null
+      }
+    ]
+  },
+  "members": [],
+  "pivotLocations": []
+}
