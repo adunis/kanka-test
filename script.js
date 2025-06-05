@@ -659,40 +659,49 @@ document.addEventListener("DOMContentLoaded", async () => {
   // --- INITIALIZATION FLOW ---
   // --- INITIALIZATION FLOW ---
   async function initialize() {
-    console.log("[INIT] Starting initialization...");
-    setupCoreControls(); // Setup modal buttons, clear keys
-    clearStagedArticleData(); // Initialize staged data to a clean state
+        console.log("[INIT] Starting initialization...");
+        setupCoreControls();
+        clearStagedArticleData();
 
-    try {
-      await loadConfig(); // Load base config (this might set GITHUB_READ_TOKEN)
-      console.log("[INIT] Base config loaded into appConfig.");
+        try {
+            await loadConfig(); // Sets appConfig
+            console.log("[INIT] Base config loaded into appConfig.");
 
-      // --- MODIFIED PART (loading from config) ---
-      // (Your existing logic for GITHUB_READ_TOKEN from config parts or single field)
-      // ... (this part remains the same as you provided)
+            // Set GITHUB_READ_TOKEN from config IF it exists
+            if (appConfig && appConfig.github && appConfig.github.TOKEN) {
+                GITHUB_READ_TOKEN = appConfig.github.TOKEN;
+                console.log("[INIT] GitHub Read Token (from config) loaded.");
+            } else {
+                console.log("[INIT] No GitHub Read Token found in config.json.");
+            }
 
-      // --- NEW: Load GITHUB_WRITE_TOKEN and GEMINI_API_KEY from sessionStorage ---
-      const sessionWriteToken = sessionStorage.getItem("kankaEditor_githubWriteToken");
-      if (sessionWriteToken) {
-          GITHUB_WRITE_TOKEN = sessionWriteToken;
-          console.log("[INIT] GitHub Write Token loaded from sessionStorage.");
-      }
-      const sessionGeminiKey = sessionStorage.getItem("kankaEditor_geminiApiKey");
-      if (sessionGeminiKey) {
-          GEMINI_API_KEY = sessionGeminiKey;
-          console.log("[INIT] Gemini API Key loaded from sessionStorage.");
-      }
-      // --- END NEW ---
+            // Load GITHUB_WRITE_TOKEN and GEMINI_API_KEY from sessionStorage
+            const sessionWriteToken = sessionStorage.getItem("kankaEditor_githubWriteToken");
+            if (sessionWriteToken) {
+                GITHUB_WRITE_TOKEN = sessionWriteToken;
+                console.log("[INIT] GitHub Write Token loaded from sessionStorage.");
+            }
+            const sessionGeminiKey = sessionStorage.getItem("kankaEditor_geminiApiKey");
+            if (sessionGeminiKey) {
+                GEMINI_API_KEY = sessionGeminiKey;
+                console.log("[INIT] Gemini API Key loaded from sessionStorage.");
+            }
 
-      updateTokenStatusDisplay(); // Initial display based on what was loaded
+            updateTokenStatusDisplay(); // Update display based on loaded tokens
 
-            // Always attempt to initialize the app structure.
-            // proceedWithAppInitialization will need to be robust enough
-            // to handle the case where no tokens are available for fetching data.
-            await proceedWithAppInitialization(true);
-    } catch (error) {
-      console.error("[INIT] Initialization failed:", error);
-      showError(`Initialization failed: ${error.message}.`);
+            // Now decide how to proceed
+            if (GITHUB_READ_TOKEN || GITHUB_WRITE_TOKEN) {
+                // If any GitHub token is available (read from config or write from session)
+                await proceedWithAppInitialization(true); // true for initial load
+            } else {
+                // Only show modal if NO tokens are available at all
+                console.log("[INIT] No GitHub token available from config or session. Prompting for a token.");
+                showApiKeyModal(true, false, "general");
+            }
+
+        } catch (error) {
+            console.error("[INIT] Initialization failed:", error);
+            showError(`Initialization failed: ${error.message}.`);
       disableAppControls();
       if (clearKeysBtn) clearKeysBtn.disabled = false;
       updateTokenStatusDisplay(); // Final update of status
@@ -737,46 +746,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     // if (collapseSidebarBtn && sidebar) collapseSidebarBtn.textContent = sidebar.classList.contains("collapsed") ? "»" : "«";
     // if (collapseImagePreviewBtn && imagePreviewSidebar) collapseImagePreviewBtn.textContent = imagePreviewSidebar.classList.contains("collapsed") ? "«" : "»";
 
-    // --- Token Check before proceeding with data-dependent operations ---
-    if (!GITHUB_READ_TOKEN && !GITHUB_WRITE_TOKEN) {
-        console.log("[PROCEED_INIT] No GitHub token available. Skipping file list fetch and URL loading.");
-        if (jsonEntryContentDiv) {
-            jsonEntryContentDiv.innerHTML = `
-                <div style="padding: 20px; text-align: center;">
-                    <h2>Welcome to the Kanka Data Editor!</h2>
-                    <p>To get started, please provide your GitHub API token. This allows the application to access and display your Kanka entries.</p>
-                    <ol style="text-align: left; max-width: 500px; margin: 20px auto;">
-                        <li>Click the <strong>"Add/Update Tokens"</strong> button in the sidebar.</li>
-                        <li>Enter your GitHub Personal Access Token. A read-only token is sufficient for viewing entries. For creating, editing, or deleting entries, a token with write permissions is required.</li>
-                        <li>(Optional) Add a Google Gemini API Key to enable AI-powered features like content formatting and improvement suggestions.</li>
-                        <li>Click <strong>"Save Keys"</strong>.</li>
-                        <li>After saving, click the <strong>"Refresh File List"</strong> button (lightning bolt icon in the sidebar) to load your data.</li>
-                    </ol>
-                    <p>Your tokens are stored only in your browser's session storage and are not sent anywhere else other than to GitHub/Google for API access.</p>
-                </div>`;
-        }
-        if (currentFileNameH2) {
-            currentFileNameH2.textContent = "Token Setup Required";
-        }
-        if (fileCountSpan) {
-            fileCountSpan.textContent = "0 files (Tokens Required)";
-        }
-        if (fileTreeRootUl) {
-            fileTreeRootUl.innerHTML = "<li>Please add tokens and refresh.</li>";
-        }
-        // Ensure UI is responsive and essential buttons are active
-        hideLoading(); // Hide any loading indicators that might have been shown.
-        updateButtonStatesBasedOnTokens(); // This ensures "Add/Update Tokens" and "Clear Tokens" are correctly enabled/disabled.
-        if (clearKeysBtn) clearKeysBtn.disabled = false; // Explicitly enable "Clear Keys"
+    // At this point, initialize() has ensured that either GITHUB_READ_TOKEN or GITHUB_WRITE_TOKEN is available.
+    // The explicit "no token" check and message display block has been removed from here.
 
-        console.log("[PROCEED_INIT] Stopped initialization early due to missing tokens.");
-        return; // Stop further execution in this function
-    }
-
-    // --- Original logic continues if tokens ARE available ---
+    // --- Original logic continues ---
     if (isReadOnlyLoad) {
-        // setupAppEventListeners(); // Moved up
-        // if (sidebar && resizer) makeResizable(sidebar, resizer); // Moved up
+        // This path is taken on initial load if tokens were found by initialize()
         console.log("[PROCEED_INIT] GitHub token found. Fetching initial file list...");
         await fetchFileList(); // This populates flatJsonData
 
@@ -1252,39 +1227,52 @@ function hideLoading() {
     if (cancelBtn) cancelBtn.disabled = false;
   }
 
-  function getGitHubHeaders(forWriteOperation = false) {
+function getGitHubHeaders(forWriteOperation = false) {
     let tokenToUse = null;
 
     if (forWriteOperation) {
-      if (GITHUB_WRITE_TOKEN) {
-        tokenToUse = GITHUB_WRITE_TOKEN;
-      } else {
-        // Prompt for write token
-        console.warn(
-          "[HEADERS] Write operation attempted without a write token."
-        );
-        showApiKeyModal(true, false, "write_action"); // true for GH required, false for Gemini, context
-        throw new Error(
-          "GitHub write token is required for this operation. Please provide it."
-        );
-      }
-    } else {
-      // For read operations
-      tokenToUse = GITHUB_WRITE_TOKEN || GITHUB_READ_TOKEN;
+        if (GITHUB_WRITE_TOKEN) {
+            tokenToUse = GITHUB_WRITE_TOKEN;
+            console.log("[HEADERS] Using GITHUB_WRITE_TOKEN for write operation.");
+        } else {
+            console.warn("[HEADERS] Write operation attempted without a write token. Prompting user.");
+            showApiKeyModal(true, false, "write_action"); // Prompt for GitHub token (true), Gemini optional (false), context for write
+            throw new Error("GitHub write token is required for this operation. Please provide it via the modal and retry.");
+        }
+    } else { // For Read Operations
+        if (GITHUB_WRITE_TOKEN) {
+            tokenToUse = GITHUB_WRITE_TOKEN;
+            console.log("[HEADERS] Using GITHUB_WRITE_TOKEN for read operation (available).");
+        } else if (GITHUB_READ_TOKEN) {
+            tokenToUse = GITHUB_READ_TOKEN;
+            console.log("[HEADERS] Using GITHUB_READ_TOKEN (from config) for read operation.");
+        } else {
+            // This case should ideally be prevented by UI logic disabling actions that require tokens,
+            // or by initialize() prompting for a token if none are available at startup.
+            console.error("[HEADERS] No GitHub token available for read API call. This should have been caught earlier.");
+            throw new Error("No GitHub token available to access repository data for reading.");
+        }
     }
 
+    // Safeguard: This should ideally be unreachable if the logic above is correct.
     if (!tokenToUse) {
-      console.error("[HEADERS] No GitHub token available for API call.");
-      showApiKeyModal(true, false, "general"); // Prompt if no token at all
-      throw new Error(
-        "GitHub token is required to access repository data. Please provide one."
-      );
+         console.error("[HEADERS] Critical logic error: tokenToUse is null but no error was thrown before return. Forcing error.");
+         if (forWriteOperation) {
+            // Re-prompt just in case, though the earlier throw should have handled it.
+            showApiKeyModal(true, false, "write_action");
+            throw new Error("GitHub write token is critically missing. Please provide and retry.");
+         } else {
+            // For read operations, if we reach here, it's a more critical config/state issue.
+            // Avoid modal here as per instruction for this specific "no token for read" path.
+            throw new Error("No GitHub token critically available for reading. Please ensure configuration or add a token if prompted previously.");
+         }
     }
+
     return {
-      Accept: "application/vnd.github.v3+json",
-      Authorization: `token ${tokenToUse}`,
+        Accept: "application/vnd.github.v3+json",
+        Authorization: `token ${tokenToUse}`,
     };
-  }
+}
 
   async function fetchDirectoryContentsRecursive(directoryPath) {
     const url = `${API_BASE_URL}/${directoryPath}?ref=${GITHUB_BRANCH}`;
