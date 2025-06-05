@@ -45,6 +45,10 @@
       <span class="button-icon">+</span>
       <span class="button-text">Create New Entry (Root)</span>
     </button>
+    <button id="createStagedArticleBtn" style="margin-top: 10px;" disabled>
+      <span class="button-icon">📝</span>
+      <span class="button-text">Create Staged Article</span>
+    </button>
     <button id="createNewFolderBtn" style="margin-top: 10px;" disabled>
       <span class="button-icon">📁</span>
       <span class="button-text">Create New Folder (Root)</span>
@@ -53,6 +57,7 @@
       <span class="button-icon">⇆</span>
       <span class="button-text">Reorganize Entries</span>
     </button>
+    <div id="stagingModeIndicator" style="display:none; color: orange; margin-top: 10px; text-align: center;">Staging Mode Active</div>
     <button id="collapseSidebarBtn" style="margin-top: 10px;">«</button>
 </aside>
 
@@ -109,6 +114,34 @@
                           <b>Linking:</b> Type <code>@Entry Name</code> for existing entries.<br>
                           <b>Create New Link:</b> Type <code>@New Entry Name</code> (creates file in root). Use '+' on folders in tree to create inside them.
                       </p>
+                  </div>
+
+                  <div id="stagingAreaUI" style="display:none; padding: 15px;">
+                    <h2>Create Staged Article</h2>
+
+                    <div>
+                        <label for="stagedArticleNameInput">Article Name:</label>
+                        <input type="text" id="stagedArticleNameInput" placeholder="Enter article filename (e.g., my-new-topic.json)" style="width: 100%; margin-bottom: 2px;">
+                        <span class="error-message" id="stagedArticleNameError" style="display: none; color: red; font-size: 0.8em; margin-bottom: 8px;"></span>
+                    </div>
+
+                    <div>
+                        <label for="stagedArticleContentTextarea">Article Content (JSON):</label>
+                        <textarea id="stagedArticleContentTextarea" rows="10" placeholder="Enter the full JSON content for the article." style="width: 100%; margin-bottom: 2px;"></textarea>
+                        <span class="error-message" id="stagedArticleContentError" style="display: none; color: red; font-size: 0.8em;"></span>
+                        <p class="instructions" style="font-size: 0.9em; margin-bottom: 15px; margin-top: 5px;">Ensure this is valid JSON. You might want to use the main editor to draft content, then copy the JSON here, or build it piece by piece.</p>
+                    </div>
+
+                    <div>
+                        <h3>Stage Images</h3>
+                        <input type="file" id="stagedImagesInput" multiple accept="image/*" style="margin-bottom: 10px;">
+                        <div id="stagedImagesPreviewContainer" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 5px;">
+                            <!-- Image previews will be added here by JavaScript -->
+                        </div>
+                        <p class="instructions" style="font-size: 0.9em; margin-bottom: 15px;">Selected images will be uploaded to the gallery and linked when you publish.</p>
+                    </div>
+
+                    <button id="publishStagedArticleBtn" style="padding: 10px 15px; background-color: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer;" disabled>Publish Staged Article to GitHub</button>
                   </div>
               </div>
 

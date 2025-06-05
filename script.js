@@ -36,6 +36,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const reorganizeEntriesBtn = document.getElementById("reorganizeEntriesBtn");
   const reorganizeModal = document.getElementById("reorganizeModal");
   const createImagePromptBtn = document.getElementById("createImagePromptBtn");
+  const createStagedArticleBtn = document.getElementById("createStagedArticleBtn"); // Added
+  const stagingModeIndicator = document.getElementById("stagingModeIndicator"); // Added
   const closeReorganizeModalBtn = document.getElementById(
     "closeReorganizeModalBtn"
   );
@@ -117,6 +119,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   const lightboxImage = document.getElementById("lightboxImage");
   const closeLightboxBtn = document.getElementById("closeLightboxBtn");
 
+  // Staging Area UI elements
+  const stagingAreaUI = document.getElementById("stagingAreaUI");
+  const stagedArticleNameInput = document.getElementById("stagedArticleNameInput");
+  const stagedArticleContentTextarea = document.getElementById("stagedArticleContentTextarea");
+  const stagedImagesInput = document.getElementById("stagedImagesInput");
+  const stagedImagesPreviewContainer = document.getElementById("stagedImagesPreviewContainer");
+  const publishStagedArticleBtn = document.getElementById("publishStagedArticleBtn");
+  const stagedArticleNameError = document.getElementById("stagedArticleNameError"); // Added
+  const stagedArticleContentError = document.getElementById("stagedArticleContentError"); // Added
+
   // --- State Variables ---
   let allFetchedFiles = [];
   let flatJsonData = [];
@@ -128,6 +140,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   let activeLinkElement = null;
   let contextCache = {};
   let selectedTargetFolderForReorg = null; // Added
+  let isInStagingMode = false; // Added for staging mode
+  let stagedArticleData = {
+    name: null, // Will store the intended filename (e.g., "My New Adventure.json")
+    content: null, // Will store the article's JSON content as an object
+    images: [] // Will store an array of image objects to be uploaded
+  };
+  // Example image object structure for stagedArticleData.images:
+  // {
+  //   id: "temp-uuid-random", // A temporary unique ID for local management before GitHub upload
+  //   fileName: "desired-image-name.png", // User-specified or derived filename for the gallery
+  //   fileObject: File, // The actual File object from an <input type="file">
+  //   localPreviewUrl: "blob:http://..." // URL from URL.createObjectURL() for local preview
+  // }
 
   // ...
   let GITHUB_READ_TOKEN = null; // For the default or initial read token
@@ -333,6 +358,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         // fetchFileList will internally use getGitHubHeaders(false) which prioritizes write token then read token
         await fetchFileList();
       });
+    }
+
+    if (stagedArticleNameInput) {
+      stagedArticleNameInput.addEventListener("input", handleStagedNameInput);
+    }
+    if (stagedArticleContentTextarea) {
+      stagedArticleContentTextarea.addEventListener("input", handleStagedContentInput);
+    }
+    if (stagedImagesInput) {
+      stagedImagesInput.addEventListener("change", handleStagedImagesSelection);
+    }
+    if (publishStagedArticleBtn) {
+        publishStagedArticleBtn.addEventListener("click", handlePublishStagedArticle);
     }
 
     if (createNewFileBtn) {
@@ -598,6 +636,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     setupCreateNewFolderListener();
     setupRenameEntryListener();
     setupReorganizeModalListeners();
+    setupStagingModeButtonListener(); // Added
 
     // Add sidebar collapse button listeners
     if (collapseSidebarBtn) {
@@ -622,6 +661,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function initialize() {
     console.log("[INIT] Starting initialization...");
     setupCoreControls(); // Setup modal buttons, clear keys
+    clearStagedArticleData(); // Initialize staged data to a clean state
 
     try {
       await loadConfig(); // Load base config (this might set GITHUB_READ_TOKEN)
@@ -967,6 +1007,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (refreshFileListBtn) refreshFileListBtn.disabled = !hasReadAccess || isInEditMode;
     if (createNewFileBtn) createNewFileBtn.disabled = !hasWriteAccess || isInEditMode;
+    if (createStagedArticleBtn) createStagedArticleBtn.disabled = !hasWriteAccess || isInEditMode; // Added
     if (createNewFolderBtn) createNewFolderBtn.disabled = !hasWriteAccess || isInEditMode;
     if (reorganizeEntriesBtn) {
          reorganizeEntriesBtn.disabled = !hasWriteAccess || !fileTree || fileTree.length === 0 || isInEditMode;
@@ -1025,6 +1066,7 @@ function switchToEditMode() {
     const controlsToDisable = [
       refreshFileListBtn,
       createNewFileBtn,
+      createStagedArticleBtn, // Added
       createNewFolderBtn,
       editBtn,
       deleteEntryBtn,
@@ -4283,6 +4325,445 @@ document.title = `${currentJsonData?.name || "Entry"} - Globeseekers`; // Update
   }
   window.addEventListener('resize', handleResizeForSidebarState);
 
+  // --- Staging Mode ---
+  function setupStagingModeButtonListener() {
+    if (createStagedArticleBtn) {
+      createStagedArticleBtn.addEventListener("click", () => {
+        if (!GITHUB_WRITE_TOKEN) {
+          alert("A GitHub token with write permissions is required to use staging mode. Please provide one.");
+          showApiKeyModal(true, false, "write_action");
+          return;
+        }
+
+        isInStagingMode = !isInStagingMode; // Toggle the state
+
+        if (stagingModeIndicator) {
+          stagingModeIndicator.style.display = isInStagingMode ? "block" : "none";
+        }
+
+        if (isInStagingMode) {
+          initializeNewStagedArticle();
+          if (stagingAreaUI) stagingAreaUI.style.display = "block";
+          if (viewerDiv) viewerDiv.style.display = "none";
+          if (editorDiv) editorDiv.style.display = "none";
+          if (currentFilePath && activeLinkElement) { // Deselect active file in tree
+            activeLinkElement.classList.remove("active");
+            activeLinkElement = null;
+            currentFilePath = null;
+            currentJsonData = null;
+            currentFileSha = null;
+            currentFileNameH2.textContent = "Staging New Article";
+            jsonEntryContentDiv.innerHTML = ""; // Clear view
+            imagePreviewSidebar.style.display = "none"; // Hide image preview for current entry
+          }
+        } else {
+          clearStagedArticleData();
+          if (stagingAreaUI) stagingAreaUI.style.display = "none";
+          if (viewerDiv) viewerDiv.style.display = "block"; // Show viewer by default
+          // editorDiv remains hidden unless a file is then chosen for edit
+           currentFileNameH2.textContent = "Select an entry"; // Reset title
+           jsonEntryContentDiv.innerHTML = "<p>Select an entry from the tree.</p>"; // Reset content
+        }
+        updatePublishButtonState(); // Update publish button based on new state
+        updateButtonStatesBasedOnTokens(); // Update all button states
+      });
+    }
+  }
+
+  function initializeNewStagedArticle() {
+    stagedArticleData.name = null;
+    stagedArticleData.content = {}; // Start with an empty object
+    stagedArticleData.images = [];
+    if (stagedArticleNameInput) {
+        stagedArticleNameInput.value = "";
+        stagedArticleNameInput.style.borderColor = ""; // Reset border
+    }
+    if (stagedArticleNameError) {
+        stagedArticleNameError.textContent = "";
+        stagedArticleNameError.style.display = "none";
+    }
+    if (stagedArticleContentTextarea) {
+        stagedArticleContentTextarea.value = "";
+        stagedArticleContentTextarea.classList.remove("invalid-json");
+        stagedArticleContentTextarea.style.borderColor = ""; // Reset border
+    }
+    if (stagedArticleContentError) {
+        stagedArticleContentError.textContent = "";
+        stagedArticleContentError.style.display = "none";
+    }
+    if (stagedImagesInput) stagedImagesInput.value = ""; // Clear file input
+    if (stagedImagesPreviewContainer) stagedImagesPreviewContainer.innerHTML = "";
+    console.log("[STAGING] Initialized new staged article data:", stagedArticleData);
+    updatePublishButtonState();
+  }
+
+  function clearStagedArticleData() {
+    // Revoke any existing object URLs to prevent memory leaks
+    if (stagedArticleData.images && stagedArticleData.images.length > 0) {
+        stagedArticleData.images.forEach(img => {
+            if (img.localPreviewUrl) {
+                URL.revokeObjectURL(img.localPreviewUrl);
+            }
+        });
+    }
+    stagedArticleData.name = null;
+    stagedArticleData.content = null;
+    stagedArticleData.images = [];
+
+    if (stagedArticleNameInput) {
+        stagedArticleNameInput.value = "";
+        stagedArticleNameInput.style.borderColor = "";
+    }
+    if (stagedArticleNameError) {
+        stagedArticleNameError.textContent = "";
+        stagedArticleNameError.style.display = "none";
+    }
+    if (stagedArticleContentTextarea) {
+        stagedArticleContentTextarea.value = "";
+        stagedArticleContentTextarea.classList.remove("invalid-json");
+        stagedArticleContentTextarea.style.borderColor = "";
+    }
+    if (stagedArticleContentError) {
+        stagedArticleContentError.textContent = "";
+        stagedArticleContentError.style.display = "none";
+    }
+    if (stagedImagesInput) stagedImagesInput.value = "";
+    if (stagedImagesPreviewContainer) stagedImagesPreviewContainer.innerHTML = "";
+    console.log("[STAGING] Cleared staged article data.");
+    updatePublishButtonState();
+  }
+
+  function handleStagedNameInput() {
+    if (!stagedArticleNameInput || !stagedArticleNameError) return;
+    stagedArticleNameError.style.display = "none"; // Clear previous error
+    stagedArticleNameInput.style.borderColor = ""; // Reset border
+
+    let fileName = stagedArticleNameInput.value.trim();
+    if (fileName === "") {
+        stagedArticleData.name = null;
+        stagedArticleNameError.textContent = "Filename cannot be empty.";
+        stagedArticleNameError.style.display = "block";
+        stagedArticleNameInput.style.borderColor = "red";
+        updatePublishButtonState();
+        return;
+    }
+
+    // Basic sanitization: replace spaces with hyphens, remove most special chars except hyphen, underscore, dot
+    fileName = fileName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-_.]/g, '');
+
+    if (!fileName.endsWith(".json")) {
+        // Suggest .json if not present, but don't force it if user is mid-typing something else.
+        // The final validation is on the .json suffix.
+        if (!fileName.includes('.')) { // Only add .json if no other extension is being typed
+             stagedArticleNameInput.value = fileName + ".json"; // Show suggestion
+        }
+    }
+
+    // Re-evaluate after potential modification
+    fileName = stagedArticleNameInput.value.trim();
+
+
+    if (fileName && fileName !== ".json" && fileName.endsWith(".json")) {
+        stagedArticleData.name = fileName;
+        stagedArticleNameInput.style.borderColor = "green";
+        stagedArticleNameError.style.display = "none";
+    } else {
+        stagedArticleData.name = null; // Invalid
+        stagedArticleNameInput.style.borderColor = "red";
+        if (!fileName.endsWith(".json")) {
+            stagedArticleNameError.textContent = "Filename must end with .json";
+        } else if (fileName === ".json") {
+            stagedArticleNameError.textContent = "Filename cannot be just .json";
+        } else {
+            stagedArticleNameError.textContent = "Invalid filename.";
+        }
+        stagedArticleNameError.style.display = "block";
+    }
+    updatePublishButtonState();
+  }
+
+  function handleStagedContentInput() {
+    if (!stagedArticleContentTextarea || !stagedArticleContentError) return;
+    stagedArticleContentError.style.display = "none"; // Clear previous error
+    stagedArticleContentTextarea.style.borderColor = ""; // Reset border
+
+    const contentStr = stagedArticleContentTextarea.value.trim();
+    if (contentStr === "") {
+        stagedArticleData.content = {}; // Default to empty object for valid empty state
+        stagedArticleContentTextarea.classList.remove("invalid-json");
+        stagedArticleContentError.style.display = "none";
+        updatePublishButtonState();
+        return;
+    }
+    try {
+        const parsedContent = JSON.parse(contentStr);
+        stagedArticleData.content = parsedContent;
+        stagedArticleContentTextarea.classList.remove("invalid-json");
+        stagedArticleContentTextarea.style.borderColor = "green"; // Valid JSON
+        stagedArticleContentError.style.display = "none";
+    } catch (error) {
+        stagedArticleData.content = null; // Invalid JSON
+        stagedArticleContentTextarea.classList.add("invalid-json");
+        stagedArticleContentTextarea.style.borderColor = "red"; // Invalid JSON
+        stagedArticleContentError.textContent = `Invalid JSON: ${error.message}`;
+        stagedArticleContentError.style.display = "block";
+        console.warn("[STAGING] Invalid JSON content:", error.message);
+    }
+    updatePublishButtonState();
+  }
+
+  function handleStagedImagesSelection(event) {
+    if (!stagedImagesInput || !stagedImagesPreviewContainer) return;
+
+    // Clear previous previews and revoke old URLs
+    stagedArticleData.images.forEach(img => {
+        if (img.localPreviewUrl) URL.revokeObjectURL(img.localPreviewUrl);
+    });
+    stagedArticleData.images = [];
+    stagedImagesPreviewContainer.innerHTML = "";
+
+    const files = event.target.files;
+    if (!files) return;
+
+    for (const file of files) {
+        if (!file.type.startsWith("image/")) continue;
+
+        const tempId = `temp-uuid-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        const localPreviewUrl = URL.createObjectURL(file);
+
+        const imageObject = {
+            id: tempId,
+            fileName: file.name, // We might want to sanitize this later for gallery upload
+            fileObject: file,
+            localPreviewUrl: localPreviewUrl
+        };
+        stagedArticleData.images.push(imageObject);
+
+        const previewWrapper = document.createElement("div");
+        previewWrapper.classList.add("staged-image-preview-wrapper");
+        previewWrapper.dataset.tempId = tempId;
+        previewWrapper.style.cssText = "position: relative; border: 1px solid #ddd; padding: 5px; margin:5px; display:inline-block; text-align:center;";
+
+        const imgElement = document.createElement("img");
+        imgElement.src = localPreviewUrl;
+        imgElement.style.maxWidth = "100px";
+        imgElement.style.maxHeight = "100px";
+        imgElement.style.display = "block";
+        imgElement.style.marginBottom = "5px";
+
+        const nameP = document.createElement("p");
+        nameP.textContent = file.name;
+        nameP.style.fontSize = "0.8em";
+        nameP.style.wordBreak = "break-all";
+        nameP.style.marginBottom = "5px";
+
+        const removeBtn = document.createElement("button");
+        removeBtn.textContent = "Remove";
+        removeBtn.style.fontSize = "0.8em";
+        removeBtn.style.padding = "2px 5px";
+        removeBtn.addEventListener("click", () => {
+            // Find index and remove from data
+            const indexToRemove = stagedArticleData.images.findIndex(img => img.id === tempId);
+            if (indexToRemove > -1) {
+                URL.revokeObjectURL(stagedArticleData.images[indexToRemove].localPreviewUrl);
+                stagedArticleData.images.splice(indexToRemove, 1);
+            }
+            // Remove from DOM
+            previewWrapper.remove();
+            console.log("[STAGING] Removed image:", tempId, stagedArticleData.images);
+            updatePublishButtonState();
+        });
+
+        previewWrapper.appendChild(imgElement);
+        previewWrapper.appendChild(nameP);
+        previewWrapper.appendChild(removeBtn);
+        stagedImagesPreviewContainer.appendChild(previewWrapper);
+    }
+    if (stagedImagesInput) stagedImagesInput.value = ""; // Clear file input to allow re-selection of same file
+    updatePublishButtonState();
+  }
+
+  function updatePublishButtonState() {
+    if (!publishStagedArticleBtn) return;
+
+    const isNameValid = stagedArticleData.name && stagedArticleData.name.trim() !== "" && stagedArticleData.name.endsWith(".json") && stagedArticleData.name.length > 5; // Basic check
+    const isContentValid = stagedArticleData.content && typeof stagedArticleData.content === 'object'; // Check if it's a parsed object
+
+    // Enable publish if name and content are valid. Images are optional.
+    if (isNameValid && isContentValid) {
+        publishStagedArticleBtn.disabled = false;
+        publishStagedArticleBtn.style.backgroundColor = "#28a745"; // Green
+    } else {
+        publishStagedArticleBtn.disabled = true;
+        publishStagedArticleBtn.style.backgroundColor = "#6c757d"; // Grey
+    }
+  }
+
+  async function handlePublishStagedArticle() {
+    if (!stagedArticleData.name || !stagedArticleData.name.endsWith(".json") || stagedArticleData.name.length < 6 ) { // e.g. "a.json"
+        alert("Invalid or too short article name. Ensure it's a descriptive name ending with .json.");
+        stagedArticleNameInput.focus();
+        return;
+    }
+    if (!stagedArticleData.content || typeof stagedArticleData.content !== 'object') {
+        alert("Article content is not valid JSON or is missing. Please check the content.");
+        stagedArticleContentTextarea.focus();
+        return;
+    }
+    // GITHUB_WRITE_TOKEN is checked by commitFileToGitHub, but an early check can be good UX.
+    // However, getGitHubHeaders(true) inside commitFileToGitHub already handles prompting.
+
+    if (publishStagedArticleBtn) publishStagedArticleBtn.disabled = true;
+    // Granular loading message will be updated in the loop
+    showLoading("Starting publication process...");
+
+    let publicationSuccessful = false;
+    let imagesSuccessfullyUploaded = 0;
+    let articleJsonUploadFailed = false;
+
+    try {
+        let finalArticleContent = JSON.parse(JSON.stringify(stagedArticleData.content));
+
+        // Ensure entity and image_uuids array exist
+        if (!finalArticleContent.entity) finalArticleContent.entity = {};
+        if (!Array.isArray(finalArticleContent.entity.image_uuids)) {
+            finalArticleContent.entity.image_uuids = [];
+        }
+
+        // Image Upload Process
+        if (stagedArticleData.images && stagedArticleData.images.length > 0) {
+            for (const imageToStage of stagedArticleData.images) {
+                showLoading(`Uploading image ${imageToStage.fileName}...`);
+                const imageId = crypto.randomUUID ? crypto.randomUUID() : `img-${Date.now()}-${Math.random().toString(16).substring(2,8)}`;
+                const fileExt = imageToStage.fileName.substring(imageToStage.fileName.lastIndexOf(".") + 1).toLowerCase();
+                const imageFileNameWithId = `${imageId}.${fileExt}`;
+                const imageFilePathInRepo = `${GITHUB_DATA_PATH}/${GALLERY_FOLDER}/${imageFileNameWithId}`;
+                const metadataFilePathInRepo = `${GITHUB_DATA_PATH}/${GALLERY_FOLDER}/${imageId}.json`;
+
+                // 1. Read image as Base64
+                let base64ImageContent;
+                try {
+                    const dataUrl = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = (err) => reject(err); // Pass error to reject
+                        reader.readAsDataURL(imageToStage.fileObject);
+                    });
+                    base64ImageContent = dataUrl.split(',')[1];
+                    if (!base64ImageContent) throw new Error("Empty base64 content.");
+                } catch (readError) {
+                    console.error(`[STAGING_PUBLISH] Error reading image file ${imageToStage.fileName}:`, readError);
+                    alert(`Error reading image file "${imageToStage.fileName}": ${readError.message}. Skipping this image.`);
+                    continue;
+                }
+
+                // 2. Upload Image File
+                const imageCommitMessage = `feat(gallery): Add image ${imageFileNameWithId} for staged article`;
+                const imageUploadResult = await commitFileToGitHub(imageFilePathInRepo, base64ImageContent, imageCommitMessage, null, true);
+
+                if (imageUploadResult && imageUploadResult.sha) {
+                    finalArticleContent.entity.image_uuids.push(imageId);
+                    // Update local maps (similar to uploadImageAndLink)
+                    const newImageDataForMap = {
+                        name: imageUploadResult.name, path: imageUploadResult.path, sha: imageUploadResult.sha,
+                        download_url: imageUploadResult.download_url || `${RAW_CONTENT_BASE}/${imageUploadResult.path}`, type: 'image'
+                    };
+                    imageFileMap[imageId] = newImageDataForMap;
+                    allFetchedFiles.push(newImageDataForMap);
+
+                    // 3. Create and Upload Metadata File
+                    const now = new Date().toISOString().replace("Z", ".000000Z");
+                    const imageMetadata = {
+                        id: imageId, campaign_id: finalArticleContent?.campaign_id || null,
+                        name: imageToStage.fileName, ext: fileExt, size: imageToStage.fileObject.size,
+                        created_by: finalArticleContent?.entity?.created_by || finalArticleContent?.created_by || null,
+                        created_at: now, updated_at: now, is_default: 0, folder_id: null, is_folder: 0,
+                        visibility_id: 1, focus_x: null, focus_y: null, image_folder: null,
+                    };
+                    const metadataString = JSON.stringify(imageMetadata, null, 2);
+                    const metadataCommitMessage = `feat(gallery): Add metadata for image ${imageId}`;
+                    const metadataUploadResult = await commitFileToGitHub(metadataFilePathInRepo, metadataString, metadataCommitMessage, null, false);
+
+                    if (!metadataUploadResult || !metadataUploadResult.sha) {
+                        console.warn(`[STAGING_PUBLISH] Failed to upload metadata for image ${imageId} ("${imageToStage.fileName}"). The image file was uploaded, but its metadata failed. The image UUID will still be linked if the article publishes.`);
+                        // Alerting for each metadata failure might be too noisy if many images.
+                        // A summary alert could be better if this becomes common.
+                    } else {
+                         allFetchedFiles.push({
+                            name: metadataUploadResult.name, path: metadataUploadResult.path, sha: metadataUploadResult.sha,
+                            download_url: metadataUploadResult.download_url || `${RAW_CONTENT_BASE}/${metadataUploadResult.path}`, type: 'json'
+                        });
+                         imagesSuccessfullyUploaded++;
+                    }
+                } else {
+                    // commitFileToGitHub should have alerted the user with details from GitHub API.
+                    // We provide a fallback alert here.
+                    const githubError = imageUploadResult?.message || "Unknown GitHub API error during image upload.";
+                    alert(`Failed to upload image "${imageToStage.fileName}". Error: ${githubError}. Skipping this image.`);
+                    console.error(`[STAGING_PUBLISH] Failed to upload image file ${imageToStage.fileName}. Full Result:`, imageUploadResult);
+                    continue;
+                }
+            }
+        }
+        showLoading(`Uploading article JSON for ${stagedArticleData.name}...`);
+        // Update Article Timestamps
+        const now = new Date().toISOString().replace("Z", ".000000Z");
+        finalArticleContent.created_at = finalArticleContent.created_at || now; // Keep original if exists, else set now
+        finalArticleContent.updated_at = now;
+        if (finalArticleContent.entity) {
+            finalArticleContent.entity.created_at = finalArticleContent.entity.created_at || now;
+            finalArticleContent.entity.updated_at = now;
+        }
+
+
+        // Upload Article JSON
+        const finalJsonString = JSON.stringify(finalArticleContent, null, 2);
+        const articleFilePathInRepo = `${GITHUB_DATA_PATH}/${stagedArticleData.name}`;
+        const articleCommitMessage = `feat: Publish staged article - ${stagedArticleData.name}`;
+
+        showLoading(`Uploading article ${stagedArticleData.name}...`);
+        const articleUploadResult = await commitFileToGitHub(articleFilePathInRepo, finalJsonString, articleCommitMessage);
+
+        if (articleUploadResult && articleUploadResult.sha) {
+            publicationSuccessful = true;
+            alert("Article published successfully!");
+
+            // Manually trigger the state change for isInStagingMode
+            // This will call clearStagedArticleData and update UI via the existing listener logic
+            if (createStagedArticleBtn) {
+                 // Simulate a click if isInStagingMode is true, to toggle it off
+                if(isInStagingMode) createStagedArticleBtn.click();
+            } else { // Fallback if button somehow not found
+                isInStagingMode = false;
+                clearStagedArticleData();
+                if (stagingAreaUI) stagingAreaUI.style.display = "none";
+                if (viewerDiv) viewerDiv.style.display = "block";
+                if (stagingModeIndicator) stagingModeIndicator.style.display = "none";
+            }
+
+            await fetchFileList();
+        } else {
+            articleJsonUploadFailed = true; // Mark that article upload failed
+            throw new Error(articleUploadResult?.message || "Failed to upload the main article JSON file. Check console for details.");
+        }
+
+    } catch (error) {
+        console.error("[STAGING_PUBLISH] Error publishing staged article:", error);
+        let userMessage = `Error publishing staged article: ${error.message}`;
+        if (articleJsonUploadFailed && imagesSuccessfullyUploaded > 0) {
+            userMessage = `Successfully uploaded ${imagesSuccessfullyUploaded} image(s), but FAILED to publish the article JSON itself. Error: ${error.message}. Please check GitHub for orphaned images in the gallery folder and try publishing the article content again.`;
+        } else if (imagesSuccessfullyUploaded > 0 && stagedArticleData.images.length !== imagesSuccessfullyUploaded) {
+             userMessage = `Successfully uploaded ${imagesSuccessfullyUploaded} of ${stagedArticleData.images.length} image(s). However, the article publication was interrupted due to an error: ${error.message}. You may need to clean up orphaned images from the gallery if the error occurred during image upload.`;
+        }
+        alert(userMessage);
+        if (publishStagedArticleBtn) publishStagedArticleBtn.disabled = false;
+    } finally {
+        hideLoading();
+        // If successful, the staging area is hidden by the createStagedArticleBtn.click()
+        // and publish button state handled by updatePublishButtonState via clearStagedArticleData.
+        // If not successful, button was re-enabled in catch.
+    }
+  }
 
   function setupCreateNewFolderListener() {
     if (createNewFolderBtn) {
