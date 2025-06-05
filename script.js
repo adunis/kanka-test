@@ -686,14 +686,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       updateTokenStatusDisplay(); // Initial display based on what was loaded
 
-      // Determine if we can proceed with initial (read-only) load
-      if (GITHUB_READ_TOKEN || GITHUB_WRITE_TOKEN) {
-        await proceedWithAppInitialization(true); // true for initial read-only load
-      } else {
-        // No default read token and no user-provided write token in session.
-        console.log("[INIT] No GitHub token available. Prompting for a token.");
-        showApiKeyModal(true, false, "general"); // Prompt for GitHub token (true), Gemini optional (false initially)
-      }
+            // Always attempt to initialize the app structure.
+            // proceedWithAppInitialization will need to be robust enough
+            // to handle the case where no tokens are available for fetching data.
+            await proceedWithAppInitialization(true);
     } catch (error) {
       console.error("[INIT] Initialization failed:", error);
       showError(`Initialization failed: ${error.message}.`);
@@ -741,11 +737,47 @@ document.addEventListener("DOMContentLoaded", async () => {
     // if (collapseSidebarBtn && sidebar) collapseSidebarBtn.textContent = sidebar.classList.contains("collapsed") ? "»" : "«";
     // if (collapseImagePreviewBtn && imagePreviewSidebar) collapseImagePreviewBtn.textContent = imagePreviewSidebar.classList.contains("collapsed") ? "«" : "»";
 
+    // --- Token Check before proceeding with data-dependent operations ---
+    if (!GITHUB_READ_TOKEN && !GITHUB_WRITE_TOKEN) {
+        console.log("[PROCEED_INIT] No GitHub token available. Skipping file list fetch and URL loading.");
+        if (jsonEntryContentDiv) {
+            jsonEntryContentDiv.innerHTML = `
+                <div style="padding: 20px; text-align: center;">
+                    <h2>Welcome to the Kanka Data Editor!</h2>
+                    <p>To get started, please provide your GitHub API token. This allows the application to access and display your Kanka entries.</p>
+                    <ol style="text-align: left; max-width: 500px; margin: 20px auto;">
+                        <li>Click the <strong>"Add/Update Tokens"</strong> button in the sidebar.</li>
+                        <li>Enter your GitHub Personal Access Token. A read-only token is sufficient for viewing entries. For creating, editing, or deleting entries, a token with write permissions is required.</li>
+                        <li>(Optional) Add a Google Gemini API Key to enable AI-powered features like content formatting and improvement suggestions.</li>
+                        <li>Click <strong>"Save Keys"</strong>.</li>
+                        <li>After saving, click the <strong>"Refresh File List"</strong> button (lightning bolt icon in the sidebar) to load your data.</li>
+                    </ol>
+                    <p>Your tokens are stored only in your browser's session storage and are not sent anywhere else other than to GitHub/Google for API access.</p>
+                </div>`;
+        }
+        if (currentFileNameH2) {
+            currentFileNameH2.textContent = "Token Setup Required";
+        }
+        if (fileCountSpan) {
+            fileCountSpan.textContent = "0 files (Tokens Required)";
+        }
+        if (fileTreeRootUl) {
+            fileTreeRootUl.innerHTML = "<li>Please add tokens and refresh.</li>";
+        }
+        // Ensure UI is responsive and essential buttons are active
+        hideLoading(); // Hide any loading indicators that might have been shown.
+        updateButtonStatesBasedOnTokens(); // This ensures "Add/Update Tokens" and "Clear Tokens" are correctly enabled/disabled.
+        if (clearKeysBtn) clearKeysBtn.disabled = false; // Explicitly enable "Clear Keys"
 
+        console.log("[PROCEED_INIT] Stopped initialization early due to missing tokens.");
+        return; // Stop further execution in this function
+    }
+
+    // --- Original logic continues if tokens ARE available ---
     if (isReadOnlyLoad) {
         // setupAppEventListeners(); // Moved up
         // if (sidebar && resizer) makeResizable(sidebar, resizer); // Moved up
-        console.log("[PROCEED_INIT] Fetching initial file list...");
+        console.log("[PROCEED_INIT] GitHub token found. Fetching initial file list...");
         await fetchFileList(); // This populates flatJsonData
 
         // After file list is loaded, try to load from URL and set up listener
@@ -754,8 +786,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     } else {
         console.log("[PROCEED_INIT] API keys possibly updated. Re-evaluating UI and fetching list.");
-        updateButtonStatesBasedOnTokens();
-        await fetchFileList();
+        updateButtonStatesBasedOnTokens(); // Update buttons first based on new keys
+        await fetchFileList(); // Then fetch list
         
         // Also handle URL loading and listener if not already done
         if (!window.onhashchange) { // Simple check if listener already added
@@ -764,7 +796,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
     console.log("[PROCEED_INIT] Application initialization/update complete.");
-    if (clearKeysBtn) clearKeysBtn.disabled = false;
+    if (clearKeysBtn) clearKeysBtn.disabled = false; // Ensure clear keys is usable
 }
 
   let PROMPT_IMAGE_GENERATION; // Declare it with other prompt variables
@@ -5073,15 +5105,17 @@ document.title = `${currentJsonData?.name || "Entry"} - Globeseekers`; // Update
     if (!tokenStatusIndicatorDiv || !addEditTokensBtn) return;
 
     if (GITHUB_WRITE_TOKEN) {
-      tokenStatusIndicatorDiv.textContent =
-        "Edit Mode: ENABLED (Write Token Present)";
-      tokenStatusIndicatorDiv.className = "write-token-present";
-      addEditTokensBtn.textContent = "Update Edit Tokens"; // Or "Change Edit Tokens"
+        tokenStatusIndicatorDiv.textContent = "Mode: Edit ENABLED (Write Token Present)";
+        tokenStatusIndicatorDiv.className = "token-status-indicator write-token-present";
+        addEditTokensBtn.textContent = "Update Tokens";
+    } else if (GITHUB_READ_TOKEN) {
+        tokenStatusIndicatorDiv.textContent = "Mode: Read-Only (Config Token Active)";
+        tokenStatusIndicatorDiv.className = "token-status-indicator read-only-token-present";
+        addEditTokensBtn.textContent = "Add Write Token to Enable Editing";
     } else {
-      tokenStatusIndicatorDiv.textContent =
-        "Edit Mode: DISABLED (No Write Token)";
-      tokenStatusIndicatorDiv.className = "no-write-token";
-      addEditTokensBtn.textContent = "Add Edit Tokens to Enable Editing";
+        tokenStatusIndicatorDiv.textContent = "Mode: No Token (Data Access Disabled)";
+        tokenStatusIndicatorDiv.className = "token-status-indicator no-token-present"; // Changed from no-write-token for clarity
+        addEditTokensBtn.textContent = "Add GitHub Token to Load Data";
     }
 
     // Also update display for Gemini key (optional, but good to show status)
