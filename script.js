@@ -667,35 +667,42 @@ document.addEventListener("DOMContentLoaded", async () => {
             await loadConfig(); // Sets appConfig
             console.log("[INIT] Base config loaded into appConfig.");
 
-            // Set GITHUB_READ_TOKEN from config IF it exists
-            if (appConfig && appConfig.github && appConfig.github.TOKEN) {
-                GITHUB_READ_TOKEN = appConfig.github.TOKEN;
+            // Set GITHUB_READ_TOKEN from config IF it exists and is not empty
+            if (appConfig && appConfig.github && appConfig.github.TOKEN && String(appConfig.github.TOKEN).trim() !== "") {
+                GITHUB_READ_TOKEN = String(appConfig.github.TOKEN).trim();
                 console.log("[INIT] GitHub Read Token (from config) loaded.");
             } else {
-                console.log("[INIT] No GitHub Read Token found in config.json.");
+                GITHUB_READ_TOKEN = null; // Explicitly null if not found or empty
+                console.log("[INIT] No GitHub Read Token found or it is empty in config.json.");
             }
 
-            // Load GITHUB_WRITE_TOKEN and GEMINI_API_KEY from sessionStorage
+            // Load GITHUB_WRITE_TOKEN from sessionStorage, explicitly null if empty
             const sessionWriteToken = sessionStorage.getItem("kankaEditor_githubWriteToken");
-            if (sessionWriteToken) {
-                GITHUB_WRITE_TOKEN = sessionWriteToken;
+            if (sessionWriteToken && sessionWriteToken.trim() !== "") {
+                GITHUB_WRITE_TOKEN = sessionWriteToken.trim();
                 console.log("[INIT] GitHub Write Token loaded from sessionStorage.");
+            } else {
+                GITHUB_WRITE_TOKEN = null;
             }
+
+            // Load GEMINI_API_KEY from sessionStorage, explicitly null if empty
             const sessionGeminiKey = sessionStorage.getItem("kankaEditor_geminiApiKey");
-            if (sessionGeminiKey) {
-                GEMINI_API_KEY = sessionGeminiKey;
+            if (sessionGeminiKey && sessionGeminiKey.trim() !== "") {
+                GEMINI_API_KEY = sessionGeminiKey.trim();
                 console.log("[INIT] Gemini API Key loaded from sessionStorage.");
+            } else {
+                GEMINI_API_KEY = null;
             }
 
             updateTokenStatusDisplay(); // Update display based on loaded tokens
 
             // Now decide how to proceed
-            if (GITHUB_READ_TOKEN || GITHUB_WRITE_TOKEN) {
-                // If any GitHub token is available (read from config or write from session)
+            if (GITHUB_READ_TOKEN || GITHUB_WRITE_TOKEN) { // Check if EITHER the config read token OR the session write token is present
+                console.log("[INIT] Proceeding with app initialization as a GitHub token is available.");
                 await proceedWithAppInitialization(true); // true for initial load
             } else {
-                // Only show modal if NO tokens are available at all
-                console.log("[INIT] No GitHub token available from config or session. Prompting for a token.");
+                // This block is now ONLY reached if NEITHER GITHUB_READ_TOKEN from config NOR GITHUB_WRITE_TOKEN from session was found.
+                console.log("[INIT] No GitHub token available from config or session. Prompting for a token via modal.");
                 showApiKeyModal(true, false, "general");
             }
 
