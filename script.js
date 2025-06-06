@@ -701,9 +701,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                 console.log("[INIT] Proceeding with app initialization as a GitHub token is available.");
                 await proceedWithAppInitialization(true); // true for initial load
             } else {
-                // This block is now ONLY reached if NEITHER GITHUB_READ_TOKEN from config NOR GITHUB_WRITE_TOKEN from session was found.
-                console.log("[INIT] No GitHub token available from config or session. Prompting for a token via modal.");
-                showApiKeyModal(true, false, "general");
+                console.log("[INIT] No GitHub token available from config or session. App will attempt to load. Data fetching will likely fail if no token is subsequently provided, and an error message will be shown then. User can add tokens manually via 'Add/Edit Tokens' button or will be prompted by specific actions if tokens are required.");
+                // Attempt to proceed. `fetchFileList` (called within `proceedWithAppInitialization`)
+                // will use `getGitHubHeaders()`. If no token is available, `getGitHubHeaders`
+                // for a read operation will throw an error.
+                // This error is caught by `fetchFileList` and displayed to the user via `showError()`.
+                await proceedWithAppInitialization(true);
             }
 
         } catch (error) {
