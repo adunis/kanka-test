@@ -800,6 +800,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         throw new Error("config.json is missing required top-level keys.");
       console.log("[CONFIG] config.json loaded successfully.");
 
+      // *** NEW LOGIC TO ASSEMBLE TOKEN ***
+      if (appConfig.github && appConfig.github.DEFAULT_READ_TOKEN_PARTS && Array.isArray(appConfig.github.DEFAULT_READ_TOKEN_PARTS)) {
+        appConfig.github.TOKEN = appConfig.github.DEFAULT_READ_TOKEN_PARTS.join('');
+        console.log("[CONFIG] Assembled GitHub Read Token from DEFAULT_READ_TOKEN_PARTS.");
+      } else {
+        console.log("[CONFIG] DEFAULT_READ_TOKEN_PARTS not found or not an array in config.json. `appConfig.github.TOKEN` will rely on direct value if set, or be undefined.");
+        // Ensure appConfig.github.TOKEN is not undefined if DEFAULT_READ_TOKEN_PARTS is missing,
+        // so that later checks for appConfig.github.TOKEN don't fail unexpectedly if it was meant to be empty.
+        if (appConfig.github && typeof appConfig.github.TOKEN === 'undefined') {
+            appConfig.github.TOKEN = ""; // Initialize to empty string if not set by parts or directly
+        }
+      }
+      // *** END NEW LOGIC ***
+
       GITHUB_USERNAME = appConfig.github.USERNAME;
       GITHUB_REPO = appConfig.github.REPO;
       GITHUB_DATA_PATH = appConfig.github.DATA_PATH;
