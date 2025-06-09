@@ -2,7 +2,7 @@
   "id": 1706001,
   "name": "Foreste di Lunargenta",
   "created_at": "2025-04-21T19:02:56.000000Z",
-  "updated_at": "2025-06-09T21:49:33.585.000000Z",
+  "updated_at": "2025-06-09T21:50:41.485.000000Z",
   "is_private": 0,
   "is_destroyed": 0,
   "location_id": 1714714,
@@ -21,7 +21,7 @@
     "focus_x": null,
     "focus_y": null,
     "created_at": "2025-04-21T19:02:56.000000Z",
-    "updated_at": "2025-06-09T21:49:33.585.000000Z",
+    "updated_at": "2025-06-09T21:50:41.485.000000Z",
     "created_by": 275646,
     "updated_by": 275646,
     "image_path": null,
@@ -29,7 +29,8 @@
     "header_uuid": null,
     "marketplace_uuid": null,
     "image_uuids": [
-      "6e9d7f52-faf1-4530-b39c-1db11d4bb9bc"
+      "6e9d7f52-faf1-4530-b39c-1db11d4bb9bc",
+      "a2462abc-086b-4898-9ded-297bb7ebe3da"
     ]
   }
 }
