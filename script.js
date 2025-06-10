@@ -2014,13 +2014,11 @@ function getGitHubHeaders(forWriteOperation = false) {
           // Expand the parent folder in the tree after creation
           const parentLi = event.target.closest("li.folder");
           if (parentLi) {
-            parentLi.classList.remove("collapsed");
+            parentLi.classList.remove("node-is-collapsed");
           }
           await fetchFileList(); // Refresh the entire file list
         } else {
-          console.warn(
-            "Subfolder creation might have failed as commitResult was null."
-          );
+          alert(`Failed to create subfolder "${newSubfolderName}" on GitHub. The .gitkeep file could not be committed.`);
         }
       } catch (error) {
         console.error("Error creating subfolder:", error);
